@@ -1,0 +1,84 @@
+.page {
+  box-sizing: border-box;
+  width: calc(100% - 2rem);
+  max-width: 640px;
+  margin: 3rem auto;
+  padding: 2rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.title { margin-top: 0; }
+
+.setup {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #94a3b8;
+  border-radius: 8px;
+}
+
+.field { display: grid; gap: 0.4rem; font-weight: 600; }
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.65rem;
+  border: 1px solid #64748b;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 400;
+}
+
+.input:disabled { background: #e2e8f0; color: #475569; }
+.input[aria-invalid='true'] { border-color: #b91c1c; }
+.results { margin-top: 1.5rem; }
+.tracker { margin: 1.5rem 0; }
+.healthTotal { font-size: 1.25rem; }
+.healthBar { width: 100%; accent-color: #15803d; }
+.healthControls { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.hint { color: #475569; font-size: 0.95rem; }
+.footnote { margin-top: 2rem; color: #475569; }
+
+.primaryButton,
+.secondaryButton,
+.damageButton,
+.healButton {
+  padding: 0.65rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryButton { background: #1d4ed8; color: #ffffff; }
+.secondaryButton { border-color: #64748b; background: #ffffff; color: #0f172a; }
+.damageButton { background: #991b1b; color: #ffffff; }
+.healButton { background: #166534; color: #ffffff; }
+
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.damageButton:disabled,
+.healButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.input:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.damageButton:focus-visible,
+.healButton:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+
+@media (max-width: 480px) {
+  .page { margin: 1rem auto; padding: 1rem; }
+  .setup { padding: 1rem; }
+}
