@@ -4,6 +4,7 @@ import type { CampaignWorkspace, CampaignWritePort } from '@/services/campaign-w
 import { requireUuid } from '@/services/campaign-workspace';
 import { createClient } from '@/utils/supabase/server';
 import { restoreTutorialProfile } from '@/domain/tutorial';
+import { validateInventory, type InventoryItem } from '@/domain/inventory';
 
 function record(value: unknown): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error('Invalid campaign data.');
@@ -50,11 +51,12 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   if (campaignId !== selectedId) throw new Error('Invalid selected campaign.');
   const [membersResult, crawlersResult] = await Promise.all([
     client.from('dcc_campaign_members').select('user_id').eq('campaign_id', campaignId),
-    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version,ruleset,tutorial_profile,crawler_number').eq('campaign_id', campaignId).order('name'),
+    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version,ruleset,tutorial_profile,crawler_number,inventory').eq('campaign_id', campaignId).order('name'),
   ]);
   if (membersResult.error) throw campaignDatabaseError(membersResult.error);
   if (crawlersResult.error) throw campaignDatabaseError(crawlersResult.error);
   const versions: Record<string, string> = {};
+  const inventories: Record<string, readonly InventoryItem[]> = {};
   const tutorials: Record<string, { profile: ReturnType<typeof restoreTutorialProfile>; number: number }> = {};
   const campaign: Campaign = {
     id: campaignId, name: field(row, 'name'), gmUserId: requireUuid(field(row, 'gm_user_id')),
@@ -71,6 +73,7 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
       if (crawler.ruleset === 'tutorial-v1') {
         if (!Number.isSafeInteger(item.crawler_number) || (item.crawler_number as number) < 1) throw new Error('Invalid Crawler Number.');
         tutorials[crawler.id] = { profile: restoreTutorialProfile(item.tutorial_profile), number: item.crawler_number as number };
+        inventories[crawler.id] = validateInventory(item.inventory);
       }
       return { ownerUserId: requireUuid(field(item, 'owner_user_id')), crawler };
     }),
@@ -79,7 +82,7 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   if (role === null || (role === 'player' && campaign.crawlers.some((entry) => entry.ownerUserId !== userId))) {
     throw new Error('Campaign access could not be verified.');
   }
-  return { userId, campaign, versions, tutorials };
+  return { userId, campaign, versions, tutorials, inventories };
 }
 
 export async function createCampaignWritePort(): Promise<CampaignWritePort> {

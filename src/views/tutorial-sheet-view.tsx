@@ -3,8 +3,10 @@ import { STAT_KEYS, TUTORIAL_CATALOG, tutorialModifier, tutorialSkills, type Tut
 import { CampaignForm } from '@/components/campaign-form';
 import { TutorialStatsEditor } from '@/components/tutorial-stats-editor';
 import styles from '@/styles/campaign.module.css';
+import type { InventoryItem } from '@/domain/inventory';
+import { InventoryView } from '@/views/inventory-view';
 
-export function TutorialSheetView({ crawler, profile, number, version, isGm }: { crawler: Crawler; profile: TutorialProfile; number: number; version: string; isGm: boolean }) {
+export function TutorialSheetView({ crawler, profile, number, version, isGm, inventory }: { crawler: Crawler; profile: TutorialProfile; number: number; version: string; isGm: boolean; inventory: readonly InventoryItem[] }) {
   const hidden = <><input type="hidden" name="crawlerId" value={crawler.id} /><input type="hidden" name="version" value={version} /></>;
   return <section className={styles.panel}>
     <h2>{crawler.name} — Crawler #{number.toLocaleString('en-US')}</h2>
@@ -38,7 +40,8 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm }: {
       <CampaignForm campaignId={crawler.campaignId} label="GM Crawler Number correction" key={`number-${version}`}>{hidden}<input type="hidden" name="operation" value="tutorial-number" /><label>Crawler Number<input name="crawlerNumber" type="number" min={1} max={2147483647} defaultValue={number} required /></label><button type="submit">Save number</button></CampaignForm>
     </>}
     <h3>Starting Skills and Heal</h3><ul>{tutorialSkills(profile).map((skill) => <li key={skill.name}>{skill.name} — Rank {skill.rank}{skill.stat ? ` (${skill.stat})` : ''}</li>)}</ul>
-    {TUTORIAL_CATALOG.combat.find((item) => item.id === profile.combatId)?.kind === 'spell' && <p>Starting spellcaster equipment: 5 Standard Mana Potions. Consumable inventory tracking will be added with inventory management.</p>}
+    {TUTORIAL_CATALOG.combat.find((item) => item.id === profile.combatId)?.kind === 'spell' && <p>Starting allowance: 5 Standard Mana Potions. New crawlers receive these once in inventory. For crawlers created before the inventory update or converted prototypes, record only those still remaining; this allowance is not a refill.</p>}
+    <InventoryView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} items={inventory} isGm={isGm} />
     <h3>Story and starting gear</h3>{Object.entries(profile.notes).map(([key, value]) => <p className={styles.notes} key={key}><strong>{key}: </strong>{value || 'Not recorded'}</p>)}
   </section>;
 }

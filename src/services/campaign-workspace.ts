@@ -3,12 +3,14 @@ import {
   restoreCrawler, updateCampaignCrawlerStats, type Campaign,
 } from '@/domain';
 import type { TutorialProfile } from '@/domain/tutorial';
+import type { InventoryItem } from '@/domain/inventory';
 
 export interface CampaignWorkspace {
   readonly userId: string;
   readonly campaign: Campaign | null;
   readonly versions: Readonly<Record<string, string>>;
   readonly tutorials?: Readonly<Record<string, { profile: TutorialProfile; number: number }>>;
+  readonly inventories?: Readonly<Record<string, readonly InventoryItem[]>>;
 }
 
 export interface CampaignWritePort {

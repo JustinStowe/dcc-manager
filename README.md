@@ -6,6 +6,16 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Inventory and equipment
+
+Follow [INVENTORY_SETUP.md](Docs/INVENTORY_SETUP.md) for the new per-game item
+quantities, equipment slots, and consumable quantity tracking. Apply only
+`202611090005_inventory.sql` after the already installed migrations 001–004, then
+run its database assertions and `npm run check`. This adds 46 test cases; full
+local application and live database verification are pending. Existing game
+inventory starts empty while gear notes are preserved. New spellcasters receive
+five starting Mana Potions once per game crawler. Item effects remain manual.
+
 ### Crawler profiles and game deletion
 
 After migrations 1 through 3 are applied, back up existing game data and run the
@@ -62,7 +72,7 @@ used by the application.
 | `npm start` | Serve the production build |
 | `npm run check` | Run tests, lint, typecheck, and build |
 
-The current suite passes **268 tests across 14 files**. No Nx command or separate
+Before the deleted-game routing and inventory updates, the suite contained **268 tests across 14 files**. Deleted-game routing adds nine cases; inventory adds 46. Run `npm run check` to verify the current total and all application checks. No Nx command or separate
 library build is needed.
 
 ## Current flows

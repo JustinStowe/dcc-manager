@@ -1,6 +1,6 @@
 # Dungeon Crawler Carl Manager — Project Plan
 
-Last updated: November 8, 2026
+Last updated: November 9, 2026
 
 ## Goal
 
@@ -44,17 +44,26 @@ part of the active milestone, rather than deferred work.
 | Campaign domain permissions | Installed and verified in the user's earlier build |
 | Shared storage and owner-only visibility | Installed; user reports database setup and hosting work |
 | Host / Join lobby and selected-game routing | Installed; checks passed and user reports it works |
-| Level 1 Human Tutorial entry | Implemented from official books; migration and local acceptance checks pending |
+| Level 1 Human Tutorial entry | User verified creation, persistence, health, visibility, and independent game instances |
+| Saved account writeups | Three slots per account; user verified independence from game progress |
+| GM game deletion | User verified deletion; subsequent deleted-game redirect fix reviewed from supplied commit |
+| Inventory and equipment | Implemented; migration 005, SQL assertions, local checks, and browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
 The official rulebooks and character sheet are now the rules reference.
 
-The Tutorial update adds **70 cases** (52 official rules and 18 application
-commands) for an expected **251 tests across 13 files**, retaining the user's two
-browser ID cases. The available source harness and mocked framework checks pass.
-The new migration, PostgreSQL assertions, full local checks, and browser QA still
-need to run in the user's environment.
+The user confirmed Tutorial data persists, health tracking works, GM/player
+visibility is correct, saved writeups create independent Level 1 game crawlers,
+and deleting a game preserves account writeups. The deleted-game routing fix
+from commit `2d10644703c7c1d8b170fc520e29f581e8568c31` returns missing/inaccessible
+games to the lobby with a fixed notice; database errors remain separate.
+
+Inventory is the current development piece. It adds 46 domain/service cases,
+per-game item quantities/notes, equipped locations and slot limits, explicit
+consumable quantity use, and one-time potions for newly created spellcasters.
+The available source harness passes 302 cases; full application checks and live
+PostgreSQL assertions remain pending. See `Docs/INVENTORY_SETUP.md`.
 
 ## Roadmap
 
@@ -62,9 +71,9 @@ need to run in the user's environment.
 | --- | --- | --- | --- |
 | 1. Foundation | Standalone project, MVC structure, health rules, local saves, checks | Create and track a crawler locally | Complete |
 | 2. Lobby, accounts, and shared games | Authentication, Host/Join, codes, per-game roles, ownership, database storage, conflict handling | Host or join games and resume the correct shared crawler from another device | Installed; user reports working |
-| 3. Complete crawler sheets | Human Tutorial entry, official stats/health/Mana/Favor/numbering first; remaining sheet sections afterward | Create and play a game-specific crawler using official rules | Current; Human entry update ready for local verification |
+| 3. Complete crawler sheets | Human Tutorial entry, official stats/health/Mana/Favor/numbering first; remaining sheet sections afterward | Create and play a game-specific crawler using official rules | Human entry user verified; remaining sheet sections incremental |
 | 4. Skills and spells | Catalogs, assignments, descriptions, usage rules | Manage crawler abilities during play | Planned |
-| 5. Inventory, equipment, and effects | Item definitions, owned instances, equipment, traits, supported calculations | Award and manage equipment and its effects | Planned |
+| 5. Inventory, equipment, and effects | Item definitions, owned instances, equipment, traits, supported calculations | Award and manage equipment and its effects | Current; item tracking and equipment occupancy implemented, effects deferred |
 | 6. Encounters and combat | Monsters, encounter setup, initiative, turns, health, statuses | Run combat from a GM dashboard | Planned |
 | 7. Achievements, rewards, and progression | Awards, loot, history, controlled level-up | Award rewards and apply eligible progression | Planned |
 | 8. Release readiness | Usability, mobile layout, export/recovery, hosting, broader checks | Use the application reliably for regular sessions | Planned |
@@ -141,7 +150,8 @@ Remaining before marking the update verified:
 - [ ] Check reviewed prototype conversion, stale updates, and mobile layout.
 
 See TUTORIAL_SETUP.md and TUTORIAL_RULES.md. Starting gear is currently notes;
-consumable quantities and attack execution belong to later inventory/combat work.
+consumable quantities now have explicit inventory tracking. Attack execution and
+automatic potion effects remain future work.
 Animal entry, Third Floor creation, race/class catalogs, portraits, automated
 Buffs/defenses, rests, Dying-round countdowns, and advancement remain future tasks.
 
@@ -188,3 +198,18 @@ verification, and checks that still require the user's environment.
 Game Codes currently act as invitations for signed-in, confirmed accounts while
 joining is open; there is no separate approval queue. The GM refreshes the game
 view to see new arrivals. Reusable monorepo extraction remains deferred.
+
+## Current inventory milestone
+
+- [x] Keep items on campaign crawler instances, separate from account writeups.
+- [x] Track item names, quantities, types, notes, and equipment locations.
+- [x] Enforce clothing/holding slots, two-handed conflicts, and accessory limits.
+- [x] Allow owners and the campaign GM to manage visible crawler inventories.
+- [x] Share row locks and version checks with health/Mana/stat changes.
+- [x] Seed five Mana Potions only on new spellcaster insertion.
+- [x] Preserve existing gear notes and avoid refilling existing crawlers.
+- [ ] Apply migration 005 and run the inventory database assertions.
+- [ ] Pass the real local test/lint/typecheck/build chain.
+- [ ] Complete multi-account and mobile/desktop inventory acceptance checks.
+- [ ] Add item catalogs, Hotlist/Spell entries, currencies, and controlled transfers.
+- [ ] Automate supported equipment/potion effects and combat timing.

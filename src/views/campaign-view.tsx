@@ -63,7 +63,7 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
           {!creationOnly && crawlers.map(({ crawler, ownerUserId }) => {
             const official = workspace?.tutorials?.[crawler.id];
             const version = workspace?.versions[crawler.id] ?? '';
-            if (official) return <TutorialSheetView key={crawler.id} crawler={crawler} profile={official.profile} number={official.number} version={version} isGm={role === 'gm'} />;
+            if (official) return <TutorialSheetView key={crawler.id} crawler={crawler} profile={official.profile} number={official.number} version={version} isGm={role === 'gm'} inventory={workspace?.inventories?.[crawler.id] ?? []} />;
             const maximum = getCrawlerMaximumHealth(crawler);
             return <section className={styles.panel} key={crawler.id}>
               <h2>{crawler.name} — prototype needs GM review</h2>
