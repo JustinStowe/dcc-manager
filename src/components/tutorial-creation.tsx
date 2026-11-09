@@ -4,6 +4,6 @@ import { useTutorialCreationController } from '@/controllers/use-tutorial-creati
 import { TutorialCreationView, type TutorialCreationProps } from '@/views/tutorial-creation-view';
 
 export function TutorialCreation(props: TutorialCreationProps) {
-  const { model, actions } = useTutorialCreationController(props.campaignId, props.owners[0]?.id ?? '', props.conversion?.name ?? '');
+  const { model, actions } = useTutorialCreationController(props.campaignId, props.owners[0]?.id ?? '', props.conversion?.name ?? '', props.profileSlot, props.savedProfile);
   return <TutorialCreationView {...props} model={model} actions={actions} />;
 }

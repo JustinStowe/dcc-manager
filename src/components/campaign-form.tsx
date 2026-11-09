@@ -3,9 +3,10 @@
 import type { ReactNode } from 'react';
 import { useCampaignFormController } from '@/controllers/use-campaign-form-controller';
 import styles from '@/styles/campaign.module.css';
+import type { CampaignFormState } from '@/services/campaign-workspace';
 
-export function CampaignForm({ children, label, campaignId }: { children: ReactNode; label: string; campaignId: string }) {
-  const { model, actions } = useCampaignFormController();
+export function CampaignForm({ children, label, campaignId, submitAction }: { children: ReactNode; label: string; campaignId: string; submitAction?: (previous: CampaignFormState, form: FormData) => Promise<CampaignFormState> }) {
+  const { model, actions } = useCampaignFormController(submitAction);
   return (
     <form action={actions.onSubmit} className={styles.form} aria-label={label} aria-busy={model.isPending}>
       <fieldset disabled={model.isPending} className={styles.fields}>

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { addCampaignPlayer, createCampaign } from '@/domain';
 import { createCrawler } from '@/domain/crawler';
 import { createTutorialProfile } from '@/domain/tutorial';
-import { tutorialDraftFixture } from '@/testing/tutorial-fixture';
+import { tutorialDraftFixture } from '@/test/tutorial-fixture';
 import type { CampaignWorkspace } from './campaign-workspace';
 import { executeTutorialCommand, type TutorialPort } from './tutorial-commands';
 
@@ -19,6 +19,21 @@ const creation={operation:'tutorial-create',ownerUserId:PLAYER,name:'Carl',draft
 const damage={operation:'tutorial-damage',crawlerId:ID,version:VERSION,amount:'4'};
 
 describe('Tutorial application commands',()=>{
+  it('can create a fresh game crawler without saving an account profile', async () => {
+    const { port, calls } = makePort();
+    await executeTutorialCommand(fixture(PLAYER, 'empty'), form(creation), port);
+    expect(calls[0]).toEqual(['create', expect.objectContaining({ saveSlot: null })]);
+  });
+  it('passes an optional profile slot for atomic creation and saving', async () => {
+    const { port, calls } = makePort();
+    await executeTutorialCommand(fixture(PLAYER, 'empty'), form({ ...creation, saveSlot: '3' }), port);
+    expect(calls[0]).toEqual(['create', expect.objectContaining({ saveSlot: 3 })]);
+  });
+  it('rejects saving another player crawler to the GM profile slots', async () => {
+    const { port, calls } = makePort();
+    await expect(executeTutorialCommand(fixture(GM, 'empty'), form({ ...creation, saveSlot: '1' }), port)).rejects.toThrow('only your own');
+    expect(calls).toHaveLength(0);
+  });
   it('creates only a validated Level 1 build',async()=>{const{port,calls}=makePort();await executeTutorialCommand(fixture(PLAYER,'empty'),form(creation),port);expect(calls.length).toBe(1);});
   it('prevents assigning a player build to another account',async()=>{const{port,calls}=makePort();await expect(executeTutorialCommand(fixture(PLAYER,'empty'),form({...creation,ownerUserId:GM}),port)).rejects.toThrow();expect(calls.length).toBe(0);});
   it('prevents replacing a saved crawler through creation',async()=>{const{port,calls}=makePort();await expect(executeTutorialCommand(fixture(),form(creation),port)).rejects.toThrow();expect(calls.length).toBe(0);});

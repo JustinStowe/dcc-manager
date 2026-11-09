@@ -52,3 +52,11 @@ export async function setGameJoining(campaignId: string, accepting: boolean): Pr
   const { error } = await client.rpc('dcc_set_joining', { p_campaign_id: requireUuid(campaignId), p_accepting: accepting });
   if (error) throw campaignDatabaseError(error);
 }
+
+export async function deleteGame(gameId: string, confirmationName: string): Promise<void> {
+  const client = createClient(await cookies());
+  const { error } = await client.rpc('dcc_delete_game', { p_campaign_id: requireUuid(gameId), p_confirmation_name: confirmationName });
+  if (error?.code === '22023') throw new Error('Type the exact game name to confirm deletion.');
+  if (error?.code === '42501') throw new Error('Only this game GM can delete it.');
+  if (error) throw campaignDatabaseError(error);
+}

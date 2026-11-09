@@ -4,6 +4,7 @@ import { campaignDatabaseError } from './supabase-campaign-repository';
 import type { TutorialPort, TutorialRoll } from '@/services/tutorial-commands';
 import { STAT_KEYS } from '@/domain/tutorial';
 import { requireUuid } from '@/services/campaign-workspace';
+import { profileDatabaseError } from './supabase-crawler-profiles';
 
 function tutorialError(error: { code?: string; message?: string }): Error {
   const messages = ['Recover your saved roll; rolled stats cannot be changed.', 'Roll stats on the server first.', 'Cannot cast Heal while Dying or without 2 Mana.', 'Insufficient Mana.', 'No AI Favor available.', 'Zero health must stay zero.', 'Counter exceeds supported range.'];
@@ -25,6 +26,14 @@ export async function createTutorialPort(): Promise<TutorialPort> {
   const client = createClient(await cookies());
   return {
     async create(input) {
+      if (input.saveSlot != null) {
+        const { error } = await client.rpc('dcc_create_tutorial_and_save', {
+          p_campaign_id: input.campaignId, p_owner_user_id: input.ownerId, p_name: input.name,
+          p_profile: input.profile, p_roll_id: input.rollId, p_save_slot: input.saveSlot,
+        });
+        if (error) throw profileDatabaseError(error);
+        return;
+      }
       const { error } = await client.rpc('dcc_create_tutorial', {
         p_campaign_id: input.campaignId, p_owner_user_id: input.ownerId, p_name: input.name,
         p_profile: input.profile, p_roll_id: input.rollId, p_convert_id: input.convertId, p_expected_version: input.version, p_slots: input.slots,

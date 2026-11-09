@@ -5,6 +5,22 @@ import type { CampaignWorkspace } from '@/services/campaign-workspace';
 export interface GameSummary { readonly id: string; readonly name: string }
 export interface GameLobby { readonly hosted: readonly GameSummary[]; readonly joined: readonly GameSummary[] }
 export interface HostSettings { readonly code: string; readonly acceptingPlayers: boolean }
+export interface GameDeletionPort {
+  deleteGame(gameId: string, confirmationName: string): Promise<void>;
+}
+
+export async function executeGameDeletion(userId: string, form: FormData, port: GameDeletionPort): Promise<void> {
+  requireUuid(userId);
+  const rawGameId = form.get('gameId');
+  if (typeof rawGameId !== 'string') throw new RangeError('Choose a game to delete.');
+  const gameId = requireUuid(rawGameId);
+  const confirmationName = form.get('confirmationName');
+  if (typeof confirmationName !== 'string' || confirmationName.trim() === '' || confirmationName.length > 200 || form.get('confirmed') !== 'yes') {
+    throw new RangeError('Type the game name and confirm permanent deletion.');
+  }
+  await port.deleteGame(gameId, confirmationName);
+}
+
 export interface LobbyWritePort {
   host(name: string): Promise<string>;
   join(code: string): Promise<string | null>;

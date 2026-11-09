@@ -1,10 +1,11 @@
 import { getCampaignRole } from '@/domain';
 import { createTutorialProfile, castTutorialHeal, damageTutorialSlots, restoreTutorialProfile, type Scores, type TutorialDraft, type TutorialProfile, type TutorialStats } from '@/domain/tutorial';
 import { requireUuid, type CampaignWorkspace } from './campaign-workspace';
+import { requireProfileSlot } from './crawler-profiles';
 
 export interface TutorialRoll { readonly id: string; readonly scores: Scores }
 export interface TutorialPort {
-  create(input: { campaignId: string; ownerId: string; name: string; profile: TutorialProfile; rollId: string | null; convertId: string | null; version: string | null; slots: number }): Promise<void>;
+  create(input: { campaignId: string; ownerId: string; name: string; profile: TutorialProfile; rollId: string | null; convertId: string | null; version: string | null; slots: number; saveSlot?: number | null }): Promise<void>;
   act(input: { crawlerId: string; version: string; operation: string; amount: number; stats: TutorialStats | null; number: number | null }): Promise<void>;
 }
 function text(form: FormData, name: string): string {
@@ -43,7 +44,10 @@ export async function executeTutorialCommand(workspace: CampaignWorkspace, form:
     const rawRoll = form.get('rollId');
     const rollId = typeof rawRoll === 'string' && rawRoll ? requireUuid(rawRoll) : null;
     if (profile.method === 'rolled' && !rollId) throw new Error('Roll or recover your stats on the server first.');
-    await port.create({ campaignId: campaign.id, ownerId, name, profile, rollId, convertId, version, slots });
+    const rawSaveSlot = form.get('saveSlot');
+    const saveSlot = rawSaveSlot ? requireProfileSlot(rawSaveSlot) : null;
+    if (saveSlot !== null && (convertId || ownerId !== userId)) throw new Error('Save only your own new crawler to an account profile.');
+    await port.create({ campaignId: campaign.id, ownerId, name, profile, rollId, convertId, version, slots, saveSlot });
     return convertId ? 'Prototype converted after GM review.' : 'Level 1 Human crawler created.';
   }
   const crawlerId = requireUuid(text(form, 'crawlerId'));

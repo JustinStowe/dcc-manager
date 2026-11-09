@@ -72,7 +72,7 @@ export function createTutorialProfile(input: TutorialDraft): TutorialProfile {
   const profile: TutorialProfile = {
     version: 1, pronouns: shortText(input.pronouns, 80), method: input.method, initialStats: scores,
     stats: Object.fromEntries(STAT_KEYS.map((key) => [key, { base: scores[key], enhanced: scores[key] }])) as TutorialStats,
-    backgrounds: Object.fromEntries(STAGES.map((stage) => [stage, { category: input.backgrounds[stage].category, skills: [...input.backgrounds[stage].skills] }])) as BackgroundChoices,
+    backgrounds: Object.fromEntries<BackgroundChoice>(STAGES.map((stage) => [stage, { category: input.backgrounds[stage].category, skills: [...input.backgrounds[stage].skills] }])) as BackgroundChoices,
     combatId: input.combatId,
     notes: { trauma: shortText(input.notes.trauma, 2000), looseEnds: shortText(input.notes.looseEnds, 2000), regret: shortText(input.notes.regret, 2000), gear: shortText(input.notes.gear, 4000) },
     mana: scores.intelligence, favor: 1,

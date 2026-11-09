@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addCampaignPlayer, createCampaign, createCampaignCrawler } from '@/domain';
-import { executeLobbyCommand, formatGameCode, getGameEntry, normalizeGameCode, type LobbyWritePort } from './game-lobby';
+import { executeGameDeletion, executeLobbyCommand, formatGameCode, getGameEntry, normalizeGameCode, type LobbyWritePort } from './game-lobby';
 
 const GM = '11111111-1111-1111-1111-111111111111';
 const PLAYER = '22222222-2222-2222-2222-222222222222';
@@ -64,6 +64,25 @@ describe('game lobby commands', () => {
   });
   it('rejects unrecognized actions', async () => {
     await expect(executeLobbyCommand(GM, form({ operation: 'become-gm' }), portFixture().port)).rejects.toThrow();
+  });
+});
+
+describe('game deletion', () => {
+  it('passes the exact confirmation name to the authoritative database check', async () => {
+    const calls: string[][] = [];
+    await executeGameDeletion(GM, form({ gameId: GAME, confirmationName: 'Floor one', confirmed: 'yes' }), {
+      async deleteGame(...values) { calls.push(values); },
+    });
+    expect(calls).toEqual([[GAME, 'Floor one']]);
+  });
+  it.each([
+    { gameId: GAME, confirmationName: 'Floor one', confirmed: '' },
+    { gameId: GAME, confirmationName: '', confirmed: 'yes' },
+    { gameId: 'invalid', confirmationName: 'Floor one', confirmed: 'yes' },
+  ])('rejects incomplete or malformed deletion requests', async (values) => {
+    let called = false;
+    await expect(executeGameDeletion(GM, form(values), { async deleteGame() { called = true; } })).rejects.toThrow();
+    expect(called).toBe(false);
   });
 });
 

@@ -6,6 +6,35 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Crawler profiles and game deletion
+
+After migrations 1 through 3 are applied, back up existing game data and run the
+complete [migration 4](supabase/migrations/202611090004_crawler_profiles_and_game_deletion.sql)
+once in the Supabase SQL Editor for the project configured in `.env.local`.
+It includes its own transaction and API schema-cache notification. Do not rerun
+already applied migrations. This update has not been applied to your hosted database.
+
+The lobby now includes **Create crawler**. Each account has three saved profile
+slots, separate from game characters. Profiles can be edited or removed; their
+saved starting stats remain fixed. Server rolls are saved per slot and cannot
+be rerolled by reopening the editor. When joining a game, use a saved profile or
+create a fresh crawler. A fresh crawler can optionally be saved to an empty
+account slot in the same transaction. An occupied slot is never silently replaced.
+Using a profile creates a separate game crawler with full starting resources;
+game progress does not change the reusable profile. Existing server rolls in a
+game remain authoritative: a different saved build cannot replace them.
+
+Only a game's GM can delete it. Click **Delete game**, type the exact game name,
+then click **Permanently delete game**. Cancel makes no changes. Deletion removes
+the game, membership, game crawlers, saved game rolls, and legacy archives in one
+transaction. Account profiles are preserved. Successful deletion returns to the lobby.
+
+Run the [profile and deletion database assertions](supabase/tests/crawler_profiles_and_deletion_permissions.sql)
+in a development or staging SQL Editor after applying the migration. The tests
+create fixtures inside a transaction and roll them back. A successful result
+starts with `PASS:`. Also verify the UI with two signed-in accounts: a player
+must not see game deletion controls or another account's saved profiles.
+
 For the current Level 1 Human entry update, follow [TUTORIAL_SETUP.md](TUTORIAL_SETUP.md).
 Its migration follows the two lobby migrations.
 
@@ -33,8 +62,8 @@ used by the application.
 | `npm start` | Serve the production build |
 | `npm run check` | Run tests, lint, typecheck, and build |
 
-With the existing browser ID tests retained, the expected total after this update
-is **251 tests across 13 files**. No Nx command or separate library build is needed.
+The current suite passes **268 tests across 14 files**. No Nx command or separate
+library build is needed.
 
 ## Current flows
 
@@ -88,6 +117,13 @@ client-provided role claims are not authority. Database policies filter reads,
 and checked RPC functions enforce writes and optimistic concurrency.
 
 ## Verification status
+
+The profile/deletion update passes unit tests, TypeScript, ESLint, and a Next.js
+production build. All four migrations, the new profile/deletion assertions, and
+the existing Tutorial assertions passed against an isolated PostgreSQL 18 instance
+with minimal Supabase-compatible auth fixtures. This is not a full hosted Supabase
+test. Authenticated browser acceptance checks remain pending because the available
+browser session is signed out.
 
 The user confirmed the authentication/lobby checks and reported that database
 setup and hosting worked after applying the migrations. The new Tutorial update

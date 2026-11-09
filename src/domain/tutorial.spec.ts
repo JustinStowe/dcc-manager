@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { tutorialDraftFixture } from '@/testing/tutorial-fixture';
+import { tutorialDraftFixture } from '@/test/tutorial-fixture';
 import { createCrawler, getCrawlerMaximumHealth } from './crawler';
 import { restoreCrawler } from './crawler-restoration';
 import { changeCampaignCrawlerHealth, updateCampaignCrawlerStats } from './campaign';

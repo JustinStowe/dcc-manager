@@ -8,10 +8,14 @@ import { LegacyCrawlerImport } from '@/components/legacy-crawler-import';
 import styles from '@/styles/campaign.module.css';
 import Link from 'next/link';
 import { formatGameCode, type HostSettings } from '@/services/game-lobby';
+import { SavedCrawlerChoices } from '@/components/saved-crawler-choices';
+import { DeleteGame } from '@/components/delete-game';
+import type { SavedCrawlerProfile } from '@/services/crawler-profiles';
 
-export function CampaignView({ workspace, userId, storageError, hostSettings, creationOnly = false }: {
+export function CampaignView({ workspace, userId, storageError, hostSettings, profiles, creationOnly = false }: {
   workspace: CampaignWorkspace | null; userId: string; storageError: string | null;
   hostSettings?: HostSettings | null; creationOnly?: boolean;
+  profiles?: readonly SavedCrawlerProfile[];
 }) {
   const campaign = workspace?.campaign ?? null;
   const role = campaign ? getCampaignRole(campaign, userId) : null;
@@ -52,6 +56,7 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, cr
               <h2>Players</h2>
               <p>Players join with your Game Code and can view only their own crawler. Refresh to see new arrivals.</p>
               <ul>{campaign.playerUserIds.map((id) => <li key={id}>{campaign.crawlers.find((entry) => entry.ownerUserId === id)?.crawler.name ?? 'Awaiting crawler creation'}</li>)}</ul>
+              <DeleteGame game={{ id: campaign.id, name: campaign.name }} />
             </section>
           )}
           {crawlers.length === 0 && <p>No crawlers are available to your account yet.</p>}
@@ -68,7 +73,11 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, cr
               </details> : <p>Your GM must review and convert this crawler before using the official Tutorial tracker.</p>}
             </section>;
           })}
-          {(role === 'gm' ? availableOwnerIds.length > 0 : !hasOwnCrawler) && <TutorialCreation key={availableOwnerIds.join(',')} campaignId={campaign.id} owners={(role === 'gm' ? availableOwnerIds : [userId]).map((id) => ({ id, label: id === userId ? 'Me' : `Player ${id.slice(0, 8)}` }))} />}
+          {!hasOwnCrawler && <SavedCrawlerChoices campaignId={campaign.id} profiles={profiles ?? []} />}
+          {(role === 'gm' ? availableOwnerIds.length > 0 : !hasOwnCrawler) && <details open={!profiles?.length}>
+            <summary className={styles.subchoice}>Create a fresh crawler</summary>
+            <TutorialCreation key={availableOwnerIds.join(',')} campaignId={campaign.id} owners={(role === 'gm' ? availableOwnerIds : [userId]).map((id) => ({ id, label: id === userId ? 'Me' : `Player ${id.slice(0, 8)}` }))} currentUserId={userId} emptyProfileSlots={profiles ? [1, 2, 3].filter((slot) => !profiles.some((profile) => profile.slot === slot)) : []} />
+          </details>}
           {!hasOwnCrawler && <LegacyCrawlerImport campaignId={campaign.id} />}
         </>
       )}
