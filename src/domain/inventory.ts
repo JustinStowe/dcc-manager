@@ -4,6 +4,8 @@ export const EQUIPMENT_LOCATIONS = ['stored', 'head', 'torso', 'arms', 'legs', '
 export type ItemKind = typeof ITEM_KINDS[number];
 export type GearSlot = typeof GEAR_SLOTS[number];
 export type EquipmentLocation = typeof EQUIPMENT_LOCATIONS[number];
+export const ITEM_EFFECTS = ['manual', 'mana-full'] as const;
+export type ItemEffect = typeof ITEM_EFFECTS[number];
 export interface InventoryItem {
   readonly id: string;
   readonly name: string;
@@ -12,6 +14,7 @@ export interface InventoryItem {
   readonly notes: string;
   readonly gearSlot: GearSlot;
   readonly location: EquipmentLocation;
+  readonly effect?: ItemEffect;
 }
 export type ItemDraft = Omit<InventoryItem, 'id' | 'location'>;
 export const MAX_INVENTORY_ENTRIES = 200;
@@ -35,8 +38,12 @@ export function itemQuantity(value: unknown): number {
 }
 export function validateItemDraft(value: unknown): ItemDraft {
   const row = object(value);
-  return { name: text(row.name, 120, true), kind: choice(row.kind, ITEM_KINDS), quantity: itemQuantity(row.quantity), notes: text(row.notes, 2000), gearSlot: choice(row.gearSlot, GEAR_SLOTS) };
+  const kind = choice(row.kind, ITEM_KINDS);
+  const effect = row.effect === undefined ? undefined : choice(row.effect, ITEM_EFFECTS);
+  if (effect === 'mana-full' && kind !== 'consumable') throw new RangeError('A Mana potion effect requires a consumable.');
+  return { name: text(row.name, 120, true), kind, quantity: itemQuantity(row.quantity), notes: text(row.notes, 2000), gearSlot: choice(row.gearSlot, GEAR_SLOTS), ...(effect === undefined ? {} : { effect }) };
 }
+export function itemEffect(item: Pick<InventoryItem, 'effect'>): ItemEffect { return item.effect ?? 'manual'; }
 export function equipmentLocations(slot: GearSlot): readonly EquipmentLocation[] {
   if (slot === 'none') return ['stored'];
   if (slot === 'holding') return ['stored', 'main-hand', 'off-hand'];
@@ -74,7 +81,8 @@ export type InventoryMutation =
   | { readonly operation: 'add'; readonly item: ItemDraft; readonly id: string }
   | { readonly operation: 'edit'; readonly itemId: string; readonly item: ItemDraft }
   | { readonly operation: 'equip'; readonly itemId: string; readonly location: EquipmentLocation }
-  | { readonly operation: 'consume' | 'remove'; readonly itemId: string };
+  | { readonly operation: 'classify'; readonly itemId: string; readonly effect: ItemEffect }
+  | { readonly operation: 'consume' | 'remove' | 'drink-mana'; readonly itemId: string };
 
 export function changeInventory(current: readonly InventoryItem[], command: InventoryMutation): readonly InventoryItem[] {
   const items = validateInventory(current);
@@ -83,14 +91,17 @@ export function changeInventory(current: readonly InventoryItem[], command: Inve
   if (!target) throw new RangeError('Item not found. Refresh the campaign.');
   if (command.operation === 'remove') return items.filter((item) => item.id !== target.id);
   if (command.operation === 'consume' && target.kind !== 'consumable') throw new RangeError('Only consumables can use this action.');
+  if (command.operation === 'consume' && itemEffect(target) !== 'manual') throw new RangeError('Use the supported potion action for this item.');
+  if (command.operation === 'drink-mana' && (target.kind !== 'consumable' || itemEffect(target) !== 'mana-full')) throw new RangeError('Choose an identified Standard Mana Potion.');
   return validateInventory(items.flatMap((item) => {
     if (item.id !== target.id) return [item];
     if (command.operation === 'edit') {
       const draft = validateItemDraft(command.item);
-      if (draft.kind !== item.kind || draft.gearSlot !== item.gearSlot) throw new RangeError('Item type and gear slot are fixed. Remove this entry and add a corrected item.');
+      if (draft.kind !== item.kind || draft.gearSlot !== item.gearSlot || itemEffect(draft) !== itemEffect(item)) throw new RangeError('Item type, gear slot, and effect are fixed. Use GM classification to correct an effect.');
       return [{ ...item, ...draft }];
     }
     if (command.operation === 'equip') return [{ ...item, location: command.location }];
+    if (command.operation === 'classify') return [{ ...item, effect: command.effect }];
     return item.quantity === 1 ? [] : [{ ...item, quantity: item.quantity - 1 }];
   }));
 }

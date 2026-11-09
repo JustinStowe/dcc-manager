@@ -16,7 +16,7 @@
 .error, .notice { margin-top: 1rem; padding: 0.75rem; border-radius: 0.4rem; }
 .error { color: #991b1b; background: #fef2f2; }
 .notice { color: #14532d; background: #f0fdf4; }
-.accountBar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 1rem max(1rem, calc((100% - 736px) / 2)); border-bottom: 1px solid #d6deea; background: #f8fafc; color: #1e293b; }
+.accountBar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 0.75rem max(1rem, calc((100% - 1248px) / 2)); border-bottom: 1px solid #d6deea; background: #f8fafc; color: #1e293b; }
 .accountBar strong { overflow-wrap: anywhere; }
 .accountBar .hint { margin-top: 0.4rem; max-width: 38rem; }
 .banner { padding: 1rem; color: #991b1b; background: #fef2f2; text-align: center; }

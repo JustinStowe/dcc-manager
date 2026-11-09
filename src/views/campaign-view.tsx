@@ -1,4 +1,5 @@
-import { getCampaignRole, getCrawlerMaximumHealth, getVisibleCampaignCrawlers } from '@/domain';
+import { getCampaignRole, getCrawlerMaximumHealth } from '@/domain';
+import { getDashboardCrawlers } from '@/models/campaign-dashboard';
 import type { CampaignWorkspace } from '@/services/campaign-workspace';
 import { CampaignForm } from '@/components/campaign-form';
 import { CampaignRefresh } from '@/components/campaign-refresh';
@@ -12,35 +13,34 @@ import { SavedCrawlerChoices } from '@/components/saved-crawler-choices';
 import { DeleteGame } from '@/components/delete-game';
 import type { SavedCrawlerProfile } from '@/services/crawler-profiles';
 
-export function CampaignView({ workspace, userId, storageError, hostSettings, profiles, creationOnly = false }: {
+export function CampaignView({ workspace, userId, storageError, hostSettings, profiles, creationOnly = false, selectedCrawlerId }: {
   workspace: CampaignWorkspace | null; userId: string; storageError: string | null;
   hostSettings?: HostSettings | null; creationOnly?: boolean;
   profiles?: readonly SavedCrawlerProfile[];
+  selectedCrawlerId?: string;
 }) {
   const campaign = workspace?.campaign ?? null;
   const role = campaign ? getCampaignRole(campaign, userId) : null;
-  const crawlers = campaign ? getVisibleCampaignCrawlers(campaign, userId) : [];
+  const { visible: crawlers, selected } = getDashboardCrawlers(campaign, userId, selectedCrawlerId);
   const hasOwnCrawler = crawlers.some((entry) => entry.ownerUserId === userId);
   const ownerIds = campaign ? [campaign.gmUserId, ...campaign.playerUserIds] : [];
   const availableOwnerIds = ownerIds.filter((id) => !crawlers.some((entry) => entry.ownerUserId === id));
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${styles.dashboard}`}>
       <Link href="/" className={styles.backLink}>Back to game lobby</Link>
-      <div className={styles.heading}>
-        <div><h1>{campaign?.name ?? 'Your campaign'}</h1><p>{creationOnly ? 'Create your crawler for this game' : role === 'gm' ? 'GM dashboard — all campaign crawlers' : 'Your crawler'}</p></div>
+      <div className={styles.dashboardHeader}>
+        <div><p className={styles.eyebrow}>Dungeon Crawler Carl · campaign</p><h1>{campaign?.name ?? 'Your campaign'}</h1></div>
+        <p className={styles.roleBadge}>{creationOnly ? 'Crawler creation' : role === 'gm' ? 'You are the GM' : 'Your crawler record'}</p>
         <CampaignRefresh />
       </div>
-      <section className={styles.panel}>
-        <h2>{role === 'gm' ? 'You are the GM' : 'Your game'}</h2>
-        <p>Your role and crawler are specific to this game. Use the lobby to host or join another game.</p>
-      </section>
       {storageError ? <p role="alert" className={styles.error}>{storageError}</p> : !campaign ? (
         <section className={styles.panel}><h2>Game access unavailable</h2><p>Return to the lobby and enter a valid Game Code from your GM.</p></section>
       ) : (
         <>
-          <p>Changes save to the campaign immediately. Use Refresh campaign to see updates made in other sessions.</p>
+          <p className={styles.dashboardHint}>Changes save to this game. Refresh campaign to see another session’s updates.</p>
           {role === 'gm' && (
-            <section className={styles.panel}>
+            <section className={`${styles.panel} ${styles.gameManagement}`} aria-label="Game management">
+              <div>
               {hostSettings && (
                 <>
                   <h2>Game Code</h2>
@@ -53,19 +53,24 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
                   </CampaignForm>
                 </>
               )}
-              <h2>Players</h2>
+              </div><div>
+              <h2>Players <span className={styles.countBadge}>{campaign.playerUserIds.length}</span></h2>
               <p>Players join with your Game Code and can view only their own crawler. Refresh to see new arrivals.</p>
               <ul>{campaign.playerUserIds.map((id) => <li key={id}>{campaign.crawlers.find((entry) => entry.ownerUserId === id)?.crawler.name ?? 'Awaiting crawler creation'}</li>)}</ul>
-              <DeleteGame game={{ id: campaign.id, name: campaign.name }} />
+              <details className={styles.dangerZone}><summary>Delete this game</summary><DeleteGame game={{ id: campaign.id, name: campaign.name }} /></details>
+              </div>
             </section>
           )}
           {crawlers.length === 0 && <p>No crawlers are available to your account yet.</p>}
-          {!creationOnly && crawlers.map(({ crawler, ownerUserId }) => {
+          {!creationOnly && crawlers.length > 0 && <nav className={styles.crawlerTabs} aria-label={role === 'gm' ? 'Select a crawler' : 'Your crawler'}>
+            {crawlers.map(({ crawler }) => <Link key={crawler.id} href={`/games/${campaign.id}?crawler=${crawler.id}#crawler-record`} prefetch={false} aria-current={selected?.crawler.id === crawler.id ? 'page' : undefined}>{crawler.name}</Link>)}
+          </nav>}
+          {!creationOnly && selected && [selected].map(({ crawler, ownerUserId }) => {
             const official = workspace?.tutorials?.[crawler.id];
             const version = workspace?.versions[crawler.id] ?? '';
             if (official) return <TutorialSheetView key={crawler.id} crawler={crawler} profile={official.profile} number={official.number} version={version} isGm={role === 'gm'} inventory={workspace?.inventories?.[crawler.id] ?? []} />;
             const maximum = getCrawlerMaximumHealth(crawler);
-            return <section className={styles.panel} key={crawler.id}>
+            return <section className={styles.panel} id="crawler-record" key={crawler.id}>
               <h2>{crawler.name} — prototype needs GM review</h2>
               <p>Recorded prototype health: {crawler.currentSegments}/{maximum}. These values used the earlier prototype calculation. They have not been converted automatically.</p>
               {role === 'gm' ? <details><summary>Review and convert to Level 1 Tutorial rules</summary>

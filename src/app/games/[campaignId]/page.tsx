@@ -14,7 +14,7 @@ import type { SavedCrawlerProfile } from '@/services/crawler-profiles';
 
 export const dynamic = 'force-dynamic';
 
-export default async function GamePage({ params }: { params: Promise<{ campaignId: string }> }) {
+export default async function GamePage({ params, searchParams }: { params: Promise<{ campaignId: string }>; searchParams?: Promise<{ crawler?: string }> }) {
   const user = await requireCurrentUser();
   let campaignId: string;
   try { campaignId = requireUuid((await params).campaignId); }
@@ -35,10 +35,11 @@ export default async function GamePage({ params }: { params: Promise<{ campaignI
   if (entry === 'create') {
     redirect(`/games/${campaignId}/create`);
   }
+  const selectedCrawlerId = (await searchParams)?.crawler;
   return (
     <>
       <AccountBarView email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
-      <CampaignView workspace={workspace} userId={user.id} storageError={storageError} hostSettings={settings} profiles={profiles} />
+      <CampaignView workspace={workspace} userId={user.id} storageError={storageError} hostSettings={settings} profiles={profiles} selectedCrawlerId={selectedCrawlerId} />
     </>
   );
 }

@@ -6,6 +6,22 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Potion automation and character sheet UI
+
+Follow [POTIONS_UI_SETUP.md](Docs/POTIONS_UI_SETUP.md). After the verified
+inventory migration 005, apply only `202611090006_potion_automation.sql`, run its
+potion assertions and the updated inventory assertions, then `npm run check`.
+Identified Standard Mana Potions now spend one item and restore all Mana in a
+single save. Existing stacks stay manual until the GM identifies their effect.
+Custom consumables remain manual. New spellcasters get five identified potions.
+
+The campaign dashboard now selects one crawler sheet at a time. Both roles use
+a sheet inspired by the official form, with identity fields, boxed attributes,
+ten health slots, and resource/skill sections. Health and GM correction controls
+are expandable. Offline GM and player layout previews are included in `Docs`.
+The deleted-game redirect, inventory ownership, and saved writeups are preserved.
+This update adds 32 cases; full local and live database checks are pending.
+
 ### Inventory and equipment
 
 Follow [INVENTORY_SETUP.md](Docs/INVENTORY_SETUP.md) for the new per-game item
@@ -14,7 +30,8 @@ quantities, equipment slots, and consumable quantity tracking. Apply only
 run its database assertions and `npm run check`. This adds 46 test cases; full
 local application and live database verification are pending. Existing game
 inventory starts empty while gear notes are preserved. New spellcasters receive
-five starting Mana Potions once per game crawler. Item effects remain manual.
+five starting Mana Potions once per game crawler. Supported potion effects are
+now described in the potion update above; equipment bonuses remain manual.
 
 ### Crawler profiles and game deletion
 

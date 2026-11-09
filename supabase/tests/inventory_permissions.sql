@@ -38,6 +38,13 @@ select set_config('dcc_test.inventory_potion',(select inventory->0->>'id' from p
 do $$ begin
   if (select count(*) from public.dcc_crawlers where inventory->0->>'quantity'='5')<>2 then raise exception 'Each new spellcaster must receive five starting potions.'; end if;
 end $$;
+-- With migration 006, starting potions automate. This older inventory test
+-- deliberately classifies its two stacks as manual to exercise generic consume.
+select set_config('request.jwt.claim.sub','e1111111-1111-1111-1111-111111111111',true);
+select public.dcc_inventory_action(id,version,'classify',(inventory->0->>'id')::uuid,'{"effect":"manual"}')
+  from public.dcc_crawlers where campaign_id in (current_setting('dcc_test.inventory_game')::uuid,current_setting('dcc_test.inventory_other_game')::uuid);
+select set_config('request.jwt.claim.sub','e2222222-2222-2222-2222-222222222222',true);
+select set_config('dcc_test.inventory_version',(select version::text from public.dcc_crawlers where id=current_setting('dcc_test.inventory_crawler')::uuid),true);
 -- A use changes only this game's quantity and version, not Mana or saved builds.
 select public.dcc_inventory_action(current_setting('dcc_test.inventory_crawler')::uuid,current_setting('dcc_test.inventory_version')::uuid,'consume',current_setting('dcc_test.inventory_potion')::uuid);
 select pg_temp.inventory_expect_error(format('select public.dcc_inventory_action(%L,%L,%L,%L)',current_setting('dcc_test.inventory_crawler'),current_setting('dcc_test.inventory_version'),'consume',current_setting('dcc_test.inventory_potion')),'40001');

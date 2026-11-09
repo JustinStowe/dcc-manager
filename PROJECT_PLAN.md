@@ -47,7 +47,9 @@ part of the active milestone, rather than deferred work.
 | Level 1 Human Tutorial entry | User verified creation, persistence, health, visibility, and independent game instances |
 | Saved account writeups | Three slots per account; user verified independence from game progress |
 | GM game deletion | User verified deletion; subsequent deleted-game redirect fix reviewed from supplied commit |
-| Inventory and equipment | Implemented; migration 005, SQL assertions, local checks, and browser acceptance pending |
+| Inventory and equipment | User reports `npm run check` and all manual acceptance checks passed |
+| Standard Mana Potions | Atomic use and explicit effect classification implemented; migration 006 and local acceptance pending |
+| Campaign dashboard and sheet UI | Crawler selector and official-sheet-inspired layout implemented; browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -59,11 +61,16 @@ and deleting a game preserves account writeups. The deleted-game routing fix
 from commit `2d10644703c7c1d8b170fc520e29f581e8568c31` returns missing/inaccessible
 games to the lobby with a fixed notice; database errors remain separate.
 
-Inventory is the current development piece. It adds 46 domain/service cases,
+The user reports the inventory milestone passed application checks and all
+manual acceptance tests. The next development piece is atomic Standard Mana
+Potion use and the character sheet/dashboard redesign.
+
+The verified inventory foundation adds 46 domain/service cases,
 per-game item quantities/notes, equipped locations and slot limits, explicit
 consumable quantity use, and one-time potions for newly created spellcasters.
-The available source harness passes 302 cases; full application checks and live
-PostgreSQL assertions remain pending. See `Docs/INVENTORY_SETUP.md`.
+The new potion/UI update adds 32 further cases. Its source harness passes 334
+cases with mocked boundary/view checks. Real application checks, migration 006,
+and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
 
 ## Roadmap
 
@@ -208,8 +215,22 @@ view to see new arrivals. Reusable monorepo extraction remains deferred.
 - [x] Share row locks and version checks with health/Mana/stat changes.
 - [x] Seed five Mana Potions only on new spellcaster insertion.
 - [x] Preserve existing gear notes and avoid refilling existing crawlers.
-- [ ] Apply migration 005 and run the inventory database assertions.
-- [ ] Pass the real local test/lint/typecheck/build chain.
-- [ ] Complete multi-account and mobile/desktop inventory acceptance checks.
+- [x] Apply the inventory update and complete its manual acceptance (user reported).
+- [x] Pass the inventory milestone’s local test/lint/typecheck/build chain (user reported).
+- [x] Complete the inventory manual acceptance checklist (user reported).
 - [ ] Add item catalogs, Hotlist/Spell entries, currencies, and controlled transfers.
 - [ ] Automate supported equipment/potion effects and combat timing.
+
+## Current potion and UI milestone
+
+- [x] Spend one identified Standard Mana Potion and restore Mana atomically.
+- [x] Reject full Mana, Dying, unsupported items, unauthorized users, and stale saves.
+- [x] Keep custom consumables manual and require GM classification of existing effects.
+- [x] Preserve quantities and legacy manual items during migration; never refill stacks.
+- [x] Add a GM crawler selector and keep player selection within their visible list.
+- [x] Reorganize the sheet around official identity, attributes, health, and resource areas.
+- [x] Preserve existing tracker, inventory, deletion, and correction controls.
+- [ ] Apply migration 006 and pass potion/inventory database assertions.
+- [ ] Pass the real local `npm run check` chain for this update.
+- [ ] Verify dashboard selection, potion use, and desktop/mobile layouts in the browser.
+- [ ] Add equipment bonuses, DR, Buffs, and other supported item effects next.

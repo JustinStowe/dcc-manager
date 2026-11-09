@@ -1,14 +1,16 @@
 import { getCampaignRole } from '@/domain';
-import { changeInventory, EQUIPMENT_LOCATIONS, validateItemDraft, type InventoryItem, type ItemDraft, type EquipmentLocation } from '@/domain/inventory';
+import { changeInventory, EQUIPMENT_LOCATIONS, ITEM_EFFECTS, validateItemDraft, type InventoryItem, type ItemDraft, type EquipmentLocation, type ItemEffect } from '@/domain/inventory';
+import { drinkStandardManaPotion } from '@/domain/potions';
 import { requireUuid, type CampaignWorkspace } from './campaign-workspace';
 
 export interface InventoryWrite {
   readonly crawlerId: string;
   readonly version: string;
-  readonly operation: 'add' | 'edit' | 'equip' | 'consume' | 'remove';
+  readonly operation: 'add' | 'edit' | 'equip' | 'consume' | 'remove' | 'drink-mana' | 'classify';
   readonly itemId: string | null;
   readonly item: ItemDraft | null;
   readonly location: EquipmentLocation | null;
+  readonly effect?: ItemEffect;
 }
 export interface InventoryPort { act(input: InventoryWrite): Promise<void> }
 function text(form: FormData, key: string): string {
@@ -29,11 +31,11 @@ export async function executeInventoryCommand(workspace: CampaignWorkspace, form
   const current: readonly InventoryItem[] | undefined = workspace.inventories?.[crawlerId];
   if (!current) throw new Error('Inventory could not be loaded. Refresh the campaign.');
   const operation = text(form, 'operation');
-  if (!['add', 'edit', 'equip', 'consume', 'remove'].includes(operation)) throw new RangeError('Choose an inventory action.');
+  if (!['add', 'edit', 'equip', 'consume', 'remove', 'drink-mana', 'classify'].includes(operation)) throw new RangeError('Choose an inventory action.');
   const itemId = operation === 'add' ? null : requireUuid(text(form, 'itemId'));
   const item = operation === 'add' || operation === 'edit' ? validateItemDraft({
     name: text(form, 'name'), quantity: Number(text(form, 'quantity')), kind: text(form, 'kind'),
-    gearSlot: text(form, 'gearSlot'), notes: form.get('notes') ?? '',
+    gearSlot: text(form, 'gearSlot'), notes: form.get('notes') ?? '', ...(form.has('effect') ? { effect: text(form, 'effect') } : {}),
   }) : null;
   let location: EquipmentLocation | null = null;
   if (operation === 'equip') {
@@ -43,11 +45,25 @@ export async function executeInventoryCommand(workspace: CampaignWorkspace, form
   }
   if (operation === 'remove' && form.get('confirmed') !== 'yes') throw new RangeError('Confirm removal of this entire entry.');
   if (operation === 'consume' && form.get('confirmed') !== 'yes') throw new RangeError('Confirm using one item; resolve its effects at the table.');
+  let effect: ItemEffect | undefined;
+  if (operation === 'classify') {
+    if (role !== 'gm') throw new Error('Only the GM can reclassify an existing item effect.');
+    effect = text(form, 'effect') as ItemEffect;
+    if (!ITEM_EFFECTS.includes(effect)) throw new RangeError('Choose a supported item effect.');
+  }
   // A placeholder UUID checks the new entry shape; the database generates the real ID.
   if (operation === 'add') changeInventory(current, { operation, item: item!, id: '00000000-0000-4000-8000-000000000000' });
   else if (operation === 'edit') changeInventory(current, { operation, item: item!, itemId: itemId! });
   else if (operation === 'equip') changeInventory(current, { operation, location: location!, itemId: itemId! });
+  else if (operation === 'classify') changeInventory(current, { operation, effect: effect!, itemId: itemId! });
+  else if (operation === 'drink-mana') {
+    if (form.get('confirmed') !== 'yes') throw new RangeError('Confirm the crawler can drink and potion timing is valid.');
+    const profile = workspace.tutorials?.[crawlerId]?.profile;
+    if (!profile) throw new Error('Crawler resources could not be loaded. Refresh the campaign.');
+    drinkStandardManaPotion(current, profile, entry.crawler.currentSegments, itemId!);
+  }
   else changeInventory(current, { operation: operation as 'consume' | 'remove', itemId: itemId! });
-  await port.act({ crawlerId, version, operation: operation as InventoryWrite['operation'], itemId, item, location });
+  await port.act({ crawlerId, version, operation: operation as InventoryWrite['operation'], itemId, item, location, ...(effect ? { effect } : {}) });
+  if (operation === 'drink-mana') return 'One Standard Mana Potion used. Mana fully restored.';
   return operation === 'consume' ? 'One item used. Apply its effects separately at the table.' : 'Inventory saved.';
 }
