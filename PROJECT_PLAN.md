@@ -21,8 +21,9 @@ Preserve MVC-style separation. The reusable Nx monorepo remains paused.
 - An account may host multiple games and join other games. Roles are per game.
 - Players see only their own crawler in a selected game; its GM sees everyone.
 - One crawler per account per campaign is the initial shared-storage limit.
-- Players choose initial health stats. The GM controls base health and
-  Constitution after creation. Player level-up adjustments come later through
+- Players choose their initial Tutorial stats. Existing stats become GM-controlled
+  after creation. Official Human crawlers use ten slots; Constitution determines
+  the threshold per slot. Player level-up adjustments come later through
   a separate eligibility-controlled workflow.
 - Owners and the GM can apply damage and healing. Stat edits preserve current
   health, clamp it to a lower maximum, and keep zero health at zero.
@@ -41,28 +42,27 @@ part of the active milestone, rather than deferred work.
 | Crawler creation, health rules, browser save/load | Working and manually verified |
 | Authentication | Signup, confirmation, sign-in, refresh, sign-out, and automated checks verified by the user |
 | Campaign domain permissions | Installed and verified in the user's earlier build |
-| Shared storage and owner-only visibility | Implemented; installation and live database verification pending |
-| Host / Join lobby and selected-game routing | Implemented; installation and live verification pending |
-| Expanded Vitals, Favor, Adventurer Number | Next character-sheet task; field rules still to define |
+| Shared storage and owner-only visibility | Installed; user reports database setup and hosting work |
+| Host / Join lobby and selected-game routing | Installed; checks passed and user reports it works |
+| Level 1 Human Tutorial entry | Implemented from official books; migration and local acceptance checks pending |
 
-The user confirmed **120 tests across 8 files**, lint, TypeScript, production
-build, and the live authentication flow. The cumulative shared-storage/lobby
-update adds 36 campaign cases and 25 lobby cases, for an expected **181 tests
-across 11 files** in the user's current project. This includes the user's two
-browser ID tests, which are not present in the assistant workspace.
+The user confirmed the earlier authentication and lobby builds passed checks and
+reported that the game/database flow worked after migrations were applied.
+The official rulebooks and character sheet are now the rules reference.
 
-The available source harness and mocked adapter/action/route assertions pass.
-Real local integration checks and the PostgreSQL migration/policy tests remain
-required. No migration has been executed against the user's Supabase project
-by the assistant.
+The Tutorial update adds **70 cases** (52 official rules and 18 application
+commands) for an expected **251 tests across 13 files**, retaining the user's two
+browser ID cases. The available source harness and mocked framework checks pass.
+The new migration, PostgreSQL assertions, full local checks, and browser QA still
+need to run in the user's environment.
 
 ## Roadmap
 
 | Phase | Scope | Outcome | Status |
 | --- | --- | --- | --- |
 | 1. Foundation | Standalone project, MVC structure, health rules, local saves, checks | Create and track a crawler locally | Complete |
-| 2. Lobby, accounts, and shared games | Authentication, Host/Join, codes, per-game roles, ownership, database storage, conflict handling | Host or join games and resume the correct shared crawler from another device | Current milestone; live shared-game verification pending |
-| 3. Complete crawler sheets | Expanded Vitals, Favor, Adventurer Number, attributes, mana/stamina, floor, statuses | Use a fuller game-specific character sheet | Next |
+| 2. Lobby, accounts, and shared games | Authentication, Host/Join, codes, per-game roles, ownership, database storage, conflict handling | Host or join games and resume the correct shared crawler from another device | Installed; user reports working |
+| 3. Complete crawler sheets | Human Tutorial entry, official stats/health/Mana/Favor/numbering first; remaining sheet sections afterward | Create and play a game-specific crawler using official rules | Current; Human entry update ready for local verification |
 | 4. Skills and spells | Catalogs, assignments, descriptions, usage rules | Manage crawler abilities during play | Planned |
 | 5. Inventory, equipment, and effects | Item definitions, owned instances, equipment, traits, supported calculations | Award and manage equipment and its effects | Planned |
 | 6. Encounters and combat | Monsters, encounter setup, initiative, turns, health, statuses | Run combat from a GM dashboard | Planned |
@@ -102,37 +102,48 @@ These items describe implemented code, not completed deployment verification.
 - [x] Preserve existing campaigns and assign them codes through migration.
 - [x] Supply database assertions and multi-session acceptance checks.
 
-### Remaining verification
+### Prior milestone verification
 
-- [ ] Apply the cumulative source update.
-- [ ] Apply the base database migration if it is not already installed.
-- [ ] Apply the lobby migration; do not run the old bootstrap script.
-- [ ] Run the database assertions and confirm they finish without error.
-- [ ] Run `npm run check`; expect 181 tests plus lint/typecheck/build.
-- [ ] Verify both Host branches and both Join branches with separate accounts.
-- [ ] Verify one account hosting a game while playing in another.
-- [ ] Verify player privacy, GM controls, saved data, and cross-game isolation.
-- [ ] Verify stale-version conflicts, refresh, import, and cross-device access.
+The user reported that the application checks passed and the database/game flow
+worked after the migrations were applied. Continue using the multi-session edge
+case checklist in LOBBY_SETUP.md as appropriate; those cases should not be
+assumed individually observed from a general success report.
 
-See [LOBBY_SETUP.md](LOBBY_SETUP.md) for the exact installation and test sequence.
-The first usable shared version is complete after these checks pass.
+The next update is the Human Tutorial entry below.
 
-## Character creation scope
+## Current milestone: Level 1 Human Tutorial entry
 
-The user selected **lobby first**, reusing the current creation form for this
-update. That form includes name, base health, Constitution, and current health.
+The user selected Level 1 Tutorial entry first and supplied the official sheet,
+Core Rulebook, and Rules for Survival. The prototype's original modifier/health
+arithmetic differed from the published system. Official records now use a tagged
+ruleset; old records remain prototypes until a reviewed conversion.
 
-Before expanding creation, define:
+Implemented in the new update:
 
-- The complete Vitals field list and which fields are required.
-- Favor's representation, starting value, and who may change it.
-- How Adventurer Number is assigned and whether it is unique within a campaign
-  or across games.
-- Starting attribute values and resource formulas.
-- Which fields the GM controls after creation and how level-up changes work.
+- [x] Standard array 2/3/4/5/6 or one saved, server-generated roll in fixed stat order.
+- [x] Separate Unenhanced and Enhanced stats and official modifier thresholds.
+- [x] Forty-eight Human background categories, stage ranks, and duplicate rejection.
+- [x] Starting combat choice, prescribed hand-to-hand effect where applicable, and Heal.
+- [x] Ten-slot health, per-hit damage thresholds, direct slot healing, and atomic Heal.
+- [x] Mana maximum based on Enhanced Intelligence and bounded spending/recovery.
+- [x] Human starting AI Favor, owner spending, GM awards, and GM-only stat corrections.
+- [x] Unique per-campaign Crawler Numbers beginning at 500,000 and GM correction.
+- [x] Human identity, optional pronouns/story/gear notes, and Level 1/Floor 1 defaults.
+- [x] Explicit GM review/conversion, archived prototype rows, and zero-health preservation.
+- [x] New application tests, SQL assertions, and installation/acceptance instructions.
 
-The old application's Favor and Adventurer ID displays were placeholders;
-this roadmap does not treat them as implemented game rules.
+Remaining before marking the update verified:
+
+- [ ] Apply only migration 202611090003_tutorial_entry.sql to the existing database.
+- [ ] Run tutorial_entry_permissions.sql and confirm the transaction rolls back successfully.
+- [ ] Run npm run check; expect 251 tests, lint, typecheck, and production build.
+- [ ] Check both stat methods, creation, numbering, health, Heal, Mana, Favor, and roles.
+- [ ] Check reviewed prototype conversion, stale updates, and mobile layout.
+
+See TUTORIAL_SETUP.md and TUTORIAL_RULES.md. Starting gear is currently notes;
+consumable quantities and attack execution belong to later inventory/combat work.
+Animal entry, Third Floor creation, race/class catalogs, portraits, automated
+Buffs/defenses, rests, Dying-round countdowns, and advancement remain future tasks.
 
 ## Architecture
 
@@ -165,7 +176,7 @@ verification, and checks that still require the user's environment.
 
 ## Open work and decisions
 
-- Expanded character-sheet rules listed above.
+- Remaining sheet sections and later creation modes, using the supplied books.
 - Membership removal, ownership transfer, game archiving, code rotation, and
   crawler deletion behavior.
 - Future realtime updates; current shared pages use explicit refresh and version

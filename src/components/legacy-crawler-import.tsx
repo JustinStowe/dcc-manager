@@ -9,7 +9,7 @@ export function LegacyCrawlerImport({ campaignId }: { campaignId: string }) {
   return (
     <section className={styles.panel}>
       <h2>Bring your browser save into the campaign</h2>
-      <p>This browser save has no account ownership. Import only if it is your crawler. The original save will be kept.</p>
+      <p>Import only your own old preview. It will need GM review and conversion to Tutorial rules. The original browser save will be kept.</p>
       <button type="button" onClick={actions.onFindSave} disabled={model.isBusy}>Find saved preview crawler</button>
       {model.message && <p role="status">{model.message}</p>}
       {model.crawler && (

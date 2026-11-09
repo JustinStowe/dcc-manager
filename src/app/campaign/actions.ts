@@ -7,6 +7,8 @@ import { createCampaignWritePort, loadCampaignWorkspace } from '@/adapters/supab
 import { executeCampaignCommand, requireUuid, type CampaignFormState } from '@/services/campaign-workspace';
 import { getCampaignRole } from '@/domain';
 import { setGameJoining } from '@/adapters/supabase-game-lobby';
+import { createTutorialPort } from '@/adapters/supabase-tutorial';
+import { executeTutorialCommand } from '@/services/tutorial-commands';
 
 export async function campaignAction(_previous: CampaignFormState, form: FormData): Promise<CampaignFormState> {
   const user = await requireCurrentUser();
@@ -17,7 +19,9 @@ export async function campaignAction(_previous: CampaignFormState, form: FormDat
     if (typeof rawId !== 'string') throw new RangeError('Choose a game from the lobby.');
     campaignId = requireUuid(rawId);
     const workspace = await loadCampaignWorkspace(user.id, campaignId);
-    if (form.get('operation') === 'set-joining') {
+    if (String(form.get('operation')).startsWith('tutorial-')) {
+      notice = await executeTutorialCommand(workspace, form, await createTutorialPort());
+    } else if (form.get('operation') === 'set-joining') {
       if (!workspace.campaign || getCampaignRole(workspace.campaign, user.id) !== 'gm') throw new Error('Only this game GM can change joining.');
       const accepting = form.get('accepting');
       if (accepting !== 'true' && accepting !== 'false') throw new RangeError('Choose a joining state.');
@@ -27,12 +31,12 @@ export async function campaignAction(_previous: CampaignFormState, form: FormDat
       notice = await executeCampaignCommand(workspace, form, await createCampaignWritePort());
     }
   } catch (error) {
-    if (error instanceof SyntaxError) return { error: 'The browser save could not be imported.', notice: null };
+    if (error instanceof SyntaxError || error instanceof TypeError) return { error: 'The submitted crawler data is incomplete or invalid. Review the form and try again.', notice: null };
     return { error: error instanceof Error ? error.message : 'Could not save the campaign change.', notice: null };
   }
   revalidatePath('/');
   revalidatePath(`/games/${campaignId}`);
   revalidatePath(`/games/${campaignId}/create`);
-  if (form.get('operation') === 'create' || form.get('operation') === 'import') redirect(`/games/${campaignId}`);
+  if (['create', 'import', 'tutorial-create', 'tutorial-convert'].includes(String(form.get('operation')))) redirect(`/games/${campaignId}`);
   return { error: null, notice };
 }

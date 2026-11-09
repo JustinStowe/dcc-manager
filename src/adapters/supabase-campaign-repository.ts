@@ -3,6 +3,7 @@ import { restoreCrawler, getCampaignRole, type Campaign } from '@/domain';
 import type { CampaignWorkspace, CampaignWritePort } from '@/services/campaign-workspace';
 import { requireUuid } from '@/services/campaign-workspace';
 import { createClient } from '@/utils/supabase/server';
+import { restoreTutorialProfile } from '@/domain/tutorial';
 
 function record(value: unknown): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error('Invalid campaign data.');
@@ -49,11 +50,12 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   if (campaignId !== selectedId) throw new Error('Invalid selected campaign.');
   const [membersResult, crawlersResult] = await Promise.all([
     client.from('dcc_campaign_members').select('user_id').eq('campaign_id', campaignId),
-    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version').eq('campaign_id', campaignId).order('name'),
+    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version,ruleset,tutorial_profile,crawler_number').eq('campaign_id', campaignId).order('name'),
   ]);
   if (membersResult.error) throw campaignDatabaseError(membersResult.error);
   if (crawlersResult.error) throw campaignDatabaseError(crawlersResult.error);
   const versions: Record<string, string> = {};
+  const tutorials: Record<string, { profile: ReturnType<typeof restoreTutorialProfile>; number: number }> = {};
   const campaign: Campaign = {
     id: campaignId, name: field(row, 'name'), gmUserId: requireUuid(field(row, 'gm_user_id')),
     playerUserIds: (membersResult.data ?? []).map((value: unknown) => requireUuid(field(record(value), 'user_id'))),
@@ -62,9 +64,14 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
       const crawler = restoreCrawler({
         id: field(item, 'id'), campaignId: field(item, 'campaign_id'), name: field(item, 'name'),
         baseSegments: item.base_segments, constitution: item.constitution, currentSegments: item.current_segments,
+        ruleset: item.ruleset ?? 'prototype',
       });
       if (crawler.campaignId !== campaignId) throw new Error('Invalid campaign crawler.');
       versions[crawler.id] = requireUuid(field(item, 'version'));
+      if (crawler.ruleset === 'tutorial-v1') {
+        if (!Number.isSafeInteger(item.crawler_number) || (item.crawler_number as number) < 1) throw new Error('Invalid Crawler Number.');
+        tutorials[crawler.id] = { profile: restoreTutorialProfile(item.tutorial_profile), number: item.crawler_number as number };
+      }
       return { ownerUserId: requireUuid(field(item, 'owner_user_id')), crawler };
     }),
   };
@@ -72,7 +79,7 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   if (role === null || (role === 'player' && campaign.crawlers.some((entry) => entry.ownerUserId !== userId))) {
     throw new Error('Campaign access could not be verified.');
   }
-  return { userId, campaign, versions };
+  return { userId, campaign, versions, tutorials };
 }
 
 export async function createCampaignWritePort(): Promise<CampaignWritePort> {

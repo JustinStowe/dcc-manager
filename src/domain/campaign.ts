@@ -161,6 +161,7 @@ export function changeCampaignCrawlerHealth(
 ): Campaign {
   const role = requireMember(campaign, actorUserId);
   const entry = findCrawler(campaign, crawlerId);
+  if (entry.crawler.ruleset === 'tutorial-v1') throw new RangeError('Use the Tutorial health command.');
   if (role !== 'gm' && entry.ownerUserId !== actorUserId) {
     throw new CampaignAccessError();
   }
@@ -175,6 +176,7 @@ export function updateCampaignCrawlerStats(
 ): Campaign {
   requireGm(campaign, actorUserId);
   const original = findCrawler(campaign, crawlerId).crawler;
+  if (original.ruleset === 'tutorial-v1') throw new RangeError('Use the Tutorial stat command.');
   // Explicit fields prevent a broad update from changing identity or ownership.
   const updated = createCrawler({
     id: original.id,

@@ -28,3 +28,12 @@
 .gameList a, .backLink { color: #1d4ed8; text-decoration: underline; }
 .backLink { display: inline-block; margin-bottom: 1rem; }
 .gameCode { display: block; overflow-wrap: anywhere; user-select: all; font-size: 1.05rem; font-weight: 700; padding: 0.8rem; background: #e2e8f0; border-radius: 0.4rem; }
+.statsTable { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.tableScroll { max-width: 100%; overflow-x: auto; }
+.statsTable th, .statsTable td { text-align: left; padding: 0.4rem; border-bottom: 1px solid #cbd5e1; }
+.statsTable th { text-transform: capitalize; }
+.page h3 { font-size: 1.15rem; margin: 1rem 0 0.5rem; }
+.page progress { width: 100%; height: 1.5rem; accent-color: #15803d; }
+.fields textarea { width: 100%; font: inherit; padding: 0.6rem; border: 1px solid #64748b; border-radius: 0.4rem; }
+.fields input[type="checkbox"] { width: auto; }
+.notes { white-space: pre-wrap; overflow-wrap: anywhere; }

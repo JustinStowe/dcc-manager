@@ -23,12 +23,15 @@ export function restoreCrawler(value: unknown): Crawler {
   }
 
   const data = value as Record<string, unknown>;
+  const ruleset = data['ruleset'];
+  if (ruleset !== undefined && ruleset !== 'prototype' && ruleset !== 'tutorial-v1') throw new RangeError('Unsupported crawler ruleset.');
   const crawler = createCrawler({
     id: readText(data, 'id'),
     campaignId: readText(data, 'campaignId'),
     name: readText(data, 'name'),
     baseSegments: readNumber(data, 'baseSegments'),
     constitution: readNumber(data, 'constitution'),
+    ...(ruleset === undefined ? {} : { ruleset }),
   });
 
   const currentSegments = adjustHealthSegments(

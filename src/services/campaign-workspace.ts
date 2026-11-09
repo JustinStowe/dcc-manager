@@ -2,11 +2,13 @@ import {
   addCampaignPlayer, changeCampaignCrawlerHealth, createCampaignCrawler,
   restoreCrawler, updateCampaignCrawlerStats, type Campaign,
 } from '@/domain';
+import type { TutorialProfile } from '@/domain/tutorial';
 
 export interface CampaignWorkspace {
   readonly userId: string;
   readonly campaign: Campaign | null;
   readonly versions: Readonly<Record<string, string>>;
+  readonly tutorials?: Readonly<Record<string, { profile: TutorialProfile; number: number }>>;
 }
 
 export interface CampaignWritePort {

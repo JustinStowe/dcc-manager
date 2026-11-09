@@ -6,7 +6,10 @@ and resume the crawler saved for each game.
 
 ## Setup
 
-Follow [LOBBY_SETUP.md](LOBBY_SETUP.md). It includes installation, database
+For the current Level 1 Human entry update, follow [TUTORIAL_SETUP.md](TUTORIAL_SETUP.md).
+Its migration follows the two lobby migrations.
+
+For the earlier lobby foundation, [LOBBY_SETUP.md](LOBBY_SETUP.md) includes installation, database
 migrations for fresh or previously configured projects, database policy tests,
 and manual multi-account checks. The lobby replaces the earlier manual GM
 bootstrap; do not run `bootstrap_campaign.sql`.
@@ -31,7 +34,7 @@ used by the application.
 | `npm run check` | Run tests, lint, typecheck, and build |
 
 With the existing browser ID tests retained, the expected total after this update
-is **181 tests across 11 files**. No Nx command or separate library build is needed.
+is **251 tests across 13 files**. No Nx command or separate library build is needed.
 
 ## Current flows
 
@@ -51,9 +54,16 @@ is **181 tests across 11 files**. No Nx command or separate library build is nee
 - Historical browser saves can be explicitly imported during creation. The
   original browser save is preserved.
 
-The current crawler form tracks name, base health, Constitution, and current
-health. Expanded Vitals, Favor, Adventurer Number, skills, spells, inventory,
-combat, rewards, and level-up progression remain roadmap work.
+The current creation form supports Level 1 Human crawlers with identity,
+standard-array or saved server-rolled stats, eight background Skills, two combat
+Skills, Heal, story notes, and starting gear notes. Crawler Numbers are generated
+per campaign. The official tracker uses ten slots, Enhanced-stat modifiers,
+Mana, AI Favor, and atomic Heal. The GM edits existing stats and awards Favor.
+
+Old prototype crawlers require explicit GM review and conversion. Their original
+rows are archived and zero health remains zero. See TUTORIAL_RULES.md for the
+rulebook mapping. Animal entry, Third Floor creation, full inventory/combat,
+advancement, and the remaining sheet sections are still roadmap work.
 
 ## Architecture
 
@@ -79,10 +89,11 @@ and checked RPC functions enforce writes and optimistic concurrency.
 
 ## Verification status
 
-The authentication baseline passed 120 tests, lint, typecheck, production build,
-and the user's manual authentication checks. The newer shared-storage/lobby code
-passes the available workspace harness and mocked adapter/action/route checks.
-Real local checks and PostgreSQL policy execution remain required as documented
-in LOBBY_SETUP.md; no live database migration has been run by the assistant.
+The user confirmed the authentication/lobby checks and reported that database
+setup and hosting worked after applying the migrations. The new Tutorial update
+passes the available source harness and mocked framework checks. Its full local
+checks, migration, database assertions, and browser acceptance tests remain
+pending as described in TUTORIAL_SETUP.md. No database migration has been run by
+the assistant against the user's Supabase project.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for scope, milestone status, and next steps.

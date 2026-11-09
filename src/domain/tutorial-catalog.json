@@ -1,0 +1,1115 @@
+{
+  "backgrounds": [
+    {
+      "id": "childhood-1",
+      "stage": "childhood",
+      "name": "Latchkey Kid",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Streetwise",
+          "stat": "Cha"
+        },
+        {
+          "name": "Perception",
+          "stat": "Int"
+        },
+        {
+          "name": "Stealth",
+          "stat": "Dex"
+        }
+      ]
+    },
+    {
+      "id": "childhood-2",
+      "stage": "childhood",
+      "name": "Crafty Kid",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Fabricate",
+          "stat": "Int"
+        },
+        {
+          "name": "Repair",
+          "stat": "Int"
+        },
+        {
+          "name": "Salvage",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "childhood-3",
+      "stage": "childhood",
+      "name": "Excitable Kid",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Escape Artist",
+          "stat": "Dex"
+        },
+        {
+          "name": "Endurance",
+          "stat": "Con"
+        },
+        {
+          "name": "Running",
+          "stat": "Dex"
+        }
+      ]
+    },
+    {
+      "id": "childhood-4",
+      "stage": "childhood",
+      "name": "Gymnast",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Endurance",
+          "stat": "Con"
+        },
+        {
+          "name": "Jumping",
+          "stat": "Str"
+        },
+        {
+          "name": "Performance",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "childhood-5",
+      "stage": "childhood",
+      "name": "Military Brat",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Deception",
+          "stat": "Cha"
+        },
+        {
+          "name": "Streetwise",
+          "stat": "Cha"
+        },
+        {
+          "name": "Tactics",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "childhood-6",
+      "stage": "childhood",
+      "name": "MMO Kid",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Fabricate",
+          "stat": "Int"
+        },
+        {
+          "name": "Engineering",
+          "stat": "Int"
+        },
+        {
+          "name": "Tactics",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "childhood-7",
+      "stage": "childhood",
+      "name": "Only Child",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Good First Impression",
+          "stat": "Cha"
+        },
+        {
+          "name": "Investigation",
+          "stat": "Int"
+        },
+        {
+          "name": "Negotiation",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "childhood-8",
+      "stage": "childhood",
+      "name": "Outdoor Kid",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Animal Handling",
+          "stat": "Cha"
+        },
+        {
+          "name": "Climbing",
+          "stat": "Str"
+        },
+        {
+          "name": "Swimming",
+          "stat": "Str"
+        }
+      ]
+    },
+    {
+      "id": "childhood-9",
+      "stage": "childhood",
+      "name": "Problem Child",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Intimidate",
+          "stat": "Str"
+        },
+        {
+          "name": "Deception",
+          "stat": "Cha"
+        },
+        {
+          "name": "Pugilism",
+          "stat": "Dex"
+        }
+      ]
+    },
+    {
+      "id": "childhood-10",
+      "stage": "childhood",
+      "name": "Scamp",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Hide in Shadows",
+          "stat": "Dex"
+        },
+        {
+          "name": "Jumping",
+          "stat": "Str"
+        },
+        {
+          "name": "Throwing",
+          "stat": "Str"
+        }
+      ]
+    },
+    {
+      "id": "childhood-11",
+      "stage": "childhood",
+      "name": "Teacher’s Pet",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Catcher",
+          "stat": null
+        },
+        {
+          "name": "Perception",
+          "stat": "Int"
+        },
+        {
+          "name": "Good First Impression",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "childhood-12",
+      "stage": "childhood",
+      "name": "Wild Child",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Stealth",
+          "stat": "Dex"
+        },
+        {
+          "name": "Survival",
+          "stat": "Con"
+        },
+        {
+          "name": "Running",
+          "stat": "Dex"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-1",
+      "stage": "adolescence",
+      "name": "Family Farm",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Animal Handling",
+          "stat": "Cha"
+        },
+        {
+          "name": "Fabricate",
+          "stat": "Int"
+        },
+        {
+          "name": "Tracking",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-2",
+      "stage": "adolescence",
+      "name": "Drama Nerd",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Fabricate",
+          "stat": "Int"
+        },
+        {
+          "name": "Deception",
+          "stat": "Cha"
+        },
+        {
+          "name": "Performance",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-3",
+      "stage": "adolescence",
+      "name": "Drop-Out",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Chopper Pilot",
+          "stat": "Dex"
+        },
+        {
+          "name": "Streetwise",
+          "stat": "Cha"
+        },
+        {
+          "name": "Survival",
+          "stat": "Con"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-4",
+      "stage": "adolescence",
+      "name": "Greek Life",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Negotiation",
+          "stat": "Cha"
+        },
+        {
+          "name": "Intimidate",
+          "stat": "Str"
+        },
+        {
+          "name": "Taunt",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-5",
+      "stage": "adolescence",
+      "name": "Influencer",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Negotiation",
+          "stat": "Cha"
+        },
+        {
+          "name": "Persuasion",
+          "stat": "Cha"
+        },
+        {
+          "name": "Performance",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-6",
+      "stage": "adolescence",
+      "name": "Jock",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Endurance",
+          "stat": "Con"
+        },
+        {
+          "name": "Jumping",
+          "stat": "Str"
+        },
+        {
+          "name": "Throwing",
+          "stat": "Str"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-7",
+      "stage": "adolescence",
+      "name": "McJob",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Determine Value",
+          "stat": null
+        },
+        {
+          "name": "Negotiation",
+          "stat": "Cha"
+        },
+        {
+          "name": "Repair",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-8",
+      "stage": "adolescence",
+      "name": "Popular",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Good First Impression",
+          "stat": "Cha"
+        },
+        {
+          "name": "Perception",
+          "stat": "Int"
+        },
+        {
+          "name": "Persuasion",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-9",
+      "stage": "adolescence",
+      "name": "Religious",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Catcher",
+          "stat": null
+        },
+        {
+          "name": "First Aid",
+          "stat": "Int"
+        },
+        {
+          "name": "Persuasion",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-10",
+      "stage": "adolescence",
+      "name": "Student Government",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Deception",
+          "stat": "Cha"
+        },
+        {
+          "name": "Persuasion",
+          "stat": "Cha"
+        },
+        {
+          "name": "Investigation",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-11",
+      "stage": "adolescence",
+      "name": "Nerd",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Investigation",
+          "stat": "Int"
+        },
+        {
+          "name": "Repair",
+          "stat": "Int"
+        },
+        {
+          "name": "Fabricate",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "adolescence-12",
+      "stage": "adolescence",
+      "name": "Weirdo",
+      "rank": 1,
+      "skills": [
+        {
+          "name": "Streetwise",
+          "stat": "Cha"
+        },
+        {
+          "name": "Intimidate",
+          "stat": "Str"
+        },
+        {
+          "name": "Fabricate",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "career-1",
+      "stage": "career",
+      "name": "Criminal",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Deception",
+          "stat": "Cha"
+        },
+        {
+          "name": "Stealth",
+          "stat": "Dex"
+        },
+        {
+          "name": "Streetwise",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "career-2",
+      "stage": "career",
+      "name": "Service Industry",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Dagger",
+          "stat": "Dex"
+        },
+        {
+          "name": "Endurance",
+          "stat": "Con"
+        },
+        {
+          "name": "Sleight of Hand",
+          "stat": "Dex"
+        }
+      ]
+    },
+    {
+      "id": "career-3",
+      "stage": "career",
+      "name": "Small Business Owner",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Determine Value",
+          "stat": null
+        },
+        {
+          "name": "Negotiation",
+          "stat": "Cha"
+        },
+        {
+          "name": "Perception",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "career-4",
+      "stage": "career",
+      "name": "Medical",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Sleight of Hand",
+          "stat": "Dex"
+        },
+        {
+          "name": "Detect Lies",
+          "stat": "Int"
+        },
+        {
+          "name": "First Aid",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "career-5",
+      "stage": "career",
+      "name": "Law Enforcement",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Detect Lies",
+          "stat": "Int"
+        },
+        {
+          "name": "Handgun",
+          "stat": "Dex"
+        },
+        {
+          "name": "Investigation",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "career-6",
+      "stage": "career",
+      "name": "Gig Worker",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Driving",
+          "stat": "Dex"
+        },
+        {
+          "name": "Escape Artist",
+          "stat": "Str"
+        },
+        {
+          "name": "Negotiation",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "career-7",
+      "stage": "career",
+      "name": "Teacher",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Detect Lies",
+          "stat": "Int"
+        },
+        {
+          "name": "Perception",
+          "stat": "Int"
+        },
+        {
+          "name": "Performance",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "career-8",
+      "stage": "career",
+      "name": "Office Drone",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Dumpster Diving",
+          "stat": "Int"
+        },
+        {
+          "name": "Endurance",
+          "stat": "Con"
+        },
+        {
+          "name": "Investigation",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "career-9",
+      "stage": "career",
+      "name": "Entertainer",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Deception",
+          "stat": "Cha"
+        },
+        {
+          "name": "Good First Impression",
+          "stat": "Cha"
+        },
+        {
+          "name": "Performance",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "career-10",
+      "stage": "career",
+      "name": "Unhoused",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Dumpster Diving",
+          "stat": "Int"
+        },
+        {
+          "name": "Streetwise",
+          "stat": "Cha"
+        },
+        {
+          "name": "Survival",
+          "stat": "Con"
+        }
+      ]
+    },
+    {
+      "id": "career-11",
+      "stage": "career",
+      "name": "Middle Manager",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Deception",
+          "stat": "Cha"
+        },
+        {
+          "name": "Intimidate",
+          "stat": "Str"
+        },
+        {
+          "name": "Negotiation",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "career-12",
+      "stage": "career",
+      "name": "Military",
+      "rank": 3,
+      "skills": [
+        {
+          "name": "Handgun",
+          "stat": "Dex"
+        },
+        {
+          "name": "Survival",
+          "stat": "Con"
+        },
+        {
+          "name": "Tactics",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "hobby-1",
+      "stage": "hobby",
+      "name": "Collector",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Fabricate",
+          "stat": "Int"
+        },
+        {
+          "name": "Determine Value",
+          "stat": null
+        },
+        {
+          "name": "Investigation",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "hobby-2",
+      "stage": "hobby",
+      "name": "Cosplay",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Fabricate",
+          "stat": "Int"
+        },
+        {
+          "name": "Performance",
+          "stat": "Cha"
+        },
+        {
+          "name": "Salvage",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "hobby-3",
+      "stage": "hobby",
+      "name": "Drinker",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Deception",
+          "stat": "Cha"
+        },
+        {
+          "name": "Intimidate",
+          "stat": "Str"
+        },
+        {
+          "name": "Streetwise",
+          "stat": "Cha"
+        }
+      ]
+    },
+    {
+      "id": "hobby-4",
+      "stage": "hobby",
+      "name": "Gamer",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Aiming",
+          "stat": "Dex"
+        },
+        {
+          "name": "Perception",
+          "stat": "Int"
+        },
+        {
+          "name": "Tactics",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "hobby-5",
+      "stage": "hobby",
+      "name": "Gym Rat",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Running",
+          "stat": "Dex"
+        },
+        {
+          "name": "Endurance",
+          "stat": "Con"
+        },
+        {
+          "name": "Swimming",
+          "stat": "Str"
+        }
+      ]
+    },
+    {
+      "id": "hobby-6",
+      "stage": "hobby",
+      "name": "Hunting",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Tracking",
+          "stat": "Int"
+        },
+        {
+          "name": "Shotgun",
+          "stat": "Dex"
+        },
+        {
+          "name": "Stealth",
+          "stat": "Dex"
+        }
+      ]
+    },
+    {
+      "id": "hobby-7",
+      "stage": "hobby",
+      "name": "Music",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Perception",
+          "stat": "Int"
+        },
+        {
+          "name": "Performance",
+          "stat": "Cha"
+        },
+        {
+          "name": "Sleight of Hand",
+          "stat": "Dex"
+        }
+      ]
+    },
+    {
+      "id": "hobby-8",
+      "stage": "hobby",
+      "name": "Motorsports",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Driving",
+          "stat": "Dex"
+        },
+        {
+          "name": "Repair",
+          "stat": "Int"
+        },
+        {
+          "name": "Salvage",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "hobby-9",
+      "stage": "hobby",
+      "name": "Climber",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Climbing",
+          "stat": "Str"
+        },
+        {
+          "name": "Jumping",
+          "stat": "Str"
+        },
+        {
+          "name": "Endurance",
+          "stat": "Con"
+        }
+      ]
+    },
+    {
+      "id": "hobby-10",
+      "stage": "hobby",
+      "name": "Pop Culture",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Determine Value",
+          "stat": null
+        },
+        {
+          "name": "Investigation",
+          "stat": "Int"
+        },
+        {
+          "name": "Perception",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "hobby-11",
+      "stage": "hobby",
+      "name": "Tinkering",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Engineering",
+          "stat": "Int"
+        },
+        {
+          "name": "Repair",
+          "stat": "Int"
+        },
+        {
+          "name": "Salvage",
+          "stat": "Int"
+        }
+      ]
+    },
+    {
+      "id": "hobby-12",
+      "stage": "hobby",
+      "name": "Travel",
+      "rank": 2,
+      "skills": [
+        {
+          "name": "Endurance",
+          "stat": "Con"
+        },
+        {
+          "name": "Negotiation",
+          "stat": "Cha"
+        },
+        {
+          "name": "Streetwise",
+          "stat": "Cha"
+        }
+      ]
+    }
+  ],
+  "combat": [
+    {
+      "id": "club",
+      "name": "Club",
+      "kind": "weapon"
+    },
+    {
+      "id": "improvised-weapons",
+      "name": "Improvised Weapons",
+      "kind": "weapon"
+    },
+    {
+      "id": "warhammer",
+      "name": "Warhammer",
+      "kind": "weapon"
+    },
+    {
+      "id": "axe",
+      "name": "Axe",
+      "kind": "weapon"
+    },
+    {
+      "id": "dagger",
+      "name": "Dagger",
+      "kind": "weapon"
+    },
+    {
+      "id": "longsword",
+      "name": "Longsword",
+      "kind": "weapon"
+    },
+    {
+      "id": "rapier",
+      "name": "Rapier",
+      "kind": "weapon"
+    },
+    {
+      "id": "bow",
+      "name": "Bow",
+      "kind": "weapon"
+    },
+    {
+      "id": "crossbow",
+      "name": "Crossbow",
+      "kind": "weapon"
+    },
+    {
+      "id": "handgun",
+      "name": "Handgun",
+      "kind": "weapon"
+    },
+    {
+      "id": "shotgun",
+      "name": "Shotgun",
+      "kind": "weapon"
+    },
+    {
+      "id": "javelin",
+      "name": "Javelin",
+      "kind": "weapon"
+    },
+    {
+      "id": "shuriken",
+      "name": "Shuriken",
+      "kind": "weapon"
+    },
+    {
+      "id": "slingshot",
+      "name": "Slingshot",
+      "kind": "weapon"
+    },
+    {
+      "id": "herding-weapons",
+      "name": "Herding Weapons",
+      "kind": "weapon"
+    },
+    {
+      "id": "lance",
+      "name": "Lance",
+      "kind": "weapon"
+    },
+    {
+      "id": "polearm",
+      "name": "Polearm",
+      "kind": "weapon"
+    },
+    {
+      "id": "quarterstaff",
+      "name": "Quarterstaff",
+      "kind": "weapon"
+    },
+    {
+      "id": "dirt-clod",
+      "name": "Dirt Clod",
+      "kind": "spell"
+    },
+    {
+      "id": "fire-fingers",
+      "name": "Fire Fingers",
+      "kind": "spell"
+    },
+    {
+      "id": "frost-scar",
+      "name": "Frost Scar",
+      "kind": "spell"
+    },
+    {
+      "id": "mind-tickle",
+      "name": "Mind Tickle",
+      "kind": "spell"
+    },
+    {
+      "id": "shock-treatment",
+      "name": "Shock Treatment",
+      "kind": "spell"
+    },
+    {
+      "id": "soul-collector",
+      "name": "Soul Collector",
+      "kind": "spell"
+    },
+    {
+      "id": "vine-porn",
+      "name": "Vine Porn",
+      "kind": "spell"
+    },
+    {
+      "id": "pugilism",
+      "name": "Pugilism",
+      "kind": "unarmed",
+      "effect": "Iron Punch"
+    },
+    {
+      "id": "foot-soldier",
+      "name": "Foot Soldier",
+      "kind": "unarmed",
+      "effect": "Smush"
+    },
+    {
+      "id": "noggin-nocker",
+      "name": "Noggin Nocker",
+      "kind": "unarmed",
+      "effect": "Skullcracker"
+    },
+    {
+      "id": "wrasslin",
+      "name": "Wrasslin’",
+      "kind": "unarmed",
+      "effect": "Toss"
+    }
+  ]
+}

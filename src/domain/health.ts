@@ -1,3 +1,5 @@
+// Legacy preview arithmetic, retained for old snapshots and explicit review.
+// Official tutorial-v1 crawlers use ten slots and the rules in tutorial.ts.
 export function calculateMaxHealthSegments(baseSegments: number, constitution: number,): number {
   if (
     !Number.isInteger(baseSegments) ||

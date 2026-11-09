@@ -9,6 +9,7 @@ export interface CreateCrawlerInput {
   readonly name: string;
   readonly baseSegments: number;
   readonly constitution: number;
+  readonly ruleset?: 'prototype' | 'tutorial-v1';
 }
 
 export interface Crawler extends CreateCrawlerInput {
@@ -34,10 +35,12 @@ export function createCrawler(input: CreateCrawlerInput): Crawler {
     );
   }
 
-  const maximumSegments = calculateMaxHealthSegments(
+  const legacyMaximum = calculateMaxHealthSegments(
     input.baseSegments,
     input.constitution,
   );
+  if (input.ruleset === 'tutorial-v1' && (input.baseSegments !== 10 || input.constitution < 1)) throw new RangeError('Tutorial crawlers have ten slots and positive Constitution.');
+  const maximumSegments = input.ruleset === 'tutorial-v1' ? 10 : legacyMaximum;
 
   return {
     id,
@@ -46,10 +49,12 @@ export function createCrawler(input: CreateCrawlerInput): Crawler {
     baseSegments: input.baseSegments,
     constitution: input.constitution,
     currentSegments: maximumSegments,
+    ...(input.ruleset === undefined ? {} : { ruleset: input.ruleset }),
   };
 }
 
 export function getCrawlerMaximumHealth(crawler: Crawler): number {
+  if (crawler.ruleset === 'tutorial-v1') return 10;
   return calculateMaxHealthSegments(
     crawler.baseSegments,
     crawler.constitution,
