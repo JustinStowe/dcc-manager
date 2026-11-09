@@ -22,6 +22,7 @@ export {
   CampaignAccessError,
   createCampaign,
   getCampaignRole,
+  getVisibleCampaignCrawlers,
   addCampaignPlayer,
   createCampaignCrawler,
   changeCampaignCrawlerHealth,

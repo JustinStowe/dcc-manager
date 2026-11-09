@@ -2,185 +2,178 @@
 
 Last updated: November 8, 2026
 
-## Project goal
+## Goal
 
-Build a shared application where the GM manages the campaign and players manage
-their crawlers during play. Deliver a usable shared health tracker first, then
-expand into complete crawler sheets, skills, spells, inventory, combat,
-achievements, rewards, and progression.
+Build a standalone application where users host games as GM or join games as
+players, then manage campaign-specific crawlers and run sessions together.
+Preserve MVC-style separation. The reusable Nx monorepo remains paused.
 
-The broader features come from the original project design. The sequence below
-is the proposed implementation roadmap; detailed gameplay rules must be settled
-before implementing each feature's calculations.
+## Current requirements
 
-## Scope and established decisions
+- Authentication opens a primary lobby with Host a Game and Join a Game.
+- Both branches offer New Game and Existing Game.
+- Hosting creates a campaign and assigns the active account as its GM.
+- Each game has a unique Game Code that the GM shares with players.
+- Joining validates that code against a game accepting players, adds membership,
+  and routes the player to creation for that campaign.
+- Reopening a joined game loads its saved crawler without resetting it. If
+  creation was interrupted, it resumes creation instead.
+- An account may host multiple games and join other games. Roles are per game.
+- Players see only their own crawler in a selected game; its GM sees everyone.
+- One crawler per account per campaign is the initial shared-storage limit.
+- Players choose initial health stats. The GM controls base health and
+  Constitution after creation. Player level-up adjustments come later through
+  a separate eligibility-controlled workflow.
+- Owners and the GM can apply damage and healing. Stat edits preserve current
+  health, clamp it to a lower maximum, and keep zero health at zero.
+- Existing browser saves are preserved and can be explicitly imported into a
+  selected campaign under the signed-in account.
 
-- Build a standalone Dungeon Crawler Carl Manager for the GM and players.
-- Preserve MVC-style separation between presentation, controllers, and domain rules.
-- Keep the reusable Nx monorepo work paused.
-- Support one shared campaign first; multiple independent gaming groups come later.
-- Preserve the existing crawler health behavior and browser saves.
-- Allow players to choose initial stats when creating their own crawler.
-- Restrict changes to base health and Constitution after creation to the GM.
-- Add player stat adjustments during level-up through a future controlled workflow.
-- Select authentication, database, and hosting providers during integration; none
-  has been selected or connected yet.
+The Host / Join requirement replaces the previous single-campaign restriction,
+manual GM bootstrap, and player account-ID entry flow. Multiple games are now
+part of the active milestone, rather than deferred work.
 
-## Current status
+## Status
 
 | Area | Status |
 | --- | --- |
-| Standalone Next.js application | Complete |
-| Crawler creation and health tracking | Working |
-| Browser save/load | Working; manually confirmed to survive refresh and reload |
-| Baseline automated checks | All 58 tests, lint, typecheck, and production build passed in the user's environment |
-| Campaign ownership and permission rules | Patch delivered; installation and local verification pending |
-| Accounts, shared database, and GM/player screens | Not implemented |
+| Standalone Next.js application and MVC organization | Complete |
+| Crawler creation, health rules, browser save/load | Working and manually verified |
+| Authentication | Signup, confirmation, sign-in, refresh, sign-out, and automated checks verified by the user |
+| Campaign domain permissions | Installed and verified in the user's earlier build |
+| Shared storage and owner-only visibility | Implemented; installation and live database verification pending |
+| Host / Join lobby and selected-game routing | Implemented; installation and live verification pending |
+| Expanded Vitals, Favor, Adventurer Number | Next character-sheet task; field rules still to define |
 
-The campaign patch adds 40 permission test cases, bringing the expected total
-to **98 tests across 6 test files**. All 98 cases passed in the available local
-harness. That harness is not Vitest. Dependency downloads were blocked in the
-assistant environment, so the updated project's real Vitest, ESLint, TypeScript,
-and Next.js checks still need to run in the installed project.
+The user confirmed **120 tests across 8 files**, lint, TypeScript, production
+build, and the live authentication flow. The cumulative shared-storage/lobby
+update adds 36 campaign cases and 25 lobby cases, for an expected **181 tests
+across 11 files** in the user's current project. This includes the user's two
+browser ID tests, which are not present in the assistant workspace.
 
-The patch establishes domain rules. It does not add visible account controls,
-authentication, shared storage, or enforcement in the existing browser preview.
+The available source harness and mocked adapter/action/route assertions pass.
+Real local integration checks and the PostgreSQL migration/policy tests remain
+required. No migration has been executed against the user's Supabase project
+by the assistant.
 
 ## Roadmap
 
 | Phase | Scope | Outcome | Status |
 | --- | --- | --- | --- |
-| 1. Application foundation | Standalone project, MVC organization, crawler health rules, browser saves, automated checks | Create a crawler, track health, and save it locally | Complete |
-| 2. Accounts and shared campaign | Sign-in, membership, ownership, shared storage, role-aware screens, conflicting-save handling | GM and players use the same campaign from different devices | Current milestone |
-| 3. Complete crawler sheets | Remaining attributes, mana, stamina, floor, statuses, validated editing | Use a fuller crawler sheet during a session | Planned |
-| 4. Skills and spells | Definition catalogs, crawler assignments, descriptions, applicable usage rules | View and manage a crawler's skills and spells during play | Planned |
-| 5. Inventory, equipment, and effects | Item definitions, individually owned items, equipment, traits, effect calculations | Award items, manage equipment, and apply supported effects consistently | Planned |
-| 6. Encounters and combat | Monster definitions, encounter setup, initiative, turn order, individual monster health, combat statuses | Run encounters from a GM dashboard with relevant player updates | Planned |
-| 7. Achievements, rewards, and progression | Achievement awards, loot rewards, award history, controlled level-up workflow | Award achievements and rewards, and allow eligible level-up adjustments | Planned |
-| 8. Release readiness and expansion | Usability, mobile layouts, recovery/export tools, deployment, broader testing; multiple groups afterward | Reliably use the app for regular sessions, then expand to separate groups | Planned |
+| 1. Foundation | Standalone project, MVC structure, health rules, local saves, checks | Create and track a crawler locally | Complete |
+| 2. Lobby, accounts, and shared games | Authentication, Host/Join, codes, per-game roles, ownership, database storage, conflict handling | Host or join games and resume the correct shared crawler from another device | Current milestone; live shared-game verification pending |
+| 3. Complete crawler sheets | Expanded Vitals, Favor, Adventurer Number, attributes, mana/stamina, floor, statuses | Use a fuller game-specific character sheet | Next |
+| 4. Skills and spells | Catalogs, assignments, descriptions, usage rules | Manage crawler abilities during play | Planned |
+| 5. Inventory, equipment, and effects | Item definitions, owned instances, equipment, traits, supported calculations | Award and manage equipment and its effects | Planned |
+| 6. Encounters and combat | Monsters, encounter setup, initiative, turns, health, statuses | Run combat from a GM dashboard | Planned |
+| 7. Achievements, rewards, and progression | Awards, loot, history, controlled level-up | Award rewards and apply eligible progression | Planned |
+| 8. Release readiness | Usability, mobile layout, export/recovery, hosting, broader checks | Use the application reliably for regular sessions | Planned |
 
-**The first usable shared version is the end of phase 2.** Full character sheets
-and combat management are not prerequisites for using the shared health tracker.
+Detailed game rules must be settled before implementing each feature's
+calculations. The original design establishes the broader scope but does not
+settle all mechanics.
 
-## Phase 2 — Accounts and shared campaign
+## Phase 2 checklist
 
-### 2.1 Verify the permission foundation
+### Verified foundation
 
-- [x] Add a campaign model with a GM and player membership.
-- [x] Associate each campaign crawler with its owner.
-- [x] Allow players to create their own crawler and choose initial stats.
-- [x] Allow the GM to create a crawler for a campaign member.
-- [x] Allow the owner and GM to apply damage and healing.
-- [x] Restrict existing base health and Constitution edits to the GM.
-- [x] Preserve current health during GM stat edits, clamping it if the maximum drops.
-- [x] Keep zero health at zero when stats change.
-- [x] Add tests for allowed and rejected operations and roster isolation.
-- [ ] Apply the delivered patch to the local project.
-- [ ] Run `npm run check` and confirm all 98 tests and other checks pass.
+- [x] Separate pure game rules from controllers, views, and adapters.
+- [x] Preserve health tracking and local saves.
+- [x] Add campaign ownership and post-creation stat permissions.
+- [x] Select and configure Supabase authentication.
+- [x] Add and verify signup, confirmation, sign-in, sign-out, and session refresh.
+- [x] Decide visibility: players see their own crawler; the GM sees all.
 
-### 2.2 Select authentication and shared storage
+### Shared-game implementation
 
-- [ ] Select the authentication and database providers.
-- [ ] Define environment configuration and local setup instructions.
-- [ ] Define the persistent campaign, membership, ownership, and crawler records.
-- [ ] Define how an existing browser save can be explicitly imported into a campaign.
+These items describe implemented code, not completed deployment verification.
 
-### 2.3 Implement accounts and membership
+- [x] Add shared campaign, membership, crawler, and version storage.
+- [x] Add row policies and checked write functions.
+- [x] Reject stale health/stat updates instead of silently overwriting data.
+- [x] Add an explicit browser-save import that preserves the original.
+- [x] Add Host / Join lobby branches with New / Existing options.
+- [x] Create hosted games and their Game Codes through the signed-in account.
+- [x] Join games by code, with duplicate membership handled idempotently.
+- [x] List hosted and joined games separately for each account.
+- [x] Load the selected game's data and resolve its role independently.
+- [x] Route new members to creation and existing crawlers to their sheet.
+- [x] Add GM control to pause/open new joins without removing existing access.
+- [x] Preserve existing campaigns and assign them codes through migration.
+- [x] Supply database assertions and multi-session acceptance checks.
 
-- [ ] Add sign-in and sign-out.
-- [ ] Resolve the current user from a verified session.
-- [ ] Establish the first campaign and its GM.
-- [ ] Add the player membership workflow.
-- [ ] Define invitation, removal, and ownership-transfer behavior before exposing those controls.
-- [ ] Define which roster information players may view.
+### Remaining verification
 
-### 2.4 Implement shared persistence and permission enforcement
+- [ ] Apply the cumulative source update.
+- [ ] Apply the base database migration if it is not already installed.
+- [ ] Apply the lobby migration; do not run the old bootstrap script.
+- [ ] Run the database assertions and confirm they finish without error.
+- [ ] Run `npm run check`; expect 181 tests plus lint/typecheck/build.
+- [ ] Verify both Host branches and both Join branches with separate accounts.
+- [ ] Verify one account hosting a game while playing in another.
+- [ ] Verify player privacy, GM controls, saved data, and cross-game isolation.
+- [ ] Verify stale-version conflicts, refresh, import, and cross-device access.
 
-- [ ] Load authoritative campaign membership and crawler data on the server.
-- [ ] Apply the campaign domain rules before saving changes.
-- [ ] Store each crawler separately with its ownership and campaign association.
-- [ ] Handle simultaneous updates so one user's stale save cannot silently overwrite another's changes.
-- [ ] Define how other sessions receive or refresh shared changes.
-- [ ] Implement the explicit browser-save import workflow.
-- [ ] Test account permissions and shared persistence at the server boundary.
+See [LOBBY_SETUP.md](LOBBY_SETUP.md) for the exact installation and test sequence.
+The first usable shared version is complete after these checks pass.
 
-Client-provided user IDs, role selections, or campaign snapshots are not authority.
-The domain functions accept trusted arguments; they do not authenticate users.
-The existing local browser repository remains a preview until this integration
-is complete.
+## Character creation scope
 
-### 2.5 Build GM and player interfaces
+The user selected **lobby first**, reusing the current creation form for this
+update. That form includes name, base health, Constitution, and current health.
 
-- [ ] Add a GM campaign roster and campaign-management controls.
-- [ ] Add player access to owned crawlers.
-- [ ] Connect damage and healing controls to shared persistence.
-- [ ] Add GM controls for existing base health and Constitution.
-- [ ] Display loading, save failures, permission failures, and update conflicts clearly.
-- [ ] Verify the complete workflow with separate GM and player sessions.
+Before expanding creation, define:
 
-### Phase 2 completion criteria
+- The complete Vitals field list and which fields are required.
+- Favor's representation, starting value, and who may change it.
+- How Adventurer Number is assigned and whether it is unique within a campaign
+  or across games.
+- Starting attribute values and resource formulas.
+- Which fields the GM controls after creation and how level-up changes work.
 
-- The GM and a player can sign in from separate browser sessions or devices.
-- Both use the same campaign and persisted crawler data.
-- A player can create and track their own crawler.
-- The GM can manage membership and edit protected crawler stats.
-- Players cannot edit another player's crawler or change protected stats after creation.
-- Shared updates become visible in other sessions through the chosen synchronization workflow.
-- Simultaneous updates receive defined conflict handling.
-- Data survives refresh and sign-out/sign-in.
-- Automated checks and the manual multi-session checks pass.
-
-## Editing and ownership rules
-
-| Action | Player | GM |
-| --- | --- | --- |
-| Choose initial stats during crawler creation | Own crawler | Any campaign crawler |
-| Change base health or Constitution after creation | Locked | Allowed |
-| Apply damage or healing | Own crawler | Any campaign crawler |
-| Add campaign members | Unavailable | Allowed |
-| Adjust stats during level-up | Future controlled workflow | Oversight to be defined with that workflow |
-
-Player level-up adjustments must be a separate operation with eligibility rules,
-rather than unrestricted access to existing stat-editing commands.
+The old application's Favor and Adventurer ID displays were placeholders;
+this roadmap does not treat them as implemented game rules.
 
 ## Architecture
 
 | Layer | Responsibility |
 | --- | --- |
-| Views | Markup, bindings, and display conditions |
-| Controllers | Coordinate user actions and presentation state |
-| Domain | Game rules, validation, ownership, and campaign permissions |
-| Services | Application operations and persistence contracts |
-| Adapters | Browser storage and future external-service implementations |
-| Next.js routes and server boundary | Compose the application, resolve sessions, and enforce access for shared operations |
+| Views | Screen markup, bindings, display conditions |
+| Controllers | Named user actions and presentation state |
+| Domain | Pure rules, validation, ownership, visibility |
+| Services | Application commands, routing decisions, persistence contracts |
+| Adapters | Supabase and browser storage implementations |
+| Routes/server actions | Resolve verified identity and selected-game boundaries |
+| Database | Row visibility, membership checks, constrained and versioned writes |
 
-Keep game calculations independent of React and external services. Keep styles
-in CSS files and event behavior in named controller handlers. Shared operations
-must use server-verified identity and authoritative state.
+`@/` resolves to `src`. Keep styles in CSS files and game calculations independent
+of React and external services. Browser-provided user IDs, GM flags, and campaign
+snapshots are not authorization. Database writes enforce the current account's
+actual role even when called directly through the Data API.
 
-## Delivery and validation workflow
+## Delivery workflow
 
-For each feature:
+1. Define gameplay rules and permissions relevant to the feature.
+2. Implement domain/application behavior and meaningful tests.
+3. Connect storage, controllers, and presentation.
+4. Run the project's automated checks.
+5. Run applicable database and manual multi-session checks.
+6. Update this plan with actual implementation and verification status.
 
-1. Establish the relevant gameplay rules and permission decisions.
-2. Implement domain behavior and meaningful tests.
-3. Connect application services, storage, and controllers as needed.
-4. Build the interface for that behavior.
-5. Run `npm run check`.
-6. Perform the relevant manual browser or multi-session checks.
-7. Update this plan with the actual implementation and verification status.
+For each ZIP/patch, include installation steps, expected test count, completed
+verification, and checks that still require the user's environment.
 
-When delivering a ZIP or patch, include installation instructions, the expected
-test count, verification performed, and any checks still required locally.
+## Open work and decisions
 
-## Decisions still open
+- Expanded character-sheet rules listed above.
+- Membership removal, ownership transfer, game archiving, code rotation, and
+  crawler deletion behavior.
+- Future realtime updates; current shared pages use explicit refresh and version
+  checks to reject stale writes.
+- Hosting provider and deployment configuration. Supabase is selected for auth
+  and PostgreSQL storage.
+- Detailed skill, spell, effect, inventory, combat, reward, and progression rules.
 
-- Authentication, database, and hosting providers.
-- Player visibility of other crawlers and GM-only information.
-- Account invitations, membership removal, and ownership-transfer behavior.
-- Synchronization and concurrent-update behavior.
-- Exact rules for expanded stats, skills, spells, equipment effects, and combat.
-- Level-up eligibility, permitted changes, and GM oversight.
-
-Resolve these decisions when their implementation phase begins. Multiple gaming
-groups and reusable monorepo extraction remain deferred.
+Game Codes currently act as invitations for signed-in, confirmed accounts while
+joining is open; there is no separate approval queue. The GM refreshes the game
+view to see new arrivals. Reusable monorepo extraction remains deferred.

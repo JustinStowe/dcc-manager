@@ -86,6 +86,16 @@ function requireGm(campaign: Campaign, actorUserId: string): void {
   }
 }
 
+export function getVisibleCampaignCrawlers(
+  campaign: Campaign,
+  actorUserId: string,
+): readonly OwnedCrawler[] {
+  const role = requireMember(campaign, actorUserId);
+  return campaign.crawlers.filter((entry) =>
+    role === 'gm' || entry.ownerUserId === actorUserId,
+  );
+}
+
 export function addCampaignPlayer(
   campaign: Campaign,
   actorUserId: string,

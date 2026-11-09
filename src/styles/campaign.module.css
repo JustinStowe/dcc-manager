@@ -1,0 +1,30 @@
+.page { max-width: 850px; margin: 0 auto; padding: 2rem 1rem 4rem; color: #1e293b; }
+.page h1 { font-size: 2rem; font-weight: 700; }
+.page h2 { font-size: 1.3rem; font-weight: 650; margin-bottom: 0.6rem; }
+.page p { margin-bottom: 0.7rem; }
+.heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+.panel { padding: 1.3rem; margin: 1.3rem 0; border: 1px solid #cbd5e1; border-radius: 0.8rem; background: #f8fafc; }
+.form { margin-top: 1rem; }
+.fields { display: grid; gap: 0.75rem; min-width: 0; padding: 1rem; margin: 0; border: 1px solid #cbd5e1; border-radius: 0.5rem; }
+.fields legend { padding: 0 0.4rem; font-weight: 600; }
+.fields label { display: grid; gap: 0.3rem; font-weight: 600; }
+.fields input, .fields select { width: 100%; min-width: 0; font: inherit; color: #0f172a; background: white; padding: 0.6rem; border: 1px solid #64748b; border-radius: 0.4rem; }
+.page button { padding: 0.7rem 1rem; min-height: 2.8rem; border-radius: 0.4rem; background: #19376d; color: white; font: inherit; cursor: pointer; }
+.page button:disabled, .fields:disabled { opacity: 0.6; }
+.page :is(input, select, button):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.identifier { overflow-wrap: anywhere; font-size: 0.85rem; }
+.health { font-size: 1.4rem; }
+.error, .notice { margin-top: 1rem; padding: 0.8rem; border-radius: 0.4rem; }
+.error { background: #fef2f2; color: #991b1b; }
+.notice { background: #f0fdf4; color: #14532d; }
+.lobbyGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1rem; align-items: start; }
+.page details { display: block; width: auto; }
+.choice { display: list-item; padding: 0.5rem 0; cursor: pointer; font-size: 1.5rem; font-weight: 700; }
+.page summary:focus-visible, .page a:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.submenu { margin-top: 1rem; padding: 0.5rem; border-top: 1px solid #cbd5e1; }
+.subchoice { display: list-item; cursor: pointer; font-size: 1.1rem; font-weight: 600; padding: 0.5rem 0; }
+.gameList { padding-left: 1.25rem; }
+.gameList li { margin: 0.7rem 0; }
+.gameList a, .backLink { color: #1d4ed8; text-decoration: underline; }
+.backLink { display: inline-block; margin-bottom: 1rem; }
+.gameCode { display: block; overflow-wrap: anywhere; user-select: all; font-size: 1.05rem; font-weight: 700; padding: 0.8rem; background: #e2e8f0; border-radius: 0.4rem; }

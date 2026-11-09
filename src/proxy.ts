@@ -5,4 +5,4 @@ export async function proxy(request: NextRequest) {
   return updateSession(request);
 }
 
-export const config = { matcher: ['/', '/login', '/signup', '/auth/:path*'] };
+export const config = { matcher: ['/', '/games/:path*', '/login', '/signup', '/auth/:path*'] };

@@ -9,7 +9,7 @@ export function AccountBarView({ email, signOutFailed, onSignOut }: {
     <header className={styles.accountBar}>
       <div>
         <p>Signed in as <strong>{email}</strong></p>
-        <p className={styles.hint}>Local preview: crawler saves belong to this browser and are not separated by account yet.</p>
+        <p className={styles.hint}>Players see their own crawler. The campaign GM can see everyone.</p>
         {signOutFailed && <p className={styles.error} role="alert">Could not sign out. Please try again.</p>}
       </div>
       <form action={onSignOut}><button type="submit">Sign out</button></form>
