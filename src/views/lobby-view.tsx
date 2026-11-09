@@ -15,7 +15,7 @@ export function LobbyView({ lobby, error }: { lobby: GameLobby; error: string | 
           <summary className={styles.subchoice}>New Game</summary>
           <LobbyForm operation="host" label="Create game">
             <label>Game name<input name="name" type="text" maxLength={200} required /></label>
-            <p>You will be this game's GM. Share its Game Code with your players.</p>
+            <p>You will be this game&apos;s GM. Share its Game Code with your players.</p>
           </LobbyForm>
           </details>
           <details className={styles.submenu}>
