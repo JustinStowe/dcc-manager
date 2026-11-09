@@ -19,7 +19,21 @@ export function campaignDatabaseError(error: { code?: string }): Error {
   if (error.code === '23505') return new Error('That player is already a member or already has a crawler. Refresh the campaign.');
   if (error.code === '42501') return new Error('You do not have permission to perform this action.');
   if (error.code === '22023' || error.code === '23514' || error.code === '23503') return new Error('Check the values and make sure the owner is a confirmed campaign member.');
-  return new Error('Could not access shared campaign storage. Check the database setup and try again.');
+  // Retain a support code without logging database details, query values,
+  // sessions, or keys. PostgreSQL/PostgREST codes have fixed formats.
+  const code = typeof error.code === 'string' && /^(?:[0-9A-Z]{5}|PGRST[0-9]{3})$/.test(error.code)
+    ? error.code : 'UNKNOWN';
+  console.error('[DCC database]', { code });
+  if (code === '42P01' || code === 'PGRST205') {
+    return new Error(`Shared campaign tables are unavailable. Check the database setup and configured project. Support code: ${code}.`);
+  }
+  if (code === '42883' || code === 'PGRST202') {
+    return new Error(`A required game operation is unavailable. Check the database migrations and API schema cache. Support code: ${code}.`);
+  }
+  if (code === '42703' || code === 'PGRST204') {
+    return new Error(`Shared campaign storage needs a schema update. Check the database migrations. Support code: ${code}.`);
+  }
+  return new Error(`Could not access shared campaign storage. Check the database setup and try again. Support code: ${code}.`);
 }
 
 export async function loadCampaignWorkspace(userId: string, selectedCampaignId: string): Promise<CampaignWorkspace> {
