@@ -31,7 +31,7 @@ export default async function GamePage({ params }: { params: Promise<{ campaignI
     }
   } catch (error) { storageError = error instanceof Error ? error.message : 'Could not load this game.'; }
   const entry = workspace ? getGameEntry(workspace) : 'unavailable';
-  if (!storageError && entry === 'unavailable') notFound();
+  if (!storageError && entry === 'unavailable') redirect('/?notice=game-unavailable');
   if (entry === 'create') {
     redirect(`/games/${campaignId}/create`);
   }

@@ -8,7 +8,7 @@ import type { GameLobby } from '@/services/game-lobby';
 export const dynamic = 'force-dynamic';
 
 export default async function Page({ searchParams }: {
-  searchParams: Promise<{ authError?: string }>;
+  searchParams: Promise<{ authError?: string; notice?: string }>;
 }) {
   const user = await requireCurrentUser();
   const params = await searchParams;
@@ -19,7 +19,7 @@ export default async function Page({ searchParams }: {
   return (
     <>
       <AccountBarView email={user.email ?? 'Crawler'} signOutFailed={params.authError === 'signout'} onSignOut={signOut} />
-      <LobbyView lobby={lobby} error={error} />
+      <LobbyView lobby={lobby} error={error} notice={params.notice === 'game-unavailable' ? 'This game is no longer available. It may have been deleted by its GM.' : null} />
     </>
   );
 }

@@ -4,10 +4,11 @@ import { DeleteGame } from '@/components/delete-game';
 import type { GameLobby } from '@/services/game-lobby';
 import styles from '@/styles/campaign.module.css';
 
-export function LobbyView({ lobby, error }: { lobby: GameLobby; error: string | null }) {
+export function LobbyView({ lobby, error, notice }: { lobby: GameLobby; error: string | null; notice?: string | null }) {
   return (
     <main className={styles.page}>
       <h1>Game lobby</h1><p>Host a game as GM, or join a game as a player.</p>
+      {notice && <p role="status" className={styles.notice}>{notice}</p>}
       {error && <p role="alert" className={styles.error}>{error}</p>}
       <div className={styles.lobbyGrid}>
         <section>

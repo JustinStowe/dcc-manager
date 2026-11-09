@@ -19,10 +19,13 @@ export default async function CreateCrawlerPage({ params }: { params: Promise<{ 
   let workspace: CampaignWorkspace | null = null;
   let storageError: string | null = null;
   let profiles: readonly SavedCrawlerProfile[] = [];
-  try { workspace = await loadCampaignWorkspace(user.id, campaignId); profiles = await loadCrawlerProfiles(); }
+  try {
+    workspace = await loadCampaignWorkspace(user.id, campaignId);
+    if (getGameEntry(workspace) !== 'unavailable') profiles = await loadCrawlerProfiles();
+  }
   catch (error) { storageError = error instanceof Error ? error.message : 'Could not load this game.'; }
   const entry = workspace ? getGameEntry(workspace) : 'unavailable';
-  if (!storageError && entry === 'unavailable') notFound();
+  if (!storageError && entry === 'unavailable') redirect('/?notice=game-unavailable');
   if (entry === 'gm' || entry === 'sheet') {
     redirect(`/games/${campaignId}`);
   }
