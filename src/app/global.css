@@ -1,3 +1,6 @@
+@import "tailwindcss";
+
+@layer base {
 html {
   -webkit-text-size-adjust: 100%;
   font-family:
@@ -498,4 +501,6 @@ summary svg {
   #middle-content {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
 }

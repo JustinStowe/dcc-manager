@@ -9,8 +9,8 @@
 .fields legend { padding: 0 0.4rem; font-weight: 600; }
 .fields label { display: grid; gap: 0.3rem; font-weight: 600; }
 .fields input, .fields select { width: 100%; min-width: 0; font: inherit; color: #0f172a; background: white; padding: 0.6rem; border: 1px solid #64748b; border-radius: 0.4rem; }
-.page button { padding: 0.7rem 1rem; min-height: 2.8rem; border-radius: 0.4rem; background: #19376d; color: white; font: inherit; cursor: pointer; }
-.page button:disabled, .fields:disabled { opacity: 0.6; }
+.page button:not(:where([data-inventory-system] button)) { padding: 0.7rem 1rem; min-height: 2.8rem; border-radius: 0.4rem; background: #19376d; color: white; font: inherit; cursor: pointer; }
+.page button:disabled:not(:where([data-inventory-system] button)), .fields:disabled { opacity: 0.6; }
 .page :is(input, select, button):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 .identifier { overflow-wrap: anywhere; font-size: 0.85rem; }
 .health { font-size: 1.4rem; }
@@ -147,3 +147,7 @@
   .dashboardHeader, .gameManagement, .crawlerTabs, .backLink, .dashboardHint, .sheetControls, .gmControls, .inventory details { display: none; }
   .dashboard { padding: 0; max-width: none; }.sheet { border: 1px solid black; box-shadow: none; margin: 0; }.sheetBrand { transform: none; }
 }
+
+.page [data-inventory-system] .form button { min-height: 2.5rem; padding: 0.6rem 1rem; border-radius: 0.4rem; background: #19376d; color: white; font: inherit; cursor: pointer; }
+.page [data-inventory-system] .form button:disabled { opacity: 0.5; cursor: not-allowed; }
+.page [data-inventory-system] .form button.danger { background: #991b1b; }

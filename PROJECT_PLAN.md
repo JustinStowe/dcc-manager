@@ -48,8 +48,9 @@ part of the active milestone, rather than deferred work.
 | Saved account writeups | Three slots per account; user verified independence from game progress |
 | GM game deletion | User verified deletion; subsequent deleted-game redirect fix reviewed from supplied commit |
 | Inventory and equipment | User reports `npm run check` and all manual acceptance checks passed |
-| Standard Mana Potions | Atomic use and explicit effect classification implemented; migration 006 and local acceptance pending |
-| Campaign dashboard and sheet UI | Crawler selector and official-sheet-inspired layout implemented; browser acceptance pending |
+| Standard Mana Potions | User reports checks and manual acceptance passed |
+| Campaign dashboard and sheet UI | User reports checks and manual acceptance passed |
+| Inventory grid and inspector | Implemented; Tailwind installation, local checks, and browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -234,3 +235,22 @@ view to see new arrivals. Reusable monorepo extraction remains deferred.
 - [ ] Pass the real local `npm run check` chain for this update.
 - [ ] Verify dashboard selection, potion use, and desktop/mobile layouts in the browser.
 - [ ] Add equipment bonuses, DR, Buffs, and other supported item effects next.
+
+## Current inventory UX update
+
+The user verified the potion/sheet update, then requested a cleaner two-column
+inventory. The new client component uses Tailwind, a fixed equipment panel,
+a five-to-eight-column stored-item grid, and one selected inspector. Search,
+type filtering, and pagination keep larger inventories manageable. Existing
+server actions remain authoritative for saving, equipment, potions, and removal.
+
+- [x] Add the reusable InventorySystem component and requested UI types.
+- [x] Adapt existing items while preserving two-handed slots and accessory limits.
+- [x] Keep remaining copies of equipped stacks visible without duplicating data.
+- [x] Mount only the selected inspector/action form.
+- [x] Preserve existing potion, edit, equip, drop, add, and GM classification actions.
+- [x] Pass 342 source cases plus stateful mocked UI checks.
+- [ ] Install Tailwind/PostCSS and pass the real local check chain.
+- [ ] Verify responsive layout, navigation, and all existing action flows in the browser.
+
+See `Docs/INVENTORY_GRID_SETUP.md`. No new database migration is required.

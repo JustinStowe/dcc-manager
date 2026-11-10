@@ -6,6 +6,16 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Two-column inventory grid
+
+Follow [INVENTORY_GRID_SETUP.md](Docs/INVENTORY_GRID_SETUP.md). Install Tailwind
+and PostCSS with `npm install -D tailwindcss @tailwindcss/postcss postcss`, then
+run `npm run check`. This UI update requires no database migration. It replaces
+the long inventory list with equipment slots, a responsive grid, and one item
+inspector using the existing server actions. The full reusable client component
+is `src/components/inventory-system.tsx`. Potion automation and permissions are
+unchanged; browser and full application verification remain pending.
+
 ### Potion automation and character sheet UI
 
 Follow [POTIONS_UI_SETUP.md](Docs/POTIONS_UI_SETUP.md). After the verified
