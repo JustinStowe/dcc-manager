@@ -5,7 +5,6 @@ import { CampaignForm } from '@/components/campaign-form';
 import { CampaignRefresh } from '@/components/campaign-refresh';
 import { TutorialCreation } from '@/components/tutorial-creation';
 import { TutorialSheetView } from '@/views/tutorial-sheet-view';
-import { LegacyCrawlerImport } from '@/components/legacy-crawler-import';
 import styles from '@/styles/campaign.module.css';
 import Link from 'next/link';
 import { formatGameCode, type HostSettings } from '@/services/game-lobby';
@@ -68,7 +67,7 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
           {!creationOnly && selected && [selected].map(({ crawler, ownerUserId }) => {
             const official = workspace?.tutorials?.[crawler.id];
             const version = workspace?.versions[crawler.id] ?? '';
-            if (official) return <TutorialSheetView key={crawler.id} crawler={crawler} profile={official.profile} number={official.number} version={version} isGm={role === 'gm'} inventory={workspace?.inventories?.[crawler.id] ?? []} />;
+            if (official) return <TutorialSheetView key={crawler.id} crawler={crawler} profile={official.profile} number={official.number} version={version} isGm={role === 'gm'} inventory={workspace?.inventories?.[crawler.id] ?? []} loadout={workspace?.loadouts?.[crawler.id]} />;
             const maximum = getCrawlerMaximumHealth(crawler);
             return <section className={styles.panel} id="crawler-record" key={crawler.id}>
               <h2>{crawler.name} — prototype needs GM review</h2>
@@ -83,7 +82,6 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
             <summary className={styles.subchoice}>Create a fresh crawler</summary>
             <TutorialCreation key={availableOwnerIds.join(',')} campaignId={campaign.id} owners={(role === 'gm' ? availableOwnerIds : [userId]).map((id) => ({ id, label: id === userId ? 'Me' : `Player ${id.slice(0, 8)}` }))} currentUserId={userId} emptyProfileSlots={profiles ? [1, 2, 3].filter((slot) => !profiles.some((profile) => profile.slot === slot)) : []} />
           </details>}
-          {!hasOwnCrawler && <LegacyCrawlerImport campaignId={campaign.id} />}
         </>
       )}
     </main>

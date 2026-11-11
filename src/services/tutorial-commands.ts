@@ -2,6 +2,7 @@ import { getCampaignRole } from '@/domain';
 import { createTutorialProfile, castTutorialHeal, damageTutorialSlots, restoreTutorialProfile, type Scores, type TutorialDraft, type TutorialProfile, type TutorialStats } from '@/domain/tutorial';
 import { requireUuid, type CampaignWorkspace } from './campaign-workspace';
 import { requireProfileSlot } from './crawler-profiles';
+import { loadoutTotals } from '@/domain/loadout';
 
 export interface TutorialRoll { readonly id: string; readonly scores: Scores }
 export interface TutorialPort {
@@ -72,11 +73,14 @@ export async function executeTutorialCommand(workspace: CampaignWorkspace, form:
     case 'mana-recover': break;
     case 'favor-spend': if (record.profile.favor < 1) throw new RangeError('No AI Favor available.'); break;
     case 'favor-award': if (role !== 'gm') throw new Error('Only the GM can award AI Favor.'); break;
-    case 'stats':
+    case 'stats': {
       if (role !== 'gm') throw new Error('Only the GM can edit existing stats.');
       stats = JSON.parse(text(form, 'stats')) as TutorialStats;
-      restoreTutorialProfile({ ...record.profile, stats, mana: Math.min(record.profile.mana, stats.intelligence.enhanced) });
+      const storedLoadout = workspace.loadouts?.[crawlerId], inventory = workspace.inventories?.[crawlerId];
+      const effective = storedLoadout && inventory ? loadoutTotals(stats, inventory, storedLoadout.defenseBase).stats : stats;
+      restoreTutorialProfile({ ...record.profile, stats: effective, mana: Math.min(record.profile.mana, effective.intelligence.enhanced) });
       notice = 'Stats saved. Health slots were preserved; Mana was clamped to its maximum.'; break;
+    }
     case 'number':
       if (role !== 'gm') throw new Error('Only the GM can edit Crawler Numbers.');
       crawlerNumber = number(form, 'crawlerNumber', 1, 2147483647); break;

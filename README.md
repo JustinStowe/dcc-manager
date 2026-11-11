@@ -6,6 +6,19 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Equipment bonuses, damage resistance, and quick slots
+
+Follow [EQUIPMENT_HOTLIST_SETUP.md](Docs/EQUIPMENT_HOTLIST_SETUP.md). Apply only
+`202611100007_equipment_hotlist.sql` after your verified migrations 001–006, run
+its database assertions, then `npm run check`. No dependency is added.
+
+The sheet now has ten quick slots for item-stack/Spell references and supported
+prepared actions. GM-reviewed equipped gear contributes flat attribute, DR, and
+Evade bonuses, with a separate baseline to prevent repeated accumulation. Mana
+limits recalculate without refilling resources. Raw-damage and final-net paths
+are explicit. Existing items gain no inferred bonuses; review them as GM.
+This update's SQL, full local checks, and browser acceptance remain pending.
+
 ### Two-column inventory grid
 
 Follow [INVENTORY_GRID_SETUP.md](Docs/INVENTORY_GRID_SETUP.md). Install Tailwind
@@ -104,6 +117,9 @@ library build is needed.
 
 ## Current flows
 
+- Create Crawler expands the three account save slots in the lobby. Empty slots
+  offer creation; occupied slots offer writeup review/editing and confirmed
+  deletion. Deleting a saved crawler does not change existing game crawlers.
 - Host → New Game creates a campaign, assigns its creator as GM, and generates
   a unique Game Code.
 - Host → Existing Game lists that account's hosted games.
@@ -117,8 +133,8 @@ library build is needed.
   and Constitution. Owners and the GM can apply damage and healing.
 - Version checks reject stale changes. Refresh campaign loads other sessions'
   updates; realtime subscriptions are deferred.
-- Historical browser saves can be explicitly imported during creation. The
-  original browser save is preserved.
+- Importing historical browser saves is no longer supported. Existing game
+  crawlers and original browser saves are unchanged.
 
 The current creation form supports Level 1 Human crawlers with identity,
 standard-array or saved server-rolled stats, eight background Skills, two combat

@@ -1,3 +1,4 @@
+import { restoreBonuses, type GearBonuses } from './loadout';
 export const ITEM_KINDS = ['weapon', 'armor', 'consumable', 'gear', 'quest', 'misc'] as const;
 export const GEAR_SLOTS = ['none', 'head', 'torso', 'arms', 'legs', 'feet', 'hands', 'holding', 'two-hands', 'accessory', 'belt', 'cape'] as const;
 export const EQUIPMENT_LOCATIONS = ['stored', 'head', 'torso', 'arms', 'legs', 'feet', 'hands', 'main-hand', 'off-hand', 'two-hands', 'accessory', 'belt', 'cape'] as const;
@@ -15,8 +16,9 @@ export interface InventoryItem {
   readonly gearSlot: GearSlot;
   readonly location: EquipmentLocation;
   readonly effect?: ItemEffect;
+  readonly bonuses?: GearBonuses;
 }
-export type ItemDraft = Omit<InventoryItem, 'id' | 'location'>;
+export type ItemDraft = Omit<InventoryItem, 'id' | 'location' | 'bonuses'>;
 export const MAX_INVENTORY_ENTRIES = 200;
 export const MAX_ITEM_QUANTITY = 999999;
 
@@ -60,7 +62,8 @@ export function validateInventory(value: unknown): readonly InventoryItem[] {
     const id = row.id.toLowerCase();
     if (ids.has(id)) throw new RangeError('Duplicate inventory item ID.');
     ids.add(id);
-    const item: InventoryItem = { ...validateItemDraft(row), id, location: choice(row.location, EQUIPMENT_LOCATIONS) };
+    const item: InventoryItem = { ...validateItemDraft(row), id, location: choice(row.location, EQUIPMENT_LOCATIONS), ...(row.bonuses === undefined ? {} : { bonuses: restoreBonuses(row.bonuses) }) };
+    if (item.gearSlot === 'none' && item.bonuses && Object.values(item.bonuses).some((value) => value !== 0)) throw new RangeError('Gear bonuses require an equippable item.');
     if (!equipmentLocations(item.gearSlot).includes(item.location)) throw new RangeError('This item cannot use that equipment slot.');
     const location = item.location;
     if (location === 'stored') return item;

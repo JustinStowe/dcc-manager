@@ -37,6 +37,6 @@ export async function campaignAction(_previous: CampaignFormState, form: FormDat
   revalidatePath('/');
   revalidatePath(`/games/${campaignId}`);
   revalidatePath(`/games/${campaignId}/create`);
-  if (['create', 'import', 'tutorial-create', 'tutorial-convert'].includes(String(form.get('operation')))) redirect(`/games/${campaignId}`);
+  if (['create', 'tutorial-create', 'tutorial-convert'].includes(String(form.get('operation')))) redirect(`/games/${campaignId}`);
   return { error: null, notice };
 }

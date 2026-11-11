@@ -1,6 +1,6 @@
 # Dungeon Crawler Carl Manager — Project Plan
 
-Last updated: November 9, 2026
+Last updated: November 10, 2026
 
 ## Goal
 
@@ -50,7 +50,8 @@ part of the active milestone, rather than deferred work.
 | Inventory and equipment | User reports `npm run check` and all manual acceptance checks passed |
 | Standard Mana Potions | User reports checks and manual acceptance passed |
 | Campaign dashboard and sheet UI | User reports checks and manual acceptance passed |
-| Inventory grid and inspector | Implemented; Tailwind installation, local checks, and browser acceptance pending |
+| Inventory grid and inspector | User reports application checks and manual acceptance passed |
+| Equipment bonuses, DR, and Hotlist | Implemented; migration 007 and local/database/browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -254,3 +255,26 @@ server actions remain authoritative for saving, equipment, potions, and removal.
 - [ ] Verify responsive layout, navigation, and all existing action flows in the browser.
 
 See `Docs/INVENTORY_GRID_SETUP.md`. No new database migration is required.
+
+## Current equipment and quick-slot milestone
+
+The user verified the inventory grid and requested equipment calculations and
+quick slots together. The new loadout keeps reviewed baseline stats separate
+from effective equipped totals. Gear definitions and non-gear DR are GM-only.
+A ten-slot Hotlist stores references and supports existing Mana/Heal effects,
+atomic held-item swaps, and manual preparation of the known Attack Spell.
+
+- [x] Preserve prior stats/resources and existing definitions during migration.
+- [x] Apply equipped flat attributes, DR, and Evade once per entry.
+- [x] Keep stored/prepared gear inactive; preserve health and clamp Mana on lower maxima.
+- [x] Review old manual baseline values and equipment definitions atomically.
+- [x] Provide raw-DR and final-net damage paths without double subtraction.
+- [x] Add ten quick slots with assignment, movement, replacement, clearing, and cleanup.
+- [x] Reuse atomic potion/Heal actions and ready held gear in one save.
+- [x] Preserve inventory grid, role permissions, writeup isolation, and stale-write protection.
+- [x] Pass 389 source cases plus mocked boundaries and UI-state checks.
+- [ ] Apply migration 007 and pass the supplied equipment/Hotlist SQL assertions.
+- [ ] Pass the real local check chain and browser/multi-account acceptance.
+- [ ] Add conditional effects, broader spell execution, and a turn/timing engine later.
+
+See `Docs/EQUIPMENT_HOTLIST_SETUP.md` for the reviewed baseline workflow and limits.

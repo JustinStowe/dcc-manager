@@ -6,6 +6,8 @@ import { loadGameLobby } from '@/adapters/supabase-game-lobby';
 import GamePage from './games/[campaignId]/page';
 import CreateCrawlerPage from './games/[campaignId]/create/page';
 import LobbyPage from './page';
+import { createTutorialProfile } from '@/domain/tutorial';
+import { tutorialDraftFixture } from '@/test/tutorial-fixture';
 
 vi.mock('next/navigation', () => ({
   redirect: vi.fn((destination: string) => { throw new Error(`Redirect: ${destination}`); }),
@@ -69,6 +71,30 @@ describe('lobby unavailable notice', () => {
   it('shows the fixed availability message after a missing-game redirect', async () => {
     const result = await LobbyPage({ searchParams: Promise.resolve({ notice: 'game-unavailable' }) });
     expect(result.props.children[1].props.notice).toBe('This game is no longer available. It may have been deleted by its GM.');
+  });
+
+  describe('lobby profile loading', () => {
+    it('passes account save slots to the lobby', async () => {
+      const profiles = [{ slot: 2, name: 'Carl', profile: createTutorialProfile(tutorialDraftFixture()), rollId: null, version: PLAYER }];
+      vi.mocked(loadCrawlerProfiles).mockResolvedValue(profiles);
+      const result = await LobbyPage({ searchParams: Promise.resolve({}) });
+      expect(result.props.children[1].props.profiles).toEqual(profiles);
+      expect(result.props.children[1].props.profileError).toBeNull();
+    });
+
+    it('reports profile failures separately from game loading', async () => {
+      vi.mocked(loadCrawlerProfiles).mockRejectedValue(new Error('Profile storage unavailable'));
+      const result = await LobbyPage({ searchParams: Promise.resolve({}) });
+      expect(result.props.children[1].props.profileError).toBe('Profile storage unavailable');
+      expect(result.props.children[1].props.error).toBeNull();
+    });
+
+    it('keeps crawler slots available when game loading fails', async () => {
+      vi.mocked(loadGameLobby).mockRejectedValue(new Error('Game storage unavailable'));
+      const result = await LobbyPage({ searchParams: Promise.resolve({}) });
+      expect(result.props.children[1].props.error).toBe('Game storage unavailable');
+      expect(result.props.children[1].props.profileError).toBeNull();
+    });
   });
   it('does not echo arbitrary notice text or show a message on ordinary visits', async () => {
     for (const searchParams of [{}, { notice: 'untrusted text' }]) {

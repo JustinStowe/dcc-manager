@@ -11,7 +11,7 @@ export async function createInventoryPort(): Promise<InventoryPort> {
       p_operation: input.operation, p_item_id: input.itemId, p_item: input.operation === 'classify' ? { effect: input.effect } : input.item, p_location: input.location,
     });
     if (error) {
-      if (error.code === '22023') throw new Error('Inventory change rejected. Check quantities and equipment slots, then refresh the campaign.');
+      if (error.code === '22023') throw new Error('Inventory change rejected. Check quantities, equipment slots, and derived stat limits, then refresh the campaign.');
       throw campaignDatabaseError(error);
     }
   } };

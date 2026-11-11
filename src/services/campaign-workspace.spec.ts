@@ -162,15 +162,15 @@ describe('campaign application commands', () => {
     expect(calls.length).toBe(0);
   });
 
-  it('imports zero health under the current account and campaign', async () => {
+  it('rejects browser imports even with a valid saved snapshot', async () => {
     const { port, calls } = makePort();
     const workspace = fixture(ALICE, false);
     const snapshot = JSON.stringify({ id: 'legacy', campaignId: 'local-preview', name: 'Carl', baseSegments: 10, constitution: 10, currentSegments: 0 });
-    await executeCampaignCommand(workspace, form({ operation: 'import', snapshot, ownerUserId: BOB }), port);
-    expect(calls).toEqual([['create', { campaignId: workspace.campaign?.id, ownerUserId: ALICE, name: 'Carl', baseSegments: 10, constitution: 10, currentSegments: 0 }]]);
+    await expect(executeCampaignCommand(workspace, form({ operation: 'import', snapshot, ownerUserId: BOB }), port)).rejects.toThrow('Unknown campaign action');
+    expect(calls.length).toBe(0);
   });
 
-  it('rejects malformed imported data without saving', async () => {
+  it('rejects malformed browser imports without saving', async () => {
     const { port, calls } = makePort();
     await expect(executeCampaignCommand(fixture(ALICE, false), form({ operation: 'import', snapshot: '{}' }), port)).rejects.toThrow();
     expect(calls.length).toBe(0);

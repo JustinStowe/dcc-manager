@@ -5,6 +5,7 @@ import { requireUuid } from '@/services/campaign-workspace';
 import { createClient } from '@/utils/supabase/server';
 import { restoreTutorialProfile } from '@/domain/tutorial';
 import { validateInventory, type InventoryItem } from '@/domain/inventory';
+import { bounded, loadoutTotals, restoreBaseline, restoreHotlist, type CrawlerLoadout } from '@/domain/loadout';
 
 function record(value: unknown): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error('Invalid campaign data.');
@@ -51,12 +52,13 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   if (campaignId !== selectedId) throw new Error('Invalid selected campaign.');
   const [membersResult, crawlersResult] = await Promise.all([
     client.from('dcc_campaign_members').select('user_id').eq('campaign_id', campaignId),
-    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version,ruleset,tutorial_profile,crawler_number,inventory').eq('campaign_id', campaignId).order('name'),
+    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version,ruleset,tutorial_profile,crawler_number,inventory,stat_baseline,defense_base,hotlist').eq('campaign_id', campaignId).order('name'),
   ]);
   if (membersResult.error) throw campaignDatabaseError(membersResult.error);
   if (crawlersResult.error) throw campaignDatabaseError(crawlersResult.error);
   const versions: Record<string, string> = {};
   const inventories: Record<string, readonly InventoryItem[]> = {};
+  const loadouts: Record<string, CrawlerLoadout> = {};
   const tutorials: Record<string, { profile: ReturnType<typeof restoreTutorialProfile>; number: number }> = {};
   const campaign: Campaign = {
     id: campaignId, name: field(row, 'name'), gmUserId: requireUuid(field(row, 'gm_user_id')),
@@ -74,6 +76,12 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
         if (!Number.isSafeInteger(item.crawler_number) || (item.crawler_number as number) < 1) throw new Error('Invalid Crawler Number.');
         tutorials[crawler.id] = { profile: restoreTutorialProfile(item.tutorial_profile), number: item.crawler_number as number };
         inventories[crawler.id] = validateInventory(item.inventory);
+        const baseline = restoreBaseline(item.stat_baseline);
+        const defenseBase = bounded(item.defense_base, 0, 10000);
+        const totals = loadoutTotals(baseline, inventories[crawler.id], defenseBase);
+        const profile = tutorials[crawler.id].profile;
+        if (Object.keys(totals.stats).some((key) => { const stat = key as keyof typeof totals.stats; return totals.stats[stat].base !== profile.stats[stat].base || totals.stats[stat].enhanced !== profile.stats[stat].enhanced; })) throw new Error('Equipment totals are out of sync. Ask the GM to review this crawler.');
+        loadouts[crawler.id] = { baseline, defenseBase, hotlist: restoreHotlist(item.hotlist, inventories[crawler.id], profile) };
       }
       return { ownerUserId: requireUuid(field(item, 'owner_user_id')), crawler };
     }),
@@ -82,7 +90,7 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   if (role === null || (role === 'player' && campaign.crawlers.some((entry) => entry.ownerUserId !== userId))) {
     throw new Error('Campaign access could not be verified.');
   }
-  return { userId, campaign, versions, tutorials, inventories };
+  return { userId, campaign, versions, tutorials, inventories, loadouts };
 }
 
 export async function createCampaignWritePort(): Promise<CampaignWritePort> {

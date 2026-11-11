@@ -1,19 +1,35 @@
 import Link from 'next/link';
 import { LobbyForm } from '@/components/lobby-form';
 import { DeleteGame } from '@/components/delete-game';
+import { DeleteCrawlerProfile } from '@/components/delete-crawler-profile';
 import type { GameLobby } from '@/services/game-lobby';
+import type { SavedCrawlerProfile } from '@/services/crawler-profiles';
 import styles from '@/styles/campaign.module.css';
 
-export function LobbyView({ lobby, error, notice }: { lobby: GameLobby; error: string | null; notice?: string | null }) {
+export function LobbyView({ lobby, error, profiles, profileError, notice }: {
+  lobby: GameLobby; error: string | null; profiles: readonly SavedCrawlerProfile[];
+  profileError: string | null; notice?: string | null;
+}) {
   return (
     <main className={styles.page}>
       <h1>Game lobby</h1><p>Host a game as GM, or join a game as a player.</p>
       {notice && <p role="status" className={styles.notice}>{notice}</p>}
       {error && <p role="alert" className={styles.error}>{error}</p>}
       <div className={styles.lobbyGrid}>
-        <section>
-          <h2><Link href="/crawlers">Create crawler</Link></h2>
-        </section>
+        <details className={styles.panel}>
+          <summary className={styles.choice}>Create Crawler</summary>
+          {profileError ? <p role="alert" className={styles.error}>{profileError}</p> : <>
+            <p>Saved crawlers: {profiles.length}/3</p>
+            {[1, 2, 3].map((slot) => {
+              const profile = profiles.find((item) => item.slot === slot);
+              return <details key={`${slot}-${profile?.version ?? 'empty'}`} className={styles.submenu}>
+                <summary className={styles.subchoice}>Slot {slot}: {profile?.name ?? 'Empty'}</summary>
+                <Link href={`/crawlers?slot=${slot}`} className={styles.actionLink}>{profile ? 'Review crawler' : 'Create crawler'}</Link>
+                {profile && <DeleteCrawlerProfile profile={profile} />}
+              </details>;
+            })}
+          </>}
+        </details>
         <details className={styles.panel}>
           <summary className={styles.choice}>Host a Game</summary>
           <details className={styles.submenu}>

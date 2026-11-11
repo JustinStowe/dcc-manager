@@ -17,6 +17,7 @@ export async function crawlerProfileAction(_previous: CampaignFormState, form: F
   } catch (error) {
     return { error: error instanceof SyntaxError || error instanceof TypeError ? 'Review the crawler profile and try again.' : error instanceof Error ? error.message : 'Could not save your crawler profile.', notice: null };
   }
+  revalidatePath('/');
   revalidatePath('/crawlers');
   if (destination) { revalidatePath(destination); redirect(destination); }
   return { error: null, notice };

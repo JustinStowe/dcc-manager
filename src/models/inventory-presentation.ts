@@ -1,5 +1,6 @@
 import type { InventoryItem } from '@/domain/inventory';
 import type { EquipmentSlot, GameItem, GearSlot, ItemType } from '@/components/inventory-system';
+import { restoreBonuses } from '@/domain/loadout';
 
 const TYPES: Record<InventoryItem['kind'], ItemType> = { gear: 'Gear', weapon: 'Weapon', armor: 'Armor', consumable: 'Consumable', quest: 'Quest', misc: 'Misc' };
 const SLOTS: Record<string, GearSlot> = { head: 'Head', torso: 'Torso', arms: 'Arms', legs: 'Legs', feet: 'Feet', hands: 'Hands', holding: 'Main hand', 'main-hand': 'Main hand', 'off-hand': 'Off hand', 'two-hands': 'Main hand', accessory: 'Accessory', belt: 'Accessory', cape: 'Accessory', none: 'None', stored: 'None' };
@@ -9,7 +10,8 @@ export function buildInventoryPresentation(source: readonly InventoryItem[]) {
   const sourceById: Record<string, InventoryItem> = {};
   for (const item of source) {
     const equipped = item.location !== 'stored';
-    const common = { name: item.name, type: TYPES[item.kind], description: `${item.location === 'two-hands' ? 'Occupies both hands.\n' : item.location === 'belt' || item.location === 'cape' ? `Equipment location: ${item.location}.\n` : ''}${item.notes}` };
+    const bonusText = Object.entries(restoreBonuses(item.bonuses)).filter(([, value]) => value > 0).map(([key, value]) => key === 'dr' ? `DR +${value}` : key === 'evade' ? `Evade +${value}` : `Enhanced ${key} +${value} points`).join(', ');
+    const common = { name: item.name, type: TYPES[item.kind], description: `${item.location === 'two-hands' ? 'Occupies both hands.\n' : item.location === 'belt' || item.location === 'cape' ? `Equipment location: ${item.location}.\n` : ''}${bonusText ? `While equipped: ${bonusText}.\n` : ''}${item.notes}` };
     if (equipped) {
       const id = `${item.id}:equipped`;
       items.push({ ...common, id, quantity: 1, gearSlot: SLOTS[item.location], isEquipped: true });

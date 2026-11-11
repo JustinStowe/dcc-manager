@@ -1,9 +1,10 @@
 import {
   addCampaignPlayer, changeCampaignCrawlerHealth, createCampaignCrawler,
-  restoreCrawler, updateCampaignCrawlerStats, type Campaign,
+  updateCampaignCrawlerStats, type Campaign,
 } from '@/domain';
 import type { TutorialProfile } from '@/domain/tutorial';
 import type { InventoryItem } from '@/domain/inventory';
+import type { CrawlerLoadout } from '@/domain/loadout';
 
 export interface CampaignWorkspace {
   readonly userId: string;
@@ -11,6 +12,7 @@ export interface CampaignWorkspace {
   readonly versions: Readonly<Record<string, string>>;
   readonly tutorials?: Readonly<Record<string, { profile: TutorialProfile; number: number }>>;
   readonly inventories?: Readonly<Record<string, readonly InventoryItem[]>>;
+  readonly loadouts?: Readonly<Record<string, CrawlerLoadout>>;
 }
 
 export interface CampaignWritePort {
@@ -53,15 +55,13 @@ export async function executeCampaignCommand(
     await port.addPlayer(campaign.id, target);
     return 'Player added.';
   }
-  if (operation === 'create' || operation === 'import') {
-    // Owners are account IDs, never browser save owner claims.
-    const ownerUserId = operation === 'import' ? userId : requireUuid(text(form, 'ownerUserId'));
-    const imported = operation === 'import' ? restoreCrawler(JSON.parse(text(form, 'snapshot'))) : null;
+  if (operation === 'create') {
+    const ownerUserId = requireUuid(text(form, 'ownerUserId'));
     const candidate = createCampaignCrawler(campaign, userId, {
       id: 'new-crawler', ownerUserId,
-      name: imported?.name ?? text(form, 'name'),
-      baseSegments: imported?.baseSegments ?? integer(form, 'baseSegments'),
-      constitution: imported?.constitution ?? integer(form, 'constitution'),
+      name: text(form, 'name'),
+      baseSegments: integer(form, 'baseSegments'),
+      constitution: integer(form, 'constitution'),
     }).crawlers.at(-1);
     if (!candidate) throw new Error('Unable to create crawler.');
     if (campaign.crawlers.some((entry) => entry.ownerUserId === ownerUserId)) {
@@ -70,9 +70,9 @@ export async function executeCampaignCommand(
     await port.createCrawler({
       campaignId: campaign.id, ownerUserId, name: candidate.crawler.name,
       baseSegments: candidate.crawler.baseSegments, constitution: candidate.crawler.constitution,
-      currentSegments: imported?.currentSegments ?? candidate.crawler.currentSegments,
+      currentSegments: candidate.crawler.currentSegments,
     });
-    return imported ? 'Browser crawler imported. The original browser save was kept.' : 'Crawler created and saved.';
+    return 'Crawler created and saved.';
   }
   if (operation !== 'health' && operation !== 'stats') throw new RangeError('Unknown campaign action.');
   const crawlerId = requireUuid(text(form, 'crawlerId'));

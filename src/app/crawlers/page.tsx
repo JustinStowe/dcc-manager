@@ -2,9 +2,8 @@ import Link from 'next/link';
 import { requireCurrentUser } from '@/adapters/supabase-authentication';
 import { loadCrawlerProfiles } from '@/adapters/supabase-crawler-profiles';
 import { signOut } from '@/app/auth/actions';
-import { crawlerProfileAction } from './actions';
 import { AccountBarView } from '@/views/account-bar-view';
-import { CampaignForm } from '@/components/campaign-form';
+import { DeleteCrawlerProfile } from '@/components/delete-crawler-profile';
 import { TutorialCreation } from '@/components/tutorial-creation';
 import { requireProfileSlot, type SavedCrawlerProfile } from '@/services/crawler-profiles';
 import styles from '@/styles/campaign.module.css';
@@ -26,7 +25,7 @@ export default async function CrawlerProfilesPage({ searchParams }: { searchPara
     <AccountBarView email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
     <main className={styles.page}>
       <Link href="/" className={styles.backLink}>Back to game lobby</Link>
-      <h1>Create crawler</h1>
+      <h1>{selected ? 'Review crawler' : 'Create crawler'}</h1>
       <p>Saved crawler profiles: {profiles.length}/3</p>
       {error ? <p role="alert" className={styles.error}>{error}</p> : <>
         <nav className={styles.profileSlots} aria-label="Crawler profile slots">
@@ -36,11 +35,7 @@ export default async function CrawlerProfilesPage({ searchParams }: { searchPara
           })}
         </nav>
         <TutorialCreation key={`${slot}-${selected?.version ?? 'empty'}`} campaignId="" owners={[{ id: user.id, label: 'Me' }]} profileSlot={slot} savedProfile={selected} />
-        {selected && <CampaignForm campaignId="" submitAction={crawlerProfileAction} label={`Remove saved profile ${selected.name}`}>
-          <input type="hidden" name="operation" value="delete-profile" /><input type="hidden" name="slot" value={slot} /><input type="hidden" name="version" value={selected.version} />
-          <label><input type="checkbox" name="confirmed" value="yes" required /> Remove this saved profile. Existing game crawlers will not change.</label>
-          <button type="submit" className={styles.danger}>Remove saved profile</button>
-        </CampaignForm>}
+        {selected && <DeleteCrawlerProfile key={selected.version} profile={selected} />}
       </>}
     </main>
   </>;
