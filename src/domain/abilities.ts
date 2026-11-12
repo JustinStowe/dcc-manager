@@ -71,8 +71,8 @@ export function resolveAdvancement(ability: LearnedAbility, window: AdvancementR
   const rank = die + modifier >= ability.rank ? ability.rank + 1 : ability.rank;
   return restoreAbility({ ...ability, rank, marked: false, lastAdvancement: { die, modifier, fromRank: ability.rank, toRank: rank, window } });
 }
-export function abilityCheckBonus(ability: LearnedAbility, profile: TutorialProfile): number | null {
-  return ability.passive || !ability.stat ? null : Math.min(ability.rank, 15) + tutorialModifier(profile.stats[ability.stat].enhanced);
+export function abilityCheckBonus(ability: LearnedAbility, profile: TutorialProfile, floor = 1): number | null {
+  return ability.passive || !ability.stat ? null : Math.min(ability.rank, floor >= 6 ? 20 : 15) + tutorialModifier(profile.stats[ability.stat].enhanced);
 }
 export function castLearnedSpell(ability: LearnedAbility, profile: TutorialProfile, healthSlots: number, prepared: boolean) {
   integer(healthSlots, 0, 10);

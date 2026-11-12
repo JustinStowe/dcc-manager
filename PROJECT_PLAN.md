@@ -1,6 +1,6 @@
 # Dungeon Crawler Carl Manager — Project Plan
 
-Last updated: November 11, 2026
+Last updated: November 12, 2026
 
 ## Goal
 
@@ -52,6 +52,7 @@ part of the active milestone, rather than deferred work.
 | Campaign dashboard and sheet UI | User reports checks and manual acceptance passed |
 | Inventory grid and inspector | User reports application checks and manual acceptance passed |
 | Equipment bonuses, DR, and Hotlist | User reports application checks and manual acceptance passed |
+| Sheet modals, inline editing, derived stats | Implemented in milestone 009; SQL/full application/browser acceptance pending |
 | Learned abilities and advancement marks | Implemented in milestone 008; database execution and full local/browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
@@ -76,7 +77,16 @@ The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
 
-## Current milestone: learned abilities (008)
+## Current milestone: sheet controls (009)
+
+Health and Favor modals replace the previous control sections. Version-checked
+inline edits enforce per-game roles. Only Unenhanced stats are editable by the
+GM; Enhanced scores derive from active signed modifiers and equipped gear.
+Existing non-gear adjustments migrate to explicit sources. GM level/floor
+metadata persists without automatically granting level-up or class benefits.
+See `Docs/SHEET_CONTROLS_SETUP.md` for installation and acceptance.
+
+## Previous milestone: learned abilities (008)
 
 Add per-game learned Skills, Attacks, Damage Effects, and Spells with current
 ranks, governing-stat Check references, descriptions and reviewed Mana costs.

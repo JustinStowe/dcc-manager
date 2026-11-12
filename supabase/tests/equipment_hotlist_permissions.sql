@@ -1,4 +1,4 @@
--- Run the complete script as administrator after migration 007. All fixture
+-- Run the complete script as administrator after migrations 001–009. All fixture
 -- changes roll back. Any error before the final PASS means verification failed.
 begin;
 create function pg_temp.expect_loadout_error(statement text,expected text) returns void
@@ -89,16 +89,16 @@ select pg_temp.l_inventory('edit',current_setting('dcc_test.l_hat')::uuid,'{"nam
 do $$ begin
  if not exists(select 1 from public.dcc_crawlers where id=current_setting('dcc_test.l_crawler')::uuid and tutorial_profile#>>'{stats,intelligence,enhanced}'='9' and inventory->0->'bonuses'->>'intelligence'='3') then raise exception 'Editing lost bonuses or accumulated them twice.';end if;
 end $$;
--- Rebalance an already-counted point between baseline and gear atomically.
+-- Manual Enhanced input is ignored after migration 009. Gear alone changes the maximum.
 -- Final maximum stays nine, so current Mana must never pass through five/six.
 select pg_temp.l_act('bonuses',null,null,current_setting('dcc_test.l_hat'),null,current_setting('dcc_test.l_zero')::jsonb||'{"intelligence":4,"constitution":2,"dr":4,"evade":1}',jsonb_set(current_setting('dcc_test.l_profile')::jsonb->'stats','{intelligence,enhanced}','5'));
 do $$ begin
- if not exists(select 1 from public.dcc_crawlers where id=current_setting('dcc_test.l_crawler')::uuid and tutorial_profile->>'mana'='9' and tutorial_profile#>>'{stats,intelligence,enhanced}'='9') then raise exception 'Atomic baseline/gear review lost Mana.';end if;
+ if not exists(select 1 from public.dcc_crawlers where id=current_setting('dcc_test.l_crawler')::uuid and tutorial_profile->>'mana'='9' and tutorial_profile#>>'{stats,intelligence,enhanced}'='10') then raise exception 'Derived maximum or preserved Mana incorrect.';end if;
 end $$;
 select pg_temp.l_act('bonuses',null,null,current_setting('dcc_test.l_hat'),null,current_setting('dcc_test.l_zero')::jsonb||'{"intelligence":3,"constitution":2,"dr":4,"evade":1}',current_setting('dcc_test.l_profile')::jsonb->'stats');
 -- Non-gear baseline changes still add equipment exactly once, then clamp Mana
 -- against the FINAL effective maximum rather than the intermediate baseline.
-select pg_temp.l_resource('stats',0,jsonb_set(current_setting('dcc_test.l_profile')::jsonb->'stats','{intelligence,enhanced}','5'));
+select pg_temp.l_resource('stats',0,jsonb_set(jsonb_set(current_setting('dcc_test.l_profile')::jsonb->'stats','{intelligence,base}','5'),'{intelligence,enhanced}','999'));
 do $$ begin
  if not exists(select 1 from public.dcc_crawlers where id=current_setting('dcc_test.l_crawler')::uuid and tutorial_profile#>>'{stats,intelligence,enhanced}'='8' and tutorial_profile->>'mana'='8') then raise exception 'Baseline stat update clamped against the wrong layer.';end if;
 end $$;

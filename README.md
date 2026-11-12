@@ -6,6 +6,18 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Character sheet controls (009)
+
+Follow [SHEET_CONTROLS_SETUP.md](Docs/SHEET_CONTROLS_SETUP.md). After migrations
+001–008, apply only `202611120009_sheet_controls.sql`, run the new sheet SQL
+assertions and updated equipment regressions, then `npm run check` and the
+manual checklist. Health/Favor use modals; inline edits follow Player/GM roles;
+Enhanced stats derive from base stats, active modifier sources, and gear.
+GM base-stat editing starts with Edit; saving requires a separate Confirm click.
+Existing non-gear adjustments are preserved as imported modifier sources.
+Database execution and full application/browser acceptance remain pending.
+
+
 ### Learned Skills, Spells, and advancement
 
 Follow [LEARNED_ABILITIES_SETUP.md](Docs/LEARNED_ABILITIES_SETUP.md). After your

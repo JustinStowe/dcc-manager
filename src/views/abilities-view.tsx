@@ -22,9 +22,9 @@ function DefinitionFields({ ability }: { ability?: LearnedAbility }) {
     <label><input type="checkbox" name="reviewed" value="yes" required /> GM reviewed the definition, final cost, passive status, and rank limit.</label>
   </>;
 }
-export function AbilitiesView({ campaignId, crawlerId, version, abilities, profile, isGm, hotlist, healthSlots }: {
+export function AbilitiesView({ campaignId, crawlerId, version, abilities, profile, isGm, hotlist, healthSlots, floor=1 }: {
   campaignId: string; crawlerId: string; version: string; abilities: readonly LearnedAbility[]; profile: TutorialProfile;
-  isGm: boolean; hotlist?: Hotlist; healthSlots: number;
+  isGm: boolean; hotlist?: Hotlist; healthSlots: number; floor?: number;
 }) {
   const hidden = <><input type="hidden" name="crawlerId" value={crawlerId} /><input type="hidden" name="version" value={version} /></>;
   const catalog = ABILITY_CATALOG.filter((entry) => entry.id !== 'heal' && !abilities.some((ability) => ability.name.toLowerCase() === entry.name.toLowerCase()));
@@ -32,8 +32,8 @@ export function AbilitiesView({ campaignId, crawlerId, version, abilities, profi
     <p className={styles.sheetHint}>Mark attempted Checks whether they succeed or fail. Marks do not change rank. The GM resolves marked ranks 1–4 every two hours and ranks 5–14 at floor end. Ordinary advancement stops at rank 15; benefits above 15 remain inactive until Floor 6.</p>
     <p className={styles.sheetHint}>Passive abilities usually receive no marks. Confirm special conditions; mark only one hand-to-hand Skill or Damage Effect per attack. Resolve damage, targets, cooldowns, and special effects at the table.</p>
     <div className={styles.tableScroll}><table className={styles.sheetTable}><thead><tr><th>Ability</th><th>Kind</th><th>Rank / limit</th><th>Check</th><th>Mana</th><th>Advancement</th></tr></thead><tbody>{abilities.map((ability) => {
-      const bonus = abilityCheckBonus(ability,profile);
-      return <tr key={ability.id}><td>{ability.name}</td><td>{ability.passive ? 'Passive ' : ''}{ability.kind}</td><td>{ability.rank} / {ability.maxRank}{ability.rank > 15 ? ' (effective 15)' : ''}</td><td>{bonus === null ? '—' : `d20 ${bonus >= 0 ? '+' : '−'} ${Math.abs(bonus)} (${ability.stat})`}</td><td>{ability.manaCost ?? '—'}</td><td>{ability.marked ? '✓ Marked' : canMarkAbility(ability) ? ability.advancement === 'special' ? 'Special condition' : 'Unmarked' : 'Not eligible'}</td></tr>;
+      const bonus = abilityCheckBonus(ability,profile,floor);
+      return <tr key={ability.id}><td>{ability.name}</td><td>{ability.passive ? 'Passive ' : ''}{ability.kind}</td><td>{ability.rank} / {ability.maxRank}{ability.rank > 15 && floor < 6 ? ' (effective 15)' : ''}</td><td>{bonus === null ? '—' : `d20 ${bonus >= 0 ? '+' : '−'} ${Math.abs(bonus)} (${ability.stat})`}</td><td>{ability.manaCost ?? '—'}</td><td>{ability.marked ? '✓ Marked' : canMarkAbility(ability) ? ability.advancement === 'special' ? 'Special condition' : 'Unmarked' : 'Not eligible'}</td></tr>;
     })}</tbody></table></div>
     <details className={styles.sheetControls}><summary>Mark, inspect &amp; manage abilities</summary>
       {abilities.map((ability) => <details key={ability.id} name={`ability-${crawlerId}`} className={styles.sheetControls}><summary>{ability.name} · Rank {ability.rank}{ability.marked ? ' · Marked' : ''}</summary>
