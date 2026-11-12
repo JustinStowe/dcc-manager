@@ -1,6 +1,6 @@
 # Dungeon Crawler Carl Manager — Project Plan
 
-Last updated: November 10, 2026
+Last updated: November 11, 2026
 
 ## Goal
 
@@ -27,8 +27,8 @@ Preserve MVC-style separation. The reusable Nx monorepo remains paused.
   a separate eligibility-controlled workflow.
 - Owners and the GM can apply damage and healing. Stat edits preserve current
   health, clamp it to a lower maximum, and keep zero health at zero.
-- Existing browser saves are preserved and can be explicitly imported into a
-  selected campaign under the signed-in account.
+- Legacy browser saves are preserved; their import UI was removed in the current
+  project. Shared game storage is the active workflow.
 
 The Host / Join requirement replaces the previous single-campaign restriction,
 manual GM bootstrap, and player account-ID entry flow. Multiple games are now
@@ -51,7 +51,8 @@ part of the active milestone, rather than deferred work.
 | Standard Mana Potions | User reports checks and manual acceptance passed |
 | Campaign dashboard and sheet UI | User reports checks and manual acceptance passed |
 | Inventory grid and inspector | User reports application checks and manual acceptance passed |
-| Equipment bonuses, DR, and Hotlist | Implemented; migration 007 and local/database/browser acceptance pending |
+| Equipment bonuses, DR, and Hotlist | User reports application checks and manual acceptance passed |
+| Learned abilities and advancement marks | Implemented in milestone 008; database execution and full local/browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -64,8 +65,9 @@ from commit `2d10644703c7c1d8b170fc520e29f581e8568c31` returns missing/inaccessi
 games to the lobby with a fixed notice; database errors remain separate.
 
 The user reports the inventory milestone passed application checks and all
-manual acceptance tests. The next development piece is atomic Standard Mana
-Potion use and the character sheet/dashboard redesign.
+manual acceptance tests. Potion automation, the sheet/dashboard redesign, and
+equipment/DR/Hotlist have since passed user-reported application/manual checks.
+The active development piece is learned abilities and advancement marks.
 
 The verified inventory foundation adds 46 domain/service cases,
 per-game item quantities/notes, equipped locations and slot limits, explicit
@@ -73,6 +75,21 @@ consumable quantity use, and one-time potions for newly created spellcasters.
 The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
+
+## Current milestone: learned abilities (008)
+
+Add per-game learned Skills, Attacks, Damage Effects, and Spells with current
+ranks, governing-stat Check references, descriptions and reviewed Mana costs.
+Players mark their own eligible abilities; the GM awards abilities, edits
+ranks/definitions, and records advancement rolls. Marks clear after success or
+failure. Current Spell records supply Hotlist choices and atomic Mana/mark
+updates. Protected Tutorial Heal stays rank 1. See
+`Docs/LEARNED_ABILITIES_SETUP.md` for installation and acceptance.
+
+The latest submitted lobby/profile controls and removal of the legacy import
+flow are preserved. Earlier milestone sections below retain their historical
+verification notes. The user's latest report confirms 007 application and
+manual checks; 008 live database, build, and browser checks remain pending.
 
 ## Roadmap
 

@@ -5,6 +5,7 @@ import {
 import type { TutorialProfile } from '@/domain/tutorial';
 import type { InventoryItem } from '@/domain/inventory';
 import type { CrawlerLoadout } from '@/domain/loadout';
+import type { LearnedAbility } from '@/domain/abilities';
 
 export interface CampaignWorkspace {
   readonly userId: string;
@@ -13,6 +14,7 @@ export interface CampaignWorkspace {
   readonly tutorials?: Readonly<Record<string, { profile: TutorialProfile; number: number }>>;
   readonly inventories?: Readonly<Record<string, readonly InventoryItem[]>>;
   readonly loadouts?: Readonly<Record<string, CrawlerLoadout>>;
+  readonly skills?: Readonly<Record<string, readonly LearnedAbility[]>>;
 }
 
 export interface CampaignWritePort {

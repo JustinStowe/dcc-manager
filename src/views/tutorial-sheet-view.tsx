@@ -1,5 +1,5 @@
 import type { Crawler } from '@/domain';
-import { STAT_KEYS, TUTORIAL_CATALOG, tutorialModifier, tutorialSkills, type TutorialProfile } from '@/domain/tutorial';
+import { STAT_KEYS, TUTORIAL_CATALOG, tutorialModifier, type TutorialProfile } from '@/domain/tutorial';
 import { CampaignForm } from '@/components/campaign-form';
 import { TutorialStatsEditor } from '@/components/tutorial-stats-editor';
 import styles from '@/styles/campaign.module.css';
@@ -7,9 +7,11 @@ import type { InventoryItem } from '@/domain/inventory';
 import { InventoryView } from '@/views/inventory-view';
 import { loadoutTotals, type CrawlerLoadout } from '@/domain/loadout';
 import { HotlistView } from '@/views/hotlist-view';
+import { AbilitiesView } from '@/views/abilities-view';
+import { abilityCheckBonus, type LearnedAbility } from '@/domain/abilities';
 import { loadoutAction } from '@/app/campaign/loadout-actions';
 
-type SheetProps = { crawler: Crawler; profile: TutorialProfile; number: number; version: string; isGm: boolean; inventory: readonly InventoryItem[]; loadout?: CrawlerLoadout };
+type SheetProps = { crawler: Crawler; profile: TutorialProfile; number: number; version: string; isGm: boolean; inventory: readonly InventoryItem[]; loadout?: CrawlerLoadout; learned?: readonly LearnedAbility[] };
 function SheetControls({ crawler, profile, number, version, isGm, loadout }: Pick<SheetProps, 'crawler' | 'profile' | 'number' | 'version' | 'isGm' | 'loadout'>) {
   const hidden = <><input type="hidden" name="crawlerId" value={crawler.id} /><input type="hidden" name="version" value={version} /></>;
   return <>
@@ -49,9 +51,9 @@ function SheetControls({ crawler, profile, number, version, isGm, loadout }: Pic
 function IdentityField({ name, value }: { name: string; value: string }) {
   return <div className={styles.identityField}><dt>{name}</dt><dd>{value}</dd></div>;
 }
-export function TutorialSheetView({ crawler, profile, number, version, isGm, inventory, loadout }: SheetProps) {
+export function TutorialSheetView({ crawler, profile, number, version, isGm, inventory, loadout, learned }: SheetProps) {
   const combat = TUTORIAL_CATALOG.combat.find((item) => item.id === profile.combatId);
-  const skills = tutorialSkills(profile);
+
   const baseline = loadout?.baseline ?? profile.stats;
   const totals = loadoutTotals(baseline, inventory, loadout?.defenseBase ?? 0);
   return <section className={styles.sheet} id="crawler-record" aria-label={`${crawler.name} character sheet`}>
@@ -66,7 +68,7 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
         </dl>
       </div>
     </header>
-    {loadout && <HotlistView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} hotlist={loadout.hotlist} inventory={inventory} profile={profile} healthSlots={crawler.currentSegments} />}
+    {loadout && <HotlistView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} hotlist={loadout.hotlist} inventory={inventory} profile={profile} healthSlots={crawler.currentSegments} learned={learned} />}
     <div className={styles.sheetBody}>
       <aside className={styles.attributeColumn} aria-label="Core attributes">
         <dl>{STAT_KEYS.map((key) => <div key={key} className={styles.attributeBox}>
@@ -88,12 +90,8 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
         <div className={styles.defenseGrid}><div><span>Evade</span><strong>d20 + {totals.evade}</strong><small>DEX modifier + {totals.gear.evade} gear; other Buffs manual</small></div><div><span>Damage resistance</span><strong>{totals.dr} DR</strong><small>{loadout?.defenseBase ?? 0} non-gear + {totals.gear.dr} equipped gear</small></div></div>
         <details className={styles.sheetControls}><summary>Stat and defense breakdown</summary><div className={styles.tableScroll}><table className={styles.sheetTable}><thead><tr><th>Stat</th><th>Unenhanced</th><th>GM / non-gear</th><th>Gear</th><th>Enhanced</th></tr></thead><tbody>{STAT_KEYS.map((key) => <tr key={key}><td>{key}</td><td>{baseline[key].base}</td><td>{baseline[key].enhanced - baseline[key].base}</td><td>+{totals.gear[key]}</td><td>{profile.stats[key].enhanced}</td></tr>)}</tbody></table></div></details>
         <SheetControls crawler={crawler} profile={profile} number={number} version={version} isGm={isGm} loadout={loadout} />
-        <section className={styles.sheetSection}><h3>Attacks</h3>
-          <div className={styles.tableScroll}><table className={styles.sheetTable}><caption className={styles.sheetHint}>Starting combat Skills · confirm attack and damage rules at the table</caption><thead><tr><th>Name</th><th>Rank</th><th>Stat / effects</th></tr></thead><tbody>
-            <tr><td>Unarmed Combat</td><td>3</td><td>Strength</td></tr><tr><td>{combat?.name}</td><td>3</td><td>{combat?.effect ? `${combat.effect} (Rank 3)` : combat?.kind === 'spell' ? 'Attack Spell' : 'See weapon description'}</td></tr>
-          </tbody></table></div>
-        </section>
-        <section className={styles.sheetSection}><h3>Skills &amp; Spells</h3><div className={styles.tableScroll}><table className={styles.sheetTable}><caption className={styles.sheetHint}>Starting ranks · Heal costs 2 Mana to restore 2 health slots</caption><thead><tr><th>Skill</th><th>Rank</th><th>Stat</th></tr></thead><tbody>{skills.map((skill) => <tr key={skill.name}><td>{skill.name}</td><td>{skill.rank}</td><td>{skill.stat ?? 'See rules'}</td></tr>)}</tbody></table></div></section>
+        <section className={styles.sheetSection}><h3>Attacks</h3><div className={styles.tableScroll}><table className={styles.sheetTable}><caption className={styles.sheetHint}>Current learned attacks · resolve damage and rank upgrades at the table</caption><thead><tr><th>Name</th><th>Rank</th><th>Check</th><th>Base damage (ranks 0–4)</th></tr></thead><tbody>{learned?.filter((ability) => ability.kind === 'attack' || (ability.kind === 'spell' && !ability.passive)).map((ability) => <tr key={ability.id}><td>{ability.name}</td><td>{ability.rank}</td><td>{abilityCheckBonus(ability,profile) === null ? '—' : `d20 + ${abilityCheckBonus(ability,profile)}`}</td><td>{ability.damage || 'See rules'}</td></tr>)}</tbody></table></div></section>
+        {learned ? <AbilitiesView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} abilities={learned} profile={profile} isGm={isGm} hotlist={loadout?.hotlist} healthSlots={crawler.currentSegments} /> : <p role="alert">Learned abilities unavailable. Apply the learned skills migration and refresh.</p>}
       </div>
     </div>
     <div className={styles.sheetFooter}>

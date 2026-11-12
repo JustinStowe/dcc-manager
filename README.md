@@ -6,6 +6,18 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Learned Skills, Spells, and advancement
+
+Follow [LEARNED_ABILITIES_SETUP.md](Docs/LEARNED_ABILITIES_SETUP.md). After your
+verified 001–007 setup, apply only `202611110008_learned_skills.sql`, run the
+included database assertions, then `npm run check` and the manual checklist.
+Players mark eligible skills on their own crawlers. GMs award abilities, review
+ranks/costs, and resolve advancement rolls. Current learned records drive Check
+references and prepared Spells without changing creation history or writeups.
+No dependencies are added. Database execution and full application/browser
+acceptance for this new milestone remain pending.
+
+
 ### Equipment bonuses, damage resistance, and quick slots
 
 Follow [EQUIPMENT_HOTLIST_SETUP.md](Docs/EQUIPMENT_HOTLIST_SETUP.md). Apply only
@@ -17,7 +29,8 @@ prepared actions. GM-reviewed equipped gear contributes flat attribute, DR, and
 Evade bonuses, with a separate baseline to prevent repeated accumulation. Mana
 limits recalculate without refilling resources. Raw-damage and final-net paths
 are explicit. Existing items gain no inferred bonuses; review them as GM.
-This update's SQL, full local checks, and browser acceptance remain pending.
+The user reports milestone 007 application checks and manual acceptance passed.
+Its SQL assertions are retained for regression testing.
 
 ### Two-column inventory grid
 
@@ -85,15 +98,15 @@ create fixtures inside a transaction and roll them back. A successful result
 starts with `PASS:`. Also verify the UI with two signed-in accounts: a player
 must not see game deletion controls or another account's saved profiles.
 
-For the current Level 1 Human entry update, follow [TUTORIAL_SETUP.md](TUTORIAL_SETUP.md).
+For the current Level 1 Human entry update, follow [TUTORIAL_SETUP.md](Docs/TUTORIAL_SETUP.md).
 Its migration follows the two lobby migrations.
 
-For the earlier lobby foundation, [LOBBY_SETUP.md](LOBBY_SETUP.md) includes installation, database
+For the earlier lobby foundation, [LOBBY_SETUP.md](Docs/LOBBY_SETUP.md) includes installation, database
 migrations for fresh or previously configured projects, database policy tests,
 and manual multi-account checks. The lobby replaces the earlier manual GM
 bootstrap; do not run `bootstrap_campaign.sql`.
 
-Supabase authentication must already be configured. See [AUTH_SETUP.md](AUTH_SETUP.md)
+Supabase authentication must already be configured. See [AUTH_SETUP.md](Docs/AUTH_SETUP.md)
 for the email/password and confirmation setup from the authentication milestone.
 Keep the project URL and publishable key in `.env.local`. No service-role key is
 used by the application.

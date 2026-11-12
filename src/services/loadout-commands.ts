@@ -4,6 +4,7 @@ import { castTutorialHeal } from '@/domain/tutorial';
 import { drinkStandardManaPotion } from '@/domain/potions';
 import { assignHotlist, bounded, damageAfterDr, loadoutTotals, readyHotlistItem, restoreBaseline, restoreBonuses, restoreHotlist, type GearBonuses, type HotlistEntry } from '@/domain/loadout';
 import { requireUuid, type CampaignWorkspace } from './campaign-workspace';
+import { castLearnedSpell } from '@/domain/abilities';
 import type { TutorialStats } from '@/domain/tutorial';
 
 export interface LoadoutWrite {
@@ -38,7 +39,7 @@ export async function executeLoadoutCommand(workspace: CampaignWorkspace, form: 
     const parts = text(form, 'target').split(':'); kind = parts[0]; target = parts[1];
     if (parts.length !== 2 || (kind !== 'item' && kind !== 'skill')) throw new RangeError('Choose an item or known Spell.');
     if (kind === 'item') target = requireUuid(target);
-    restoreHotlist(assignHotlist(loadout.hotlist, slot!, { kind, target } as HotlistEntry), items, profile);
+    restoreHotlist(assignHotlist(loadout.hotlist, slot!, { kind, target } as HotlistEntry), items, profile, workspace.skills?.[crawlerId]);
   } else if (operation === 'use' || operation === 'ready') {
     if (form.get('confirmed') !== 'yes') throw new RangeError('Confirm HUD access and Action/potion timing with the GM.');
     if (entry.crawler.currentSegments === 0) throw new RangeError('A Dying crawler cannot use their HUD.');
@@ -48,9 +49,9 @@ export async function executeLoadoutCommand(workspace: CampaignWorkspace, form: 
       if (prepared.kind !== 'item') throw new RangeError('Choose a prepared held item.');
       location = text(form, 'location'); validateInventory(readyHotlistItem(items, prepared.target, location));
     } else if (prepared.kind === 'skill') {
-      if (prepared.target !== 'heal') throw new RangeError('Resolve this Spell at the table.');
-      castTutorialHeal(entry.crawler.currentSegments, profile);
-      notice = 'Prepared Heal applied: 2 Mana spent and up to 2 health slots restored.';
+      const known = workspace.skills?.[crawlerId]?.find((ability) => ability.id === prepared.target);
+      if (known) { castLearnedSpell(known, profile, entry.crawler.currentSegments, true); notice = known.automation === 'tutorial-heal' ? 'Prepared Heal applied: 2 Mana spent and up to 2 health slots restored.' : 'Prepared Spell Mana cost recorded. Resolve its Check and effects at the table.'; }
+      else { if (prepared.target !== 'heal') throw new RangeError('Resolve this Spell at the table.'); castTutorialHeal(entry.crawler.currentSegments, profile); notice = 'Prepared Heal applied: 2 Mana spent and up to 2 health slots restored.'; }
     } else {
       const item = items.find((candidate) => candidate.id === prepared.target);
       if (!item || item.kind !== 'consumable') throw new RangeError('Use Ready for held equipment; other item effects remain manual.');

@@ -1,5 +1,6 @@
 import { STAT_KEYS, tutorialModifier, TUTORIAL_CATALOG, type TutorialStats, type TutorialProfile } from './tutorial';
 import type { InventoryItem } from './inventory';
+import type { LearnedAbility } from './abilities';
 
 export interface GearBonuses { readonly strength: number; readonly intelligence: number; readonly constitution: number; readonly dexterity: number; readonly charisma: number; readonly dr: number; readonly evade: number }
 export const ZERO_BONUSES: GearBonuses = { strength: 0, intelligence: 0, constitution: 0, dexterity: 0, charisma: 0, dr: 0, evade: 0 };
@@ -35,14 +36,15 @@ export function loadoutTotals(baseline: TutorialStats, items: readonly Inventory
   const stats = Object.fromEntries(STAT_KEYS.map((key) => [key, { base: reviewed[key].base, enhanced: bounded(reviewed[key].enhanced + gear[key], 1, 10000) }])) as TutorialStats;
   return { stats, gear, dr: bounded(defenseBase, 0, 10000) + gear.dr, evade: tutorialModifier(stats.dexterity.enhanced) + gear.evade };
 }
-export function hotlistSkills(profile: TutorialProfile) {
+export function hotlistSkills(profile: TutorialProfile, learned?: readonly LearnedAbility[]) {
+  if (learned !== undefined) return learned.filter((ability) => ability.kind === 'spell').map((ability) => ({ id: ability.id, name: ability.name, automated: true, isHeal: ability.automation === 'tutorial-heal', manaCost: ability.manaCost }));
   const combat = TUTORIAL_CATALOG.combat.find((option) => option.id === profile.combatId);
-  return [{ id: 'heal', name: 'Heal', automated: true }, ...(combat?.kind === 'spell' ? [{ id: combat.id, name: combat.name, automated: false }] : [])];
+  return [{ id: 'heal', name: 'Heal', automated: true, isHeal: true, manaCost: 2 }, ...(combat?.kind === 'spell' ? [{ id: combat.id, name: combat.name, automated: false, isHeal: false, manaCost: null }] : [])];
 }
-export function restoreHotlist(value: unknown, items: readonly InventoryItem[], profile: TutorialProfile): Hotlist {
+export function restoreHotlist(value: unknown, items: readonly InventoryItem[], profile: TutorialProfile, learned?: readonly LearnedAbility[]): Hotlist {
   if (!Array.isArray(value) || value.length !== 10) throw new RangeError('The Hotlist has exactly ten slots.');
   const seen = new Set<string>();
-  const skills = hotlistSkills(profile);
+  const skills = hotlistSkills(profile, learned);
   return value.map((raw): HotlistEntry | null => {
     if (raw === null) return null;
     const row = object(raw);
