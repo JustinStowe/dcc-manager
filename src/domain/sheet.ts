@@ -1,10 +1,11 @@
-import { STAT_KEYS, tutorialModifier, type StatKey, type TutorialStats } from './tutorial';
+import { STAT_KEYS, type StatKey, type TutorialStats } from './tutorial';
+import { resolveTypedDamage, type TypedDefenses } from './typed-defenses';
 import { bounded } from './loadout';
-export const DAMAGE_TYPES = ['Acid','Bludgeoning','Electric','Fire','Force','Holy','Ice','Necrotic','Piercing','Poison','Psychic','Slashing','Sonic','Armor Piercing'] as const;
-export type DamageType = typeof DAMAGE_TYPES[number];
-export interface DamagePart { readonly type: DamageType; readonly amount: number }
+export { DAMAGE_TYPES } from './damage-types';
+export type { DamageType, DamagePart } from './damage-types';
+import type { DamagePart } from './damage-types';
 export interface StatEffect { readonly id: string; readonly name: string; readonly active: boolean; readonly modifiers: Readonly<Record<StatKey,number>> }
-export interface SheetMetadata { readonly level: number; readonly floor: number; readonly effects: readonly StatEffect[] }
+export interface SheetMetadata { readonly level: number; readonly floor: number; readonly effects: readonly StatEffect[]; readonly defenses?: TypedDefenses }
 export function restoreEffects(value: unknown): readonly StatEffect[] {
   if (!Array.isArray(value) || value.length>100) throw new RangeError('Expected up to 100 stat modifiers.');
   const ids=new Set<string>();
@@ -20,14 +21,7 @@ export function derivedBaseline(bases: Readonly<Record<StatKey,number>>, effects
   const checked=restoreEffects(effects);
   return Object.fromEntries(STAT_KEYS.map((key)=>{const base=bounded(bases[key],1,10000);const bonus=checked.filter((effect)=>effect.active).reduce((total,effect)=>total+effect.modifiers[key],0);return [key,{base,enhanced:Math.max(1,Math.min(10000,base+bonus))}];})) as TutorialStats;
 }
-export function typedDamage(slots: number, constitution: number, dr: number, parts: readonly DamagePart[]) {
-  bounded(slots,0,10);bounded(dr,0,1000000);
-  if (!Array.isArray(parts) || parts.length<1 || parts.length>30) throw new RangeError('Enter 1–30 damage components for one hit.');
-  const grouped=new Map<DamageType,number>();
-  for (const part of parts) {
-    if (!part || !DAMAGE_TYPES.includes(part.type)) throw new RangeError('Choose a ruleset damage type.');
-    grouped.set(part.type,(grouped.get(part.type)??0)+bounded(part.amount,1,1000000000));
-  }
-  const net=[...grouped].reduce((total,[type,amount])=>total+Math.max(0,amount-(type==='Armor Piercing'?0:dr)),0);
-  return {net,slots:Math.max(0,slots-Math.floor(net/tutorialModifier(constitution)))};
+export function typedDamage(slots: number, constitution: number, dr: number, parts: readonly DamagePart[], defenses: TypedDefenses = {}) {
+  const {net,slots:after}=resolveTypedDamage(slots,constitution,dr,parts,defenses);
+  return {net,slots:after};
 }

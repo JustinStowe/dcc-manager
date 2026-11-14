@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/server';
 import { restoreTutorialProfile } from '@/domain/tutorial';
 import { validateInventory, type InventoryItem } from '@/domain/inventory';
 import { bounded, loadoutTotals, restoreBaseline, restoreHotlist, type CrawlerLoadout } from '@/domain/loadout';
+import { restoreDefenses } from '@/domain/typed-defenses';
 import { restoreEffects, derivedBaseline, type SheetMetadata } from '@/domain/sheet';
 import { STAT_KEYS, type StatKey } from '@/domain/tutorial';
 import { restoreAbilities, type LearnedAbility } from '@/domain/abilities';
@@ -55,7 +56,7 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   if (campaignId !== selectedId) throw new Error('Invalid selected campaign.');
   const [membersResult, crawlersResult] = await Promise.all([
     client.from('dcc_campaign_members').select('user_id').eq('campaign_id', campaignId),
-    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version,ruleset,tutorial_profile,crawler_number,inventory,stat_baseline,defense_base,hotlist,learned_skills,crawler_level,dungeon_floor,stat_effects').eq('campaign_id', campaignId).order('name'),
+    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version,ruleset,tutorial_profile,crawler_number,inventory,stat_baseline,defense_base,hotlist,learned_skills,crawler_level,dungeon_floor,stat_effects,typed_defenses').eq('campaign_id', campaignId).order('name'),
   ]);
   if (membersResult.error) throw campaignDatabaseError(membersResult.error);
   if (crawlersResult.error) throw campaignDatabaseError(crawlersResult.error);
@@ -85,7 +86,7 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
         const effects=restoreEffects(item.stat_effects);
         const derived=derivedBaseline(Object.fromEntries(STAT_KEYS.map((key)=>[key,baseline[key].base])) as Record<StatKey,number>,effects);
         if(STAT_KEYS.some((key)=>derived[key].enhanced!==baseline[key].enhanced))throw new Error('Stat modifiers are out of sync. Refresh the sheet.');
-        sheets[crawler.id]={level:bounded(item.crawler_level,1,1000),floor:bounded(item.dungeon_floor,1,18),effects};
+        sheets[crawler.id]={level:bounded(item.crawler_level,1,1000),floor:bounded(item.dungeon_floor,1,18),effects,defenses:restoreDefenses(item.typed_defenses)};
         const defenseBase = bounded(item.defense_base, 0, 10000);
         const totals = loadoutTotals(baseline, inventories[crawler.id], defenseBase);
         const profile = tutorials[crawler.id].profile;

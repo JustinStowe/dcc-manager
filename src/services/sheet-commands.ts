@@ -1,6 +1,7 @@
 import { getCampaignRole } from '@/domain';
 import { bounded, loadoutTotals } from '@/domain/loadout';
 import { derivedBaseline, restoreEffects, typedDamage, type DamagePart } from '@/domain/sheet';
+import { restoreDefenses } from '@/domain/typed-defenses';
 import { STAT_KEYS, type StatKey } from '@/domain/tutorial';
 import { requireUuid, type CampaignWorkspace } from './campaign-workspace';
 export interface SheetWrite { readonly crawlerId:string; readonly version:string; readonly operation:string; readonly payload:Record<string,unknown> }
@@ -16,8 +17,9 @@ export async function executeSheetCommand(workspace:CampaignWorkspace,form:FormD
   const operation=text(form,'operation'),raw:unknown=JSON.parse(text(form,'payload'));
   if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new RangeError('Invalid sheet change.');
   const source=raw as Record<string,unknown>; let payload:Record<string,unknown>;
-  if(['base-stats','number','level','floor','favor-award','effect-add','effect-toggle','effect-remove','defense'].includes(operation)&&role!=='gm')throw new Error('Only the GM can make this change.');
-  if(operation==='damage') {const parts=source.parts as DamagePart[];typedDamage(entry.crawler.currentSegments,official.profile.stats.constitution.enhanced,loadoutTotals(loadout.baseline,items,loadout.defenseBase).dr,parts);payload={parts:parts.map((part)=>({type:part.type,amount:part.amount}))};}
+  if(['base-stats','number','level','floor','favor-award','effect-add','effect-toggle','effect-remove','defense','typed-defenses'].includes(operation)&&role!=='gm')throw new Error('Only the GM can make this change.');
+  if(operation==='damage') {const parts=source.parts as DamagePart[];typedDamage(entry.crawler.currentSegments,official.profile.stats.constitution.enhanced,loadoutTotals(loadout.baseline,items,loadout.defenseBase).dr,parts,metadata.defenses??{});payload={parts:parts.map((part)=>({type:part.type,amount:part.amount}))};}
+  else if(operation==='typed-defenses')payload={defenses:restoreDefenses(source.defenses)};
   else if(operation==='healing')payload={amount:bounded(source.amount,1,10)};
   else if(operation==='mana')payload={value:bounded(source.value,0,official.profile.stats.intelligence.enhanced)};
   else if(operation==='favor-use'){if(official.profile.favor<1)throw new RangeError('No AI Favor available.');payload={};}

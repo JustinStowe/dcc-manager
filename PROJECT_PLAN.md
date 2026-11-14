@@ -52,7 +52,8 @@ part of the active milestone, rather than deferred work.
 | Campaign dashboard and sheet UI | User reports checks and manual acceptance passed |
 | Inventory grid and inspector | User reports application checks and manual acceptance passed |
 | Equipment bonuses, DR, and Hotlist | User reports application checks and manual acceptance passed |
-| Sheet modals, inline editing, derived stats | Implemented in milestone 009; SQL/full application/browser acceptance pending |
+| Sheet modals, inline editing, derived stats | User reports application checks/manual verification passed; stats Edit/Confirm keys fixed locally |
+| Typed defenses | Implemented in milestone 010; full local/database/browser acceptance pending |
 | Learned abilities and advancement marks | Implemented in milestone 008; database execution and full local/browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
@@ -77,7 +78,16 @@ The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
 
-## Current milestone: sheet controls (009)
+## Current milestone: typed defenses (010)
+
+GMs manage effective per-type resistance, vulnerability and immunity. Players
+see the saved defenses. The Health modal previews the ordered calculation and
+Apply uses version-checked server data. Existing neutral defense behavior and
+untyped Armor Piercing remain. Source conditions and associated status effects
+still require GM adjudication. The user's stats Edit/Confirm key fix remains
+untouched. See `Docs/TYPED_DEFENSES_SETUP.md`.
+
+## Previous milestone: sheet controls (009)
 
 Health and Favor modals replace the previous control sections. Version-checked
 inline edits enforce per-game roles. Only Unenhanced stats are editable by the

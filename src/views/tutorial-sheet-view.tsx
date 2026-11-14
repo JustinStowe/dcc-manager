@@ -1,3 +1,4 @@
+import { TypedDefensesView } from '@/views/typed-defenses-view';
 import { HealthManager } from '@/components/health-manager';
 import { FavorManager } from '@/components/favor-manager';
 import { SheetInlineEdit } from '@/components/sheet-inline-edit';
@@ -41,7 +42,7 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
     <div className={styles.sheetBody}>
       <SheetAttributes context={context} profile={profile} isGm={isGm} />
       <div className={styles.sheetMain}>
-        <div className={styles.healthHeading}><div className={styles.healthTitle}><h3>Health</h3><HealthManager context={context} slots={crawler.currentSegments} constitution={profile.stats.constitution.enhanced} dr={totals.dr} /></div><strong>{crawler.currentSegments * 10}% · {crawler.currentSegments}/10 slots{crawler.currentSegments === 0 ? ' · Dying' : ''}</strong></div>
+        <div className={styles.healthHeading}><div className={styles.healthTitle}><h3>Health</h3><HealthManager context={context} slots={crawler.currentSegments} constitution={profile.stats.constitution.enhanced} dr={totals.dr} defenses={metadata?.defenses??{}} /></div><strong>{crawler.currentSegments * 10}% · {crawler.currentSegments}/10 slots{crawler.currentSegments === 0 ? ' · Dying' : ''}</strong></div>
         <div className={styles.healthSlots} role="meter" aria-label="Health" aria-valuemin={0} aria-valuemax={10} aria-valuenow={crawler.currentSegments} aria-valuetext={`${crawler.currentSegments * 10}% health${crawler.currentSegments === 0 ? ', Dying' : ''}`}>
           {Array.from({ length: 10 }, (_, i) => <span key={i} className={`${styles.healthSlot} ${styles[`healthSlot${i + 1}`]}`} data-filled={i < crawler.currentSegments} aria-hidden="true"><b>{i < crawler.currentSegments ? '●' : '×'}</b><small>{(i + 1) * 10}%</small></span>)}
         </div>
@@ -51,6 +52,7 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
           <div className={styles.favorResource}><dt className={styles.visuallyHidden}>AI Favor</dt><dd><FavorManager context={context} favor={profile.favor} isGm={isGm} /></dd></div><div><dt>Move</dt><dd>20 <small>ft</small></dd></div><div><dt>Step</dt><dd>10 <small>ft</small></dd></div><div><dt>Size</dt><dd>Medium <small>(4)</small></dd></div>
         </dl>
         <div className={styles.defenseGrid}><div><span>Evade</span><strong>d20 + {totals.evade}</strong><small>DEX modifier + {totals.gear.evade} gear; other Buffs manual</small></div><div><span>Damage resistance</span><strong>{totals.dr} DR</strong><small>{loadout?.defenseBase ?? 0} non-gear + {totals.gear.dr} equipped gear</small></div></div>
+        <TypedDefensesView context={context} defenses={metadata?.defenses??{}} isGm={isGm} />
         <details className={styles.sheetControls}><summary>Stat and defense breakdown</summary><div className={styles.tableScroll}><table className={styles.sheetTable}><thead><tr><th>Stat</th><th>Unenhanced</th><th>Active modifiers</th><th>Gear</th><th>Enhanced</th></tr></thead><tbody>{STAT_KEYS.map((key) => <tr key={key}><td>{key}</td><td>{baseline[key].base}</td><td>{baseline[key].enhanced - baseline[key].base}</td><td>+{totals.gear[key]}</td><td>{profile.stats[key].enhanced}</td></tr>)}</tbody></table></div></details>
         {isGm && metadata && <StatModifiers context={context} effects={metadata.effects} defenseBase={loadout?.defenseBase??0} />}
         <section className={styles.sheetSection}><h3>Attacks</h3><div className={styles.tableScroll}><table className={styles.sheetTable}><caption className={styles.sheetHint}>Current learned attacks · resolve damage and rank upgrades at the table</caption><thead><tr><th>Name</th><th>Rank</th><th>Check</th><th>Base damage (ranks 0–4)</th></tr></thead><tbody>{learned?.filter((ability) => ability.kind === 'attack' || (ability.kind === 'spell' && !ability.passive)).map((ability) => <tr key={ability.id}><td>{ability.name}</td><td>{ability.rank}</td><td>{abilityCheckBonus(ability,profile,floor) === null ? '—' : `d20 + ${abilityCheckBonus(ability,profile,floor)}`}</td><td>{ability.damage || 'See rules'}</td></tr>)}</tbody></table></div></section>

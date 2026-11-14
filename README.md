@@ -6,6 +6,17 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Typed defenses (010)
+
+Follow [TYPED_DEFENSES_SETUP.md](Docs/TYPED_DEFENSES_SETUP.md). After verified
+migrations 001–009, apply only `202611120010_typed_defenses.sql`, run its SQL
+assertions and the preceding regression scripts, then `npm run check` and the
+manual checklist. GMs manage per-type Resistance, Vulnerability and Immunity;
+players see read-only summaries. The Health modal previews and applies stored
+defenses after DR. The stats Edit/Confirm component is not replaced.
+Full local/database/browser acceptance for milestone 010 remains pending.
+
+
 ### Character sheet controls (009)
 
 Follow [SHEET_CONTROLS_SETUP.md](Docs/SHEET_CONTROLS_SETUP.md). After migrations
@@ -13,7 +24,6 @@ Follow [SHEET_CONTROLS_SETUP.md](Docs/SHEET_CONTROLS_SETUP.md). After migrations
 assertions and updated equipment regressions, then `npm run check` and the
 manual checklist. Health/Favor use modals; inline edits follow Player/GM roles;
 Enhanced stats derive from base stats, active modifier sources, and gear.
-GM base-stat editing starts with Edit; saving requires a separate Confirm click.
 Existing non-gear adjustments are preserved as imported modifier sources.
 Database execution and full application/browser acceptance remain pending.
 
