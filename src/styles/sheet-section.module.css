@@ -1,0 +1,9 @@
+.section { margin: 1rem 0; }
+.section > .heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin: 0; padding: .45rem .65rem; list-style: none; background: #171717; color: #fff; cursor: pointer; text-transform: uppercase; letter-spacing: .05em; font-family: Impact, 'Arial Narrow', sans-serif; font-size: 1.05rem; font-weight: 700; }
+.section > .heading::-webkit-details-marker { display: none; }
+.section > .heading > h3 { margin: 0; padding: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; }
+.indicator::before { content: '+'; font: 700 1.2rem/1 Arial, sans-serif; }
+.section[open] > .heading .indicator::before { content: '−'; }
+.heading:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.body { padding: .7rem .25rem; min-width: 0; }
+.body h4 { margin: .5rem 0; }

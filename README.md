@@ -6,6 +6,17 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Tracked effects and automatic updates (011–012)
+
+Follow [EFFECTS_LIVE_SETUP.md](Docs/EFFECTS_LIVE_SETUP.md). After 001–010, apply
+`202611140011_tracked_effects.sql`, then `202611140012_live_updates.sql`; run the
+new SQL assertions, npm check, and the two-account browser checklist. GM effects
+supply active stats/defenses with manual round expiration. Private per-user
+notifications trigger authorized server refreshes, with edit protection and
+automatic fallback/resync. No package or environment changes are required.
+Full local/database/browser acceptance for this update remains pending.
+
+
 ### Typed defenses (010)
 
 Follow [TYPED_DEFENSES_SETUP.md](Docs/TYPED_DEFENSES_SETUP.md). After verified

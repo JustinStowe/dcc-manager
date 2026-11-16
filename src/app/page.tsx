@@ -19,7 +19,7 @@ export default async function Page({ searchParams }: {
   const profileError = profileResult.status === 'rejected' ? profileResult.reason instanceof Error ? profileResult.reason.message : 'Could not load crawler profiles.' : null;
   return (
     <>
-      <AccountBarView email={user.email ?? 'Crawler'} signOutFailed={params.authError === 'signout'} onSignOut={signOut} />
+      <AccountBarView liveUserId={user.id} email={user.email ?? 'Crawler'} signOutFailed={params.authError === 'signout'} onSignOut={signOut} />
       <LobbyView lobby={lobby} error={error} profiles={profiles} profileError={profileError} notice={params.notice === 'game-unavailable' ? 'This game is no longer available. It may have been deleted by its GM.' : null} />
     </>
   );

@@ -2,7 +2,6 @@ import { getCampaignRole, getCrawlerMaximumHealth } from '@/domain';
 import { getDashboardCrawlers } from '@/models/campaign-dashboard';
 import type { CampaignWorkspace } from '@/services/campaign-workspace';
 import { CampaignForm } from '@/components/campaign-form';
-import { CampaignRefresh } from '@/components/campaign-refresh';
 import { TutorialCreation } from '@/components/tutorial-creation';
 import { TutorialSheetView } from '@/views/tutorial-sheet-view';
 import styles from '@/styles/campaign.module.css';
@@ -30,13 +29,12 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
       <div className={styles.dashboardHeader}>
         <div><p className={styles.eyebrow}>Dungeon Crawler Carl · campaign</p><h1>{campaign?.name ?? 'Your campaign'}</h1></div>
         <p className={styles.roleBadge}>{creationOnly ? 'Crawler creation' : role === 'gm' ? 'You are the GM' : 'Your crawler record'}</p>
-        <CampaignRefresh />
       </div>
       {storageError ? <p role="alert" className={styles.error}>{storageError}</p> : !campaign ? (
         <section className={styles.panel}><h2>Game access unavailable</h2><p>Return to the lobby and enter a valid Game Code from your GM.</p></section>
       ) : (
         <>
-          <p className={styles.dashboardHint}>Changes save to this game. Refresh campaign to see another session’s updates.</p>
+          <p className={styles.dashboardHint}>Changes save to this game and update automatically across signed-in sessions.</p>
           {role === 'gm' && (
             <section className={`${styles.panel} ${styles.gameManagement}`} aria-label="Game management">
               <div>
@@ -54,7 +52,7 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
               )}
               </div><div>
               <h2>Players <span className={styles.countBadge}>{campaign.playerUserIds.length}</span></h2>
-              <p>Players join with your Game Code and can view only their own crawler. Refresh to see new arrivals.</p>
+              <p>Players join with your Game Code and can view only their own crawler. New arrivals appear automatically.</p>
               <ul>{campaign.playerUserIds.map((id) => <li key={id}>{campaign.crawlers.find((entry) => entry.ownerUserId === id)?.crawler.name ?? 'Awaiting crawler creation'}</li>)}</ul>
               <details className={styles.dangerZone}><summary>Delete this game</summary><DeleteGame game={{ id: campaign.id, name: campaign.name }} /></details>
               </div>

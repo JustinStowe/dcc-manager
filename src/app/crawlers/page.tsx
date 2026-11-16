@@ -22,7 +22,7 @@ export default async function CrawlerProfilesPage({ searchParams }: { searchPara
   } catch (failure) { error = failure instanceof Error ? failure.message : 'Could not load crawler profiles.'; }
   const selected = profiles.find((profile) => profile.slot === slot);
   return <>
-    <AccountBarView email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
+    <AccountBarView liveUserId={user.id} email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
     <main className={styles.page}>
       <Link href="/" className={styles.backLink}>Back to game lobby</Link>
       <h1>{selected ? 'Review crawler' : 'Create crawler'}</h1>

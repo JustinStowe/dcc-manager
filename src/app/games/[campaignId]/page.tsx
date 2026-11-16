@@ -38,7 +38,7 @@ export default async function GamePage({ params, searchParams }: { params: Promi
   const selectedCrawlerId = (await searchParams)?.crawler;
   return (
     <>
-      <AccountBarView email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
+      <AccountBarView liveUserId={user.id} email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
       <CampaignView workspace={workspace} userId={user.id} storageError={storageError} hostSettings={settings} profiles={profiles} selectedCrawlerId={selectedCrawlerId} />
     </>
   );

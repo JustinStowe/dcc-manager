@@ -1,6 +1,6 @@
 # Dungeon Crawler Carl Manager — Project Plan
 
-Last updated: November 12, 2026
+Last updated: November 14, 2026
 
 ## Goal
 
@@ -53,6 +53,8 @@ part of the active milestone, rather than deferred work.
 | Inventory grid and inspector | User reports application checks and manual acceptance passed |
 | Equipment bonuses, DR, and Hotlist | User reports application checks and manual acceptance passed |
 | Sheet modals, inline editing, derived stats | User reports application checks/manual verification passed; stats Edit/Confirm keys fixed locally |
+| Tracked effects and automatic updates | Implemented in 011–012; local/database/browser acceptance pending |
+| Collapsible sheet and direct ability management | User reports application/manual verification passed |
 | Typed defenses | Implemented in milestone 010; full local/database/browser acceptance pending |
 | Learned abilities and advancement marks | Implemented in milestone 008; database execution and full local/browser acceptance pending |
 
@@ -78,7 +80,20 @@ The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
 
-## Current milestone: typed defenses (010)
+## Current milestone: tracked effects and automatic updates (011–012)
+
+GM-managed named effects carry sources, visible notes, active stat modifiers,
+typed-defense flags and optional manual round countdowns. Existing modifiers
+and base defenses are preserved in the migration. Private per-account
+invalidation notifications refresh authorized server snapshots, with batching,
+reconnect/fallback resync and automatic-refresh edit protection. See
+`Docs/EFFECTS_LIVE_SETUP.md` for migration and two-account acceptance.
+
+The user reports the collapsible sections and direct ability-management UI
+passed application and manual checks. Their stats button-key and LAN-origin
+fixes are preserved by excluding those files from this overlay.
+
+## Previous milestone: typed defenses (010)
 
 GMs manage effective per-type resistance, vulnerability and immunity. Players
 see the saved defenses. The Health modal previews the ordered calculation and

@@ -31,7 +31,7 @@ export default async function CreateCrawlerPage({ params }: { params: Promise<{ 
   }
   return (
     <>
-      <AccountBarView email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
+      <AccountBarView liveUserId={user.id} email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
       <CampaignView workspace={workspace} userId={user.id} storageError={storageError} profiles={profiles} creationOnly />
     </>
   );
