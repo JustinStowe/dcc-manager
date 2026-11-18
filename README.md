@@ -146,6 +146,9 @@ used by the application.
 
 ## Commands
 
+Next.js uses the `security` agent-upgrade policy for security update reminders
+during development and builds. Updates are not installed automatically.
+
 | Command | Purpose |
 | --- | --- |
 | `npm ci` | Install the dependencies recorded in your lockfile |
