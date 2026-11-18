@@ -1,3 +1,5 @@
+import type {EffectTemplate,EffectLinks} from '@/domain/effect-templates';
+import {LinkedEffectView} from './linked-effect-view';
 import { QuickSlots } from '@/components/quick-slots';
 import { CampaignForm } from '@/components/campaign-form';
 import { loadoutAction } from '@/app/campaign/loadout-actions';
@@ -7,9 +9,9 @@ import type { TutorialProfile } from '@/domain/tutorial';
 import styles from '@/styles/campaign.module.css';
 import type { LearnedAbility } from '@/domain/abilities';
 
-export function HotlistView({ campaignId, crawlerId, version, hotlist, inventory, profile, healthSlots, learned }: {
+export function HotlistView({ campaignId, crawlerId, version, hotlist, inventory, profile, healthSlots, learned, templates, links }: {
   campaignId: string; crawlerId: string; version: string; hotlist: Hotlist; inventory: readonly InventoryItem[]; profile: TutorialProfile; healthSlots: number;
-  learned?: readonly LearnedAbility[];
+  learned?: readonly LearnedAbility[];templates?:readonly EffectTemplate[];links?:EffectLinks;
 }) {
   const skills = hotlistSkills(profile, learned);
   const slots = hotlist.map((entry, index) => {
@@ -19,10 +21,11 @@ export function HotlistView({ campaignId, crawlerId, version, hotlist, inventory
     const name = item?.name ?? skill?.name ?? 'Empty';
     const hidden = <><input type="hidden" name="crawlerId" value={crawlerId} /><input type="hidden" name="version" value={version} /><input type="hidden" name="slot" value={number} /></>;
     const controls = <div className={styles.controlGrid}>
+      {entry&&<LinkedEffectView context={{campaignId,crawlerId,version}} kind={entry.kind==='skill'?'spell':'item'} target={entry.target} templates={templates} links={links}/>}
       {((item?.kind === 'consumable') || skill?.automated) && <CampaignForm key={`use-${number}-${version}`} campaignId={campaignId} submitAction={loadoutAction} label={`Use prepared ${name}`}>
         {hidden}<input type="hidden" name="operation" value="use" />
-        <div>{skill ? skill.isHeal ? 'Heal: spend 2 Mana and restore 2 health slots atomically.' : `Spend the reviewed ${skill.manaCost} Mana cost and record an eligible ordinary-use mark. Resolve the Spell’s Check and effects at the table.` : item && itemEffect(item) === 'mana-full' ? 'Use one Standard Mana Potion and fully restore Mana atomically.' : 'Use one item; custom effects remain manual.'}</div>
-        <label><input type="checkbox" name="confirmed" value="yes" required /> Conscious, HUD accessible, and Action/Interrupt and potion timing are valid.</label>
+        <div>{skill ? skill.isHeal ? 'Heal: spend 2 Mana and restore 2 health slots atomically.' : `Spend the reviewed ${skill.manaCost} Mana cost and record an eligible ordinary-use mark. ${links?.[`spell:${skill.id}`]?'Applies its linked self effect in the same save.':'Resolve the Spell’s Check and effects at the table.'}` : item && itemEffect(item) === 'mana-full' ? 'Use one Standard Mana Potion and fully restore Mana atomically.' : item&&links?.[`item:${item.id}`]?'Use one item and apply its linked self effect in the same save.':'Use one item; custom effects remain manual.'}</div>
+        <label><input type="checkbox" name="confirmed" value="yes" required /> Conscious, HUD accessible, eligible self effects / successful Checks if required, and Action/Interrupt and potion timing are valid.</label>
         <button type="submit" disabled={healthSlots === 0 || (skill?.manaCost !== null && skill?.manaCost !== undefined && profile.mana < skill.manaCost) || (item?.effect === 'mana-full' && profile.mana >= profile.stats.intelligence.enhanced)}>Use prepared action</button>
       </CampaignForm>}
       {item && ['holding', 'two-hands'].includes(item.gearSlot) && <CampaignForm key={`ready-${number}-${version}`} campaignId={campaignId} submitAction={loadoutAction} label={`Ready ${name}`}>

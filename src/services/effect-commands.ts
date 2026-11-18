@@ -18,7 +18,7 @@ export async function executeEffectCommand(w:CampaignWorkspace,f:FormData,port:E
  if(operation==='add'){const value=definition(f,'new-effect');after=restoreTrackedEffects([...after,value]);payload={definition:value};}
  else if(operation==='tick'){if(f.get('confirmed')!=='yes')throw new RangeError('Confirm advancing this crawler one round.');after=advanceEffectRound(after);payload={};}
  else{const id=text(f,'effectId',true),effect=after.find(e=>e.id===id);if(!effect)throw new RangeError('Effect unavailable.');
-  if(operation==='edit'){const value=definition(f,id);after=restoreTrackedEffects(after.map(e=>e.id===id?value:e));payload={id,definition:value};}
+  if(operation==='edit'){const value={...definition(f,id),...(effect.templateId?{templateId:effect.templateId,templateVersion:effect.templateVersion}:{})};after=restoreTrackedEffects(after.map(e=>e.id===id?value:e));payload={id,definition:value};}
   else if(operation==='toggle'){const active=text(f,'active',true);if(!['true','false'].includes(active))throw new RangeError('Choose active or inactive.');after=restoreTrackedEffects(after.map(e=>e.id===id?{...e,active:active==='true'}:e));payload={id,active:active==='true'};}
   else if(operation==='remove'){if(f.get('confirmed')!=='yes')throw new RangeError('Confirm effect removal.');after=after.filter(e=>e.id!==id);payload={id};}
   else throw new RangeError('Unknown effect action.');

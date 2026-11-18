@@ -58,7 +58,7 @@ export async function executeSkillCommand(workspace: CampaignWorkspace, form: Fo
     if (!confirmed) throw new RangeError('Confirm casting conditions, final Mana cost, and timing at the table.');
     const prepared = workspace.loadouts?.[crawlerId]?.hotlist.some((slot) => slot?.kind === 'skill' && slot.target === id) ?? false;
     castLearnedSpell(target!,profile,entry.crawler.currentSegments,prepared);
-    notice = target!.automation === 'tutorial-heal' ? 'Heal applied: 2 Mana spent and up to 2 health slots restored.' : `${target!.manaCost} Mana spent. Resolve the Spell’s Check and effects at the table; eligible advancement policy applied.`;
+    notice = target!.automation === 'tutorial-heal' ? 'Heal applied: 2 Mana spent and up to 2 health slots restored.' : workspace.sheets?.[crawlerId]?.links?.[`spell:${target!.id}`] ? `${target!.manaCost} Mana spent and linked self effect applied.` : `${target!.manaCost} Mana spent. Resolve the Spell’s Check and effects at the table; eligible advancement policy applied.`;
   }
   await port.act({ crawlerId,version,operation,id,definition:data,marked,confirmed,window,die,modifier });
   return notice;

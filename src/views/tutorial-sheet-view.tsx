@@ -1,3 +1,4 @@
+import type {EffectTemplate} from '@/domain/effect-templates';
 import { SheetSection } from '@/components/sheet-section';
 import { TypedDefensesView } from '@/views/typed-defenses-view';
 import { HealthManager } from '@/components/health-manager';
@@ -16,11 +17,11 @@ import { HotlistView } from '@/views/hotlist-view';
 import { AbilitiesView } from '@/views/abilities-view';
 import { abilityCheckBonus, type LearnedAbility } from '@/domain/abilities';
 
-type SheetProps = { crawler: Crawler; profile: TutorialProfile; number: number; version: string; isGm: boolean; inventory: readonly InventoryItem[]; loadout?: CrawlerLoadout; learned?: readonly LearnedAbility[]; metadata?: SheetMetadata };
+type SheetProps = { crawler: Crawler; profile: TutorialProfile; number: number; version: string; isGm: boolean; inventory: readonly InventoryItem[]; loadout?: CrawlerLoadout; learned?: readonly LearnedAbility[]; metadata?: SheetMetadata; templates?:readonly EffectTemplate[] };
 function IdentityField({ name, value }: { name: string; value: string }) {
   return <div className={styles.identityField}><dt>{name}</dt><dd>{value}</dd></div>;
 }
-export function TutorialSheetView({ crawler, profile, number, version, isGm, inventory, loadout, learned, metadata }: SheetProps) {
+export function TutorialSheetView({ crawler, profile, number, version, isGm, inventory, loadout, learned, metadata, templates }: SheetProps) {
   const combat = TUTORIAL_CATALOG.combat.find((item) => item.id === profile.combatId);
 
   const context={campaignId:crawler.campaignId,crawlerId:crawler.id,version};
@@ -39,7 +40,7 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
         </dl>
       </div>
     </header>
-    {loadout && <HotlistView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} hotlist={loadout.hotlist} inventory={inventory} profile={profile} healthSlots={crawler.currentSegments} learned={learned} />}
+    {loadout && <HotlistView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} hotlist={loadout.hotlist} inventory={inventory} profile={profile} healthSlots={crawler.currentSegments} learned={learned} templates={templates} links={metadata?.links} />}
     <div className={styles.sheetBody}>
       <SheetAttributes context={context} profile={profile} isGm={isGm} />
       <div className={styles.sheetMain}>
@@ -58,13 +59,13 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
         <h4>Stat and defense breakdown</h4><div className={styles.tableScroll}><table className={styles.sheetTable}><thead><tr><th>Stat</th><th>Unenhanced</th><th>Active modifiers</th><th>Gear</th><th>Enhanced</th></tr></thead><tbody>{STAT_KEYS.map((key) => <tr key={key}><td>{key}</td><td>{baseline[key].base}</td><td>{baseline[key].enhanced - baseline[key].base}</td><td>+{totals.gear[key]}</td><td>{profile.stats[key].enhanced}</td></tr>)}</tbody></table></div>
         {isGm && <p>Non-gear DR: <SheetInlineEdit context={context} field="defense" label="Non-gear DR" value={loadout?.defenseBase??0} editable min={0} max={10000}/></p>}
         </SheetSection>
-        <TrackedEffectsView context={context} effects={metadata?.trackedEffects??[]} isGm={isGm}/>
+        <TrackedEffectsView context={context} effects={metadata?.trackedEffects??[]} isGm={isGm} templates={templates}/>
         <SheetSection title="Attacks"><div className={styles.tableScroll}><table className={styles.sheetTable}><caption className={styles.sheetHint}>Current learned attacks · resolve damage and rank upgrades at the table</caption><thead><tr><th>Name</th><th>Rank</th><th>Check</th><th>Base damage (ranks 0–4)</th></tr></thead><tbody>{learned?.filter((ability) => ability.kind === 'attack' || (ability.kind === 'spell' && !ability.passive)).map((ability) => <tr key={ability.id}><td>{ability.name}</td><td>{ability.rank}</td><td>{abilityCheckBonus(ability,profile,floor) === null ? '—' : `d20 + ${abilityCheckBonus(ability,profile,floor)}`}</td><td>{ability.damage || 'See rules'}</td></tr>)}</tbody></table></div></SheetSection>
-        {learned ? <AbilitiesView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} abilities={learned} profile={profile} isGm={isGm} floor={floor} hotlist={loadout?.hotlist} healthSlots={crawler.currentSegments} /> : <p role="alert">Learned abilities unavailable. Apply the learned skills migration and refresh.</p>}
+        {learned ? <AbilitiesView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} abilities={learned} profile={profile} isGm={isGm} floor={floor} hotlist={loadout?.hotlist} healthSlots={crawler.currentSegments} templates={templates} links={metadata?.links} /> : <p role="alert">Learned abilities unavailable. Apply the learned skills migration and refresh.</p>}
       </div>
     </div>
     <div className={styles.sheetFooter}>
-      <InventoryView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} items={inventory} isGm={isGm} mana={profile.mana} maxMana={profile.stats.intelligence.enhanced} healthSlots={crawler.currentSegments} baseline={baseline} />
+      <InventoryView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} items={inventory} isGm={isGm} mana={profile.mana} maxMana={profile.stats.intelligence.enhanced} healthSlots={crawler.currentSegments} baseline={baseline} templates={templates} links={metadata?.links} />
       {combat?.kind === 'spell' && <p className={styles.sheetHint}>Starting allowance: five Standard Mana Potions, granted once to new game crawlers. Existing stacks require GM effect identification; this is not a refill.</p>}
       <details className={styles.storyDetails}><summary>Story &amp; starting gear notes</summary><dl className={styles.storyGrid}>{Object.entries(profile.notes).map(([key, value]) => <div key={key}><dt>{key === 'looseEnds' ? 'Loose ends' : key === 'gear' ? 'Original starting gear' : key}</dt><dd className={styles.notes}>{value || 'Not recorded'}</dd></div>)}</dl></details>
     </div>

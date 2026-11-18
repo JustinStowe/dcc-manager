@@ -50,7 +50,7 @@ export async function executeLoadoutCommand(workspace: CampaignWorkspace, form: 
       location = text(form, 'location'); validateInventory(readyHotlistItem(items, prepared.target, location));
     } else if (prepared.kind === 'skill') {
       const known = workspace.skills?.[crawlerId]?.find((ability) => ability.id === prepared.target);
-      if (known) { castLearnedSpell(known, profile, entry.crawler.currentSegments, true); notice = known.automation === 'tutorial-heal' ? 'Prepared Heal applied: 2 Mana spent and up to 2 health slots restored.' : 'Prepared Spell Mana cost recorded. Resolve its Check and effects at the table.'; }
+      if (known) { castLearnedSpell(known, profile, entry.crawler.currentSegments, true); notice = known.automation === 'tutorial-heal' ? 'Prepared Heal applied: 2 Mana spent and up to 2 health slots restored.' : workspace.sheets?.[crawlerId]?.links?.[`spell:${known.id}`]?'Prepared Spell Mana spent and linked self effect applied.':'Prepared Spell Mana cost recorded. Resolve its Check and effects at the table.'; }
       else { if (prepared.target !== 'heal') throw new RangeError('Resolve this Spell at the table.'); castTutorialHeal(entry.crawler.currentSegments, profile); notice = 'Prepared Heal applied: 2 Mana spent and up to 2 health slots restored.'; }
     } else {
       const item = items.find((candidate) => candidate.id === prepared.target);
@@ -58,7 +58,7 @@ export async function executeLoadoutCommand(workspace: CampaignWorkspace, form: 
       if (itemEffect(item) === 'mana-full') {
         drinkStandardManaPotion(items, profile, entry.crawler.currentSegments, item.id);
         notice = 'One prepared Mana Potion spent and Mana fully restored.';
-      } else notice = 'One prepared item spent. Resolve its custom effect at the table.';
+      } else notice = workspace.sheets?.[crawlerId]?.links?.[`item:${item.id}`]?'One prepared item spent and linked self effect applied.':'One prepared item spent. Resolve its custom effect at the table.';
     }
   } else if (operation === 'bonuses') {
     if (role !== 'gm') throw new Error('Only the GM defines equipment bonuses.');

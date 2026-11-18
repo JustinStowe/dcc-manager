@@ -5,6 +5,7 @@ import {
 import type { TutorialProfile } from '@/domain/tutorial';
 import type { InventoryItem } from '@/domain/inventory';
 import type { CrawlerLoadout } from '@/domain/loadout';
+import type { EffectTemplate } from '@/domain/effect-templates';
 import type { SheetMetadata } from '@/domain/sheet';
 import type { LearnedAbility } from '@/domain/abilities';
 
@@ -15,6 +16,7 @@ export interface CampaignWorkspace {
   readonly tutorials?: Readonly<Record<string, { profile: TutorialProfile; number: number }>>;
   readonly inventories?: Readonly<Record<string, readonly InventoryItem[]>>;
   readonly loadouts?: Readonly<Record<string, CrawlerLoadout>>;
+  readonly templates?: readonly EffectTemplate[];
   readonly sheets?: Readonly<Record<string,SheetMetadata>>;
   readonly skills?: Readonly<Record<string, readonly LearnedAbility[]>>;
 }

@@ -1,3 +1,5 @@
+import type {EffectTemplate,EffectLinks} from '@/domain/effect-templates';
+import {LinkedEffectView} from './linked-effect-view';
 import { CampaignForm } from '@/components/campaign-form';
 import InventorySystem, { type ItemActionPanels } from '@/components/inventory-system';
 import { inventoryAction } from '@/app/campaign/inventory-actions';
@@ -21,10 +23,10 @@ function ItemFields({ item }: { item?: InventoryItem }) {
     <label>Item notes and effects<textarea name="notes" rows={3} maxLength={2000} defaultValue={item?.notes ?? ''} /></label>
   </>;
 }
-export function InventoryView({ campaignId, crawlerId, version, items, isGm, mana, maxMana, healthSlots, baseline }: {
+export function InventoryView({ campaignId, crawlerId, version, items, isGm, mana, maxMana, healthSlots, baseline, templates, links }: {
   campaignId: string; crawlerId: string; version: string; items: readonly InventoryItem[]; isGm: boolean;
   mana?: number; maxMana?: number; healthSlots?: number;
-  baseline?: TutorialStats;
+  baseline?: TutorialStats; templates?:readonly EffectTemplate[];links?:EffectLinks;
 }) {
   const presentation = buildInventoryPresentation(items);
   const itemActions: Record<string, ItemActionPanels> = {};
@@ -36,12 +38,12 @@ export function InventoryView({ campaignId, crawlerId, version, items, isGm, man
       {displayed.isEquipped ? <input type="hidden" name="location" value="stored" /> : <label>Equipment slot<select name="location" defaultValue={equipmentLocations(item.gearSlot)[1]}>{equipmentLocations(item.gearSlot).filter((location) => location !== 'stored').map((location) => <option key={location} value={location}>{label(location)}</option>)}</select></label>}
       <div>Occupied slots are rejected. Gloves are separate from held items; two-handed gear occupies both hands.</div><button type="submit">{displayed.isEquipped ? 'Unequip item' : 'Equip item'}</button>
     </CampaignForm>;
-    const use = item.kind !== 'consumable' ? undefined : <CampaignForm key={`use-${item.id}-${version}`} campaignId={campaignId} submitAction={inventoryAction} label={`Use ${item.name}`}>
+    const use = item.kind !== 'consumable' ? undefined : <>{itemEffect(item)==='manual'&&<LinkedEffectView context={{campaignId,crawlerId,version}} kind="item" target={item.id} templates={templates} links={links} isGm={isGm}/>}<CampaignForm key={`use-${item.id}-${version}`} campaignId={campaignId} submitAction={inventoryAction} label={`Use ${item.name}`}>
       {hidden}<input type="hidden" name="operation" value={itemEffect(item) === 'mana-full' ? 'drink-mana' : 'consume'} />
-      <div>{itemEffect(item) === 'mana-full' ? 'Spends one potion and fully restores Mana in the same save. Full Mana and Dying block use.' : 'Spends one item only. Resolve custom effects separately at the table.'}</div>
+      <div>{itemEffect(item) === 'mana-full' ? 'Spends one potion and fully restores Mana in the same save. Full Mana and Dying block use.' : links?.[`item:${item.id}`]?'Spends one item and applies its linked self effect in the same save. Confirm eligible effects and timing.':'Spends one item only. Resolve custom effects separately at the table.'}</div>
       <label><input type="checkbox" name="confirmed" value="yes" required /> Confirm the crawler can use this item and potion Action/Interrupt and every-other-round timing are valid.</label>
-      <button type="submit" disabled={itemEffect(item) === 'mana-full' && (healthSlots === undefined || healthSlots === 0 || mana === undefined || maxMana === undefined || mana >= maxMana)}>{itemEffect(item) === 'mana-full' ? 'Use potion · restore all Mana' : 'Use one item'}</button>
-    </CampaignForm>;
+      <button type="submit" disabled={(!!links?.[`item:${item.id}`]&&healthSlots===0)||(itemEffect(item) === 'mana-full' && (healthSlots === undefined || healthSlots === 0 || mana === undefined || maxMana === undefined || mana >= maxMana))}>{itemEffect(item) === 'mana-full' ? 'Use potion · restore all Mana' : 'Use one item'}</button>
+    </CampaignForm></>;
     itemActions[displayed.id] = {
       equip, use,
       edit: <CampaignForm key={`edit-${item.id}-${version}`} campaignId={campaignId} submitAction={inventoryAction} label={`Edit ${item.name}`}>

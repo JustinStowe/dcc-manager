@@ -2,6 +2,7 @@ import {describe,expect,it,vi} from 'vitest';
 import {TrackedEffectsView} from '@/views/tracked-effects-view';
 import {EffectsManager} from './effects-manager';
 import type {TrackedEffect} from '@/domain/tracked-effects';
+vi.mock('@/components/effect-template-manager',()=>({EffectTemplateManager:()=>null}));
 vi.mock('@/components/effects-manager',()=>({EffectsManager:()=>null}));
 const context={campaignId:'game',crawlerId:'crawler',version:'version'};
 const effect:TrackedEffect={id:'one',name:'Active buff',kind:'buff',source:'Spell',notes:'Visible to player',active:true,remainingRounds:1,modifiers:{strength:2,intelligence:0,constitution:0,dexterity:0,charisma:0},defenses:{Fire:{resistant:true,vulnerable:false,immune:false}}};

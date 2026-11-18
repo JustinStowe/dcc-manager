@@ -45,6 +45,7 @@ export async function executeInventoryCommand(workspace: CampaignWorkspace, form
   }
   if (operation === 'remove' && form.get('confirmed') !== 'yes') throw new RangeError('Confirm removal of this entire entry.');
   if (operation === 'consume' && form.get('confirmed') !== 'yes') throw new RangeError('Confirm using one item; resolve its effects at the table.');
+  if(operation==='consume'&&workspace.sheets?.[crawlerId]?.links?.[`item:${itemId}`]&&entry.crawler.currentSegments===0)throw new RangeError('A Dying crawler cannot use a linked consumable.');
   let effect: ItemEffect | undefined;
   if (operation === 'classify') {
     if (role !== 'gm') throw new Error('Only the GM can reclassify an existing item effect.');
@@ -65,5 +66,5 @@ export async function executeInventoryCommand(workspace: CampaignWorkspace, form
   else changeInventory(current, { operation: operation as 'consume' | 'remove', itemId: itemId! });
   await port.act({ crawlerId, version, operation: operation as InventoryWrite['operation'], itemId, item, location, ...(effect ? { effect } : {}) });
   if (operation === 'drink-mana') return 'One Standard Mana Potion used. Mana fully restored.';
-  return operation === 'consume' ? 'One item used. Apply its effects separately at the table.' : 'Inventory saved.';
+  return operation === 'consume' ? workspace.sheets?.[crawlerId]?.links?.[`item:${itemId}`] ? 'One item used and linked self effect applied.' : 'One item used. Apply its effects separately at the table.' : 'Inventory saved.';
 }
