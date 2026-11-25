@@ -9,12 +9,13 @@ import { STAT_KEYS, type Scores } from '@/domain/tutorial';
 import type { TypedDefenses } from '@/domain/typed-defenses';
 import { SheetModal } from './sheet-modal';
 import styles from '@/styles/sheet-controls.module.css';
+import terminal from '@/styles/floor-three-terminal.module.css';
 import { ProgressionManager } from './progression-manager';
 import type { ProgressionState } from '@/domain/progression';
 import type { AdvancementState } from '@/domain/advancement';
 
 export interface ThirdFloorManagerProps {
-  context: SheetContext; state?: ThirdFloorState; floor: number; isGm: boolean; advancementReady: boolean;
+  context: SheetContext; crawlerName?: string; level?: number; state?: ThirdFloorState; floor: number; isGm: boolean; advancementReady: boolean;
   bases: Scores; skills: readonly LearnedAbility[]; defenseBase: number; baseDefenses: TypedDefenses;
   progression?: ProgressionState; advancement?: AdvancementState;
 }
@@ -83,7 +84,7 @@ function LegacyThirdFloorManager({ context, state, floor, isGm, advancementReady
   return <>
     <p>{selected ? `${selected.raceName} / ${selected.className} · ${selected.mode === 'reconciled' ? 'existing benefits reconciled' : 'benefits applied'}` : !state?.reviewed ? 'GM review of existing benefits required.' : `${state.offers.length} GM-approved choice(s) available.`}</p>
     <button type="button" className={styles.statToggle} onClick={show}>Manage Race &amp; Class</button>
-    <SheetModal open={open} title="Third Floor Race & Class" pending={mutation.pending} onClose={close}><div key={epoch}>
+    <SheetModal open={open} title="Third Floor Race & Class" className={terminal.terminal} pending={mutation.pending} onClose={close}><div key={epoch}>
       <p>Choose Race and Class together on Floor 3 or deeper. You can allocate authorized level-up points before or after selection. New bonuses to learned Skills stop at Rank 10; existing higher ranks remain.</p>
       {!state ? <p role="alert">Race/Class data unavailable. Apply migration 018 and refresh.</p> : !advancementReady ? <p>Complete the GM level-advancement reconciliation first.</p> : selected ? <>
         <p>{selected.raceName} / {selected.className} is saved for this game. Benefits cannot be applied again.</p>

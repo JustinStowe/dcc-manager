@@ -20,7 +20,7 @@ export async function executeSystemAi(workspace:CampaignWorkspace,input:unknown,
  const profile=workspace.tutorials?.[request.crawlerId]?.profile;
  const context:CrawlerAiContext={stats:c.stats,skills:c.skills,evidence:c.state.evidence,history:JSON.stringify({backgrounds:profile?.backgrounds,notes:profile?.notes}),candidates};
  if(request.purpose==='class-suggestions'&&!candidates.length)throw new SystemAiError('no-candidates','No verified eligible pairs are available. Ask the GM to review unknown facts or the Earth incentive decision.',422);
- const fingerprint=createHash('sha256').update(JSON.stringify({request,model,rules:PROGRESSION_VERSION,prompt:'system-ai-v1'})).digest('hex');
+ const fingerprint=createHash('sha256').update(JSON.stringify({request,model,rules:PROGRESSION_VERSION,prompt:'system-ai-v2'})).digest('hex');
  const lease=await usage.reserve({crawlerId:request.crawlerId,version:request.version,purpose:request.purpose,fingerprint,model});
  try{
   const run=request.purpose==='class-suggestions'?{

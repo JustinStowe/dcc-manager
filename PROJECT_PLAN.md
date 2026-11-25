@@ -259,6 +259,83 @@ definitions, offers, reward review and immutable selection provenance; it keeps
 the 018 identity/Favor projection. Migration 020 adds the RLS-protected generation
 and durable usage records. This preserves the existing character data layer.
 
+Acceptance fix: System AI request origins
+
+The user encountered "Open System AI from your game" when generating a custom
+Class. The API compared the browser's public origin with Next.js's potentially
+rewritten internal URL, rejecting valid LAN/proxy requests before Groq ran.
+The shared validator now uses the public Host/forwarding headers and protocol,
+while rejecting foreign origins, malformed authorities, missing origins and
+cross-site browser fetch metadata. Authentication and crawler permissions remain
+required. No database migration or provider configuration change is needed.
+
+Verification: `npm run check` passed 1,162 tests across 63 files, lint, typecheck
+and production build; the optional provider smoke test remains skipped in this
+offline chain. The 32 new tests cover the origin validator and actual API boundary,
+including custom Class requests from both configured LAN hosts, HTTPS forwarding,
+cross-site rejection, sign-in requirements and preserved 429 responses. An HTTP
+probe against the running local app passed the LAN origin check and reached the
+expected signed-out 401; a foreign origin received 403. Authenticated browser
+generation still needs the user's acceptance retry.
+
+Acceptance fix: Groq generated-output validation
+
+The user's Groq dashboard identified `json_validate_failed`: a recommendation's
+commentary contained 570 characters against the 500-character cap. The adapter
+had incorrectly treated every HTTP 400 as an unavailable/unsupported model.
+Generated-output validation now has its own error classification and one bounded
+repair attempt, shared with local JSON/Zod and mechanical validation. Genuine
+credential/model errors and rate limits remain separate and are not auto-retried.
+The 500-character commentary and 400-character reason schema caps are unchanged;
+prompts target 300 and 240 characters respectively to leave headroom. The prompt
+cache revision was advanced. Provider diagnostics log only numeric status and
+known error codes, never raw messages, failed generations, notes or API keys.
+
+Verification: `npm run check` passed 1,177 tests across 64 files, lint, typecheck
+and production build. The three opt-in live tests are skipped in that offline
+chain; `npm run test:ai` separately passed all three with synthetic data: custom
+Race, custom Class and class recommendations with the original length caps.
+Regression cases cover the exact 570-character failure, safe SDK error parsing,
+one shared retry budget, unchanged strict provider schemas, and preserved 429
+handling. No model/environment change or database migration is required. The
+authenticated acceptance retry remains pending.
+
+Floor 3 selection terminal redesign (November 25, 2026)
+
+The supplied `dungeon_crawler_world_floor_3_race_class_selection_terminal.html`
+is the visual reference for the selection screen. Its sample crawlers, simulated
+bonuses and mandatory automatic stat allocation are not rules sources. The app
+continues to use the verified Core catalog and approved flexible p. 128 ruling.
+
+- Added a wide, dark terminal with cyan/amber accents, responsive panels and a
+  guided Race → Class → Stats → Present flow. Other sheet dialogs keep their
+  existing appearance.
+- Replaced catalog dropdowns with searchable, alphabetized lists, Earth/GM-menu/
+  real AI recommendation filters, source pages, stat pills and benefit inspectors.
+  All 30 premade Races and 52 Classes, plus approved custom entries, remain available.
+- Added the crawler's actual name/level and a persistent desktop summary of the
+  browsed identity, selected GM offer, Unenhanced preview and authorized points.
+  Browsing an unoffered pair clears the selected offer; it cannot authorize a build.
+- Added manual authorized-point allocation to the Stats stage using the existing
+  atomic selection operation. Zero allocation is omitted. Whole-number/budget
+  limits, optional numerical-minimum assistant, GM-only per-benefit reconciliation,
+  immutable selections and opening-version checks remain enforced.
+- Kept custom drafts, GM menu/overrides, evidence, incentive decisions and System AI
+  within the terminal. Custom generator fields appear only for custom-build requests;
+  generated builds open the appropriate Race/Class editor stage for review.
+- Added an explicit final presentation of choices, point spending, skipped benefits
+  and GM waivers before the once-only confirmation. No schema/migration is needed.
+
+Verification: `npm run check` passed 1,188 tests (three opt-in live AI tests skipped),
+lint, typecheck and production build. Eleven new interaction regressions cover
+final-step gating, offer authorization, allocation persistence/reset/validation,
+zero-point omission, GM reconciliation visibility and saved identities. Browser
+preview checks used synthetic crawler data with saving disabled: catalog search,
+unoffered-pair protection, stat allocation/final preview, over-budget blocking,
+and desktop/390px phone layouts. Signed-in GM/player saves against the hosted game
+still need user acceptance. The earlier reported missing runtime Groq configuration
+remains a separate open acceptance issue; this UI change does not verify credentials.
+
 Dependencies: `groq-sdk`, `zod`, and `server-only`. The existing `.env.local` and
 credentials are untouched. The default model is `openai/gpt-oss-20b`, configurable
 with `GROQ_MODEL`; unsupported models do not silently fall back to another tier.

@@ -1,0 +1,21 @@
+import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
+vi.mock('server-only',()=>({}));
+import { createGroqClient } from './groq-client';
+import { SystemAiOutputError,type AiCompletionRequest } from '@/lib/ai/systemAi';
+
+const request:AiCompletionRequest={model:'openai/gpt-oss-20b',messages:[{role:'user',content:'Synthetic test'}],name:'test',schema:{type:'object',properties:{},additionalProperties:false},maxTokens:1600};
+const fetchMock=vi.fn();
+beforeEach(()=>{vi.stubEnv('GROQ_API_KEY','synthetic-test-key');vi.stubGlobal('fetch',fetchMock);fetchMock.mockReset();vi.spyOn(console,'warn').mockImplementation(()=>{});});
+afterEach(()=>{vi.unstubAllGlobals();vi.unstubAllEnvs();vi.restoreAllMocks();});
+function fail(status:number,code:string,message='Provider rejection',extra:Record<string,unknown>={}){fetchMock.mockResolvedValue(new Response(JSON.stringify({error:{code,message,...extra}}),{status,headers:{'content-type':'application/json'}}));}
+
+describe('Groq provider error classification',()=>{
+ it('recognizes the actual generated-JSON length failure as repairable output',async()=>{fail(400,'json_validate_failed',"Generated JSON does not match the expected schema. Error: '/recommendations/0/commentary' maxLength: got 570, want 500",{failed_generation:'private generated text'});await expect(createGroqClient().complete(request)).rejects.toBeInstanceOf(SystemAiOutputError);expect(fetchMock).toHaveBeenCalledOnce();expect(console.warn).toHaveBeenCalledWith('[System AI provider]',{status:400,code:'json_validate_failed'});const logs=JSON.stringify(vi.mocked(console.warn).mock.calls);expect(logs).not.toContain('private generated text');expect(logs).not.toContain('synthetic-test-key');expect(logs).not.toContain('commentary');});
+ it('handles SDK error payloads with a top-level validation code',async()=>{fetchMock.mockResolvedValue(new Response(JSON.stringify({code:'json_validate_failed',message:'JSON too long'}),{status:400,headers:{'content-type':'application/json'}}));await expect(createGroqClient().complete(request)).rejects.toMatchObject({code:'invalid-output',status:502});});
+ it.each([[404,'model_not_found'],[400,'model_decommissioned'],[403,'model_permission_blocked'],[400,'unsupported_response_format']]as const)('keeps genuine model/configuration rejection %s/%s distinct',async(status,code)=>{fail(status,code);await expect(createGroqClient().complete(request)).rejects.toMatchObject({code:'model-unavailable',status:503});expect(fetchMock).toHaveBeenCalledOnce();});
+ it('does not call every HTTP 400 a model error',async()=>{fail(400,'invalid_json_schema');await expect(createGroqClient().complete(request)).rejects.toMatchObject({code:'provider-request-rejected',status:502});});
+ it('separates rejected server credentials',async()=>{fail(401,'invalid_api_key');await expect(createGroqClient().complete(request)).rejects.toMatchObject({code:'provider-auth'});});
+ it('preserves rate-limit headers without SDK auto-retries',async()=>{fetchMock.mockResolvedValue(new Response(JSON.stringify({error:{message:'Slow down',code:'rate_limit_exceeded'}}),{status:429,headers:{'content-type':'application/json','retry-after':'27'}}));await expect(createGroqClient().complete(request)).rejects.toMatchObject({code:'rate-limit',status:429,retryAfter:27});expect(fetchMock).toHaveBeenCalledOnce();});
+ it('never logs arbitrary provider codes or private messages',async()=>{fail(400,'private-sensitive-code','private crawler notes');await expect(createGroqClient().complete(request)).rejects.toMatchObject({code:'provider-request-rejected'});expect(JSON.stringify(vi.mocked(console.warn).mock.calls)).not.toContain('private');});
+ it('sends strict output constraints unchanged and uses the configured model',async()=>{fetchMock.mockResolvedValue(new Response(JSON.stringify({choices:[{message:{content:'{}'}}],usage:{total_tokens:25}}),{status:200,headers:{'content-type':'application/json'}}));expect(await createGroqClient().complete(request)).toEqual({content:'{}',tokens:25});const options=fetchMock.mock.calls[0][1]as RequestInit;const body=JSON.parse(options.body as string);expect(body).toMatchObject({model:'openai/gpt-oss-20b',response_format:{type:'json_schema',json_schema:{strict:true,schema:request.schema}}});});
+});

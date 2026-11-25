@@ -71,7 +71,8 @@ before being shown as legal.
 **Ask the System AI** ranks locally eligible candidates or generates a legal
 custom draft. Loading an AI draft into the editor is an explicit action;
 generation never changes crawler mechanics. Server-only `groq-sdk` orchestration
-uses purpose-specific prompts/Zod schemas, one bounded semantic repair attempt,
+uses purpose-specific prompts/Zod schemas, one shared repair attempt for generated
+JSON/schema or mechanical failures (at most two provider calls per generation),
 compact context, request/token limits and durable cooldown/deduplication records.
 429 responses keep drafts on screen and show a retry countdown. Missing keys,
 model errors, timeouts and invalid drafts leave manual selection available.
@@ -111,7 +112,8 @@ overwrite an existing one:
 ./scripts/check-database.ps1 -TestDatabase dcc_test_floor3 -Port 55439
 ```
 
-The provider smoke test is opt-in and uses synthetic data only:
+The provider smoke tests cover recommendations and custom Race/Class drafts.
+They are opt-in and use synthetic data only:
 
 ```text
 npm run test:ai

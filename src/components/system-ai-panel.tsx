@@ -1,11 +1,11 @@
 'use client';
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { SheetContext } from '@/controllers/use-sheet-mutation';
 import { parseCustomBuild, type CustomBuild } from '@/domain/custom-build';
 import { suggestionsSchema, type ClassSuggestions } from '@/lib/ai/schemas/floor-three';
 import styles from '@/styles/sheet-controls.module.css';
 export function SystemAiPanel({context,raceId,onBuild,onSuggestions}:{context:SheetContext;raceId:string;onBuild(build:CustomBuild):void;onSuggestions(value:ClassSuggestions):void}){
- const[pending,setPending]=useState(false),[error,setError]=useState(''),[remaining,setRemaining]=useState(0),[build,setBuild]=useState<CustomBuild|null>(null),[notice,setNotice]=useState('');
+ const[pending,setPending]=useState(false),[error,setError]=useState(''),[remaining,setRemaining]=useState(0),[build,setBuild]=useState<CustomBuild|null>(null),[notice,setNotice]=useState(''),[purpose,setPurpose]=useState('class-suggestions');
  const abort=useRef<AbortController|null>(null);
  useEffect(()=>()=>{abort.current?.abort();},[]);
  useEffect(()=>{if(remaining<1)return;const timer=setTimeout(()=>setRemaining(n=>Math.max(0,n-1)),1000);return()=>clearTimeout(timer);},[remaining]);
@@ -20,12 +20,13 @@ export function SystemAiPanel({context,raceId,onBuild,onSuggestions}:{context:Sh
   }catch(error){if(!controller.signal.aborted)setError(error instanceof Error?error.message:'The System is unavailable.');else setError('The request ended before a draft arrived. Your crawler is unchanged.');}
   finally{clearTimeout(timeout);abort.current=null;setPending(false);}
  }
+ function changePurpose(e:ChangeEvent<HTMLSelectElement>){setPurpose(e.target.value);}
  function useBuild(){if(build)onBuild(build);}
  return <details><summary>Ask the System AI</summary><p>Generate suggestions or a custom draft. The GM approves offers and custom definitions. Generation never applies benefits.</p>
   <form onSubmit={generate}><fieldset className={styles.fields} disabled={pending||remaining>0}>
-   <label>Request<select name="purpose" defaultValue="class-suggestions"><option value="class-suggestions">Class recommendations for the selected Race</option><option value="custom-build">Custom Race or Class draft</option></select></label>
-   <label>Custom type<select name="kind" defaultValue="class"><option value="class">Class · 30 BP</option><option value="race">Race · 25 BP</option></select></label>
-   <label><input name="earth" type="checkbox" value="yes" defaultChecked /> Earth origin for custom draft</label>
+   <label>Request<select name="purpose" value={purpose} onChange={changePurpose}><option value="class-suggestions">Class recommendations for the selected Race</option><option value="custom-build">Custom Race or Class draft</option></select></label>
+   <div hidden={purpose!=='custom-build'}><label>Custom type<select name="kind" defaultValue="class"><option value="class">Class · 30 BP</option><option value="race">Race · 25 BP</option></select></label>
+   <label><input name="earth" type="checkbox" value="yes" defaultChecked /> Earth origin for custom draft</label></div>
    <label>Theme / preferences<textarea name="theme" maxLength={800} placeholder="A protective chef who solves problems with a frying pan…" /></label>
    <button type="submit">{pending?'The System is thinking…':remaining?`Retry in ${remaining}s`:'Generate'}</button>
   </fieldset></form>
