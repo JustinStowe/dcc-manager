@@ -1,4 +1,5 @@
 import catalog from './third-floor-catalog.json';
+import expandedCatalog from './progression-catalog.json';
 import { ABILITY_CATALOG, restoreAbilities, restoreAbility, type AbilityDefinition, type LearnedAbility } from './abilities';
 import { whole } from './advancement';
 import { STAT_KEYS, type Scores } from './tutorial';
@@ -50,9 +51,11 @@ export function restoreThirdFloor(value: unknown): ThirdFloorState {
     if (!['applied', 'reconciled'].includes(s.mode as string)) throw new RangeError('Invalid selection mode.');
     const raceId = shortText(s.raceId), classId = shortText(s.classId);
     if ((raceId === 'manual' || classId === 'manual') && s.mode !== 'reconciled') throw new RangeError('Manual identity requires GM reconciliation.');
-    if (raceId !== 'manual' && !RACES.some(row => row.id === raceId)) throw new RangeError('Invalid saved Race.');
-    if (classId !== 'manual' && !CLASSES.some(row => row.id === classId)) throw new RangeError('Invalid saved Class.');
-    if (raceId !== 'manual' && classId !== 'manual') selectionPair(`${raceId}|${classId}`);
+    const savedRace = expandedCatalog.options.find(row => row.id === raceId && row.kind === 'race');
+    const savedClass = expandedCatalog.options.find(row => row.id === classId && row.kind === 'class');
+    if (raceId !== 'manual' && !savedRace) throw new RangeError('Invalid saved Race.');
+    if (classId !== 'manual' && !savedClass) throw new RangeError('Invalid saved Class.');
+    if (savedRace && savedClass?.earthOnly && !savedRace.earth) throw new RangeError('Earth Class requires Earth Race.');
     selected = { raceId, classId, raceName: shortText(s.raceName), className: shortText(s.className), size: whole(s.size, 1, 8), move: whole(s.move, 0, 10000), step: whole(s.step, 0, 10000), mode: s.mode as ThirdFloorSelection['mode'], notes: shortText(s.notes, 500) };
   }
   if ((!row.reviewed && (selected || offers.length)) || (selected && offers.length)) throw new RangeError('Inconsistent selection state.');

@@ -60,7 +60,8 @@ part of the active milestone, rather than deferred work.
 | Effect templates and unified abilities | Implemented in milestone 013; user reports completion |
 | Encounter tracker | Compact official Mob phases and optional PvP initiative implemented in 016; database and browser acceptance pending |
 | GM-controlled level advancement | Complete; user confirmed migration 015, checks, and working in-app advancement on November 25, 2026 |
-| Third Floor Race/Class selection | Implemented in 018 with a reviewed starter catalog and existing-benefit reconciliation; application/local SQL checks passed; hosted/browser acceptance pending |
+| Third Floor Race/Class selection | Expanded in 019 to the full Core catalog, custom builds, verified evidence, GM rulings and per-benefit reconciliation; hosted/browser acceptance pending |
+| Modular System AI (Groq) | Implemented in 020 with strict schemas, legal drafts, suggestions and durable request limits; synthetic live provider test passed; hosted/browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -79,8 +80,8 @@ Effect templates and unified abilities are complete by user report. GM-controlle
 level advancement is complete: on November 25, 2026, the user confirmed migration
 015 and its checks passed and advancement works in the app. Encounter popup and
 creature catalog work remains tracked separately in milestone 017. Third Floor
-Race/Class selection is implemented in milestone 018 below; hosted migration and
-GM/player browser acceptance remain pending.
+Race/Class selection began in milestone 018 and is expanded in 019–020 below;
+hosted migration and GM/player browser acceptance remain pending.
 
 The verified inventory foundation adds 46 domain/service cases,
 per-game item quantities/notes, equipped locations and slot limits, explicit
@@ -144,7 +145,7 @@ owning player; the sheet regression uses checked level awards after 015.
 Lint excludes the temporary `tmp/` directory so historical scratch dependencies
 cannot interfere with application checks. Unrelated encounter changes are preserved.
 
-## Current milestone: Third Floor Race/Class selection (018)
+## Foundation milestone: Third Floor Race/Class selection (018)
 
 Reviewed the official Core Rulebook directly: printed pp. 128–129 (selection,
 prerequisites and Rank 10 selection bonus cap), 131, 135, 140–142, 150, 152–153
@@ -194,6 +195,84 @@ benefits remain table-adjudicated and are identified in the selection UI. Prior
 partially applied benefits must be completed/corrected with GM tools before
 recording them as already applied. Selection/review is one-time; later respecs and
 expanded catalogs are future work. No dependencies were added.
+
+## Current milestone: complete Floor 3 rules and modular System AI (019–020)
+
+Discovery completed November 25, 2026. See `FLOOR3_SYSTEM_AI_PLAN.md` for the
+codebase audit, official source references, premade index, custom point-buy costs
+and detriments, reconciliation design, additive schema plan and Groq architecture.
+The user approved all six recommended interpretations and the integration on
+November 25, 2026. Implementation expands milestone 018; hosted acceptance has
+not yet been reported. Setup and manual acceptance steps are in `README.md`.
+
+- [x] Audit existing Supabase, domain, Server Action, state and UI conventions.
+- [x] Verify Core selection/build rules and document rules/model ambiguities.
+- [x] Propose an integration that preserves existing advancement and benefits.
+- [x] Adopt Core p. 128's flexible order with a guided Race → Class UI; keep
+      authorized level spending before/after selection. The optional minimum
+      assistant appears only for explicitly defined numerical Unenhanced minima.
+- [x] Ingest all 30 Races and 52 Classes, fixed grants, choices, explicit
+      prerequisites, Earth symbols, split points and Rank-20 permissions.
+- [x] Add pure typed custom-build costs/refunds, separate 25/30 budgets, maximum
+      five usable detriment BP each, discarded leftovers and five Passive ranks.
+- [x] Keep unknown evidence distinct from unmet requirements; add GM verification,
+      optional identity policy, explicit budget/prerequisite/rank waivers and reasons.
+- [x] Add a single GM-reviewed Earth incentive decision; never auto-issue rewards.
+- [x] Preserve 015/018 balances, records and selections; support identity-only
+      reconciliation and individual already-applied benefits without replay.
+- [x] Add checked, atomic SQL persistence, immutable selected definitions,
+      equipment-inclusive Stat caps, inherited Primal benefits and history.
+- [x] Add server-only Groq orchestration, purpose-specific schemas/prompts, Zod,
+      semantic validation/one repair, durable budgets and a 429 countdown UI.
+- [x] Pass a real strict-schema connection test and the complete Zod custom-build
+      smoke test with the configured Groq account, using synthetic data only.
+- [x] Complete the final application and fresh-database verification below.
+- [ ] Apply migrations 019 then 020 to the hosted database and refresh games.
+- [ ] Complete authenticated GM/player, responsive UI and live refresh acceptance.
+
+Final verification on November 25, 2026:
+
+- `npm run check` passed: 1,130 tests across 61 files, ESLint, Next.js route/type
+  generation, TypeScript and the production build. The opt-in provider test is
+  the single skipped test/file in this normal offline chain.
+- `npm run test:ai` passed the real strict-schema custom-build test with the
+  configured Groq account and synthetic data only. The returned build also passed
+  the point-buy engine; no real crawler history was sent during verification.
+- The clean local database runner applied 001–020, exercised the actual 018→020
+  upgrade with selected/unreviewed crawlers, and preserved complete pre-existing
+  rows/versions, advancement balances, resources and account writeups.
+- All 12 applicable SQL suites passed: progression rules, progression permissions,
+  AI usage permissions, Third Floor selection, advancement, templates, effects/live,
+  encounters, sheet controls, equipment/Hotlist, learned abilities and defenses.
+- Tests include partial legacy Human Favor preservation, zero-rank detriments,
+  combined allocation rollback, separate split pools, explicit GM rank waivers,
+  custom/bespoke persistence, inherited Primal benefits, equipment-inclusive caps,
+  unknown evidence, cooldowns, stale/repeated writes and game/owner isolation.
+- `git diff --check` and whitespace inspection of new files passed. The isolated
+  PostgreSQL server was stopped after verification. Local auth/realtime fixtures
+  were simulated; hosted migrations, WebSocket delivery and authenticated browser
+  acceptance were not performed or claimed.
+
+Migration 019 extends the existing crawler JSON aggregate for evidence, approved
+definitions, offers, reward review and immutable selection provenance; it keeps
+the 018 identity/Favor projection. Migration 020 adds the RLS-protected generation
+and durable usage records. This preserves the existing character data layer.
+
+Dependencies: `groq-sdk`, `zod`, and `server-only`. The existing `.env.local` and
+credentials are untouched. The default model is `openai/gpt-oss-20b`, configurable
+with `GROQ_MODEL`; unsupported models do not silently fall back to another tier.
+Standard app launchers and the opt-in provider runner use the OS certificate
+store with TLS verification enabled; this was necessary for the local connection.
+
+Full ingestion corrected the discovery's cross-page assignments: Smush 5 belongs
+to Sasquatch and the mandatory Patron choice to Poet Laureate. Santero and
+Herbalist have Earth symbols despite no individual box bullet. The printed
+Dungeon Dad purchases total 36 BP against a 32 BP budget; the engine enforces
+the printed costs and requires an explicit GM ruling for that exact build.
+Paladin's repeated Charisma bonus, its undefined Protective Shell casting entry,
+and City Elf's conflicting reassignment amount are preserved/documented without
+inventing rules. Conditional/passive combat effects and rewards remain manual;
+see `README.md` for the precise automation limits and acceptance checklist.
 
 ## Current milestone: encounter popup and creature catalog (017)
 
@@ -278,11 +357,11 @@ manual checks; 008 live database, build, and browser checks remain pending.
 | --- | --- | --- | --- |
 | 1. Foundation | Standalone project, MVC structure, health rules, local saves, checks | Create and track a crawler locally | Complete |
 | 2. Lobby, accounts, and shared games | Authentication, Host/Join, codes, per-game roles, ownership, database storage, conflict handling | Host or join games and resume the correct shared crawler from another device | Installed; user reports working |
-| 3. Complete crawler sheets | Human Tutorial entry, official stats/health/Mana/Favor/numbering first; remaining sheet sections afterward | Create and play a game-specific crawler using official rules | Human entry verified; Third Floor selection starter catalog implemented in 018; broader creation remains |
+| 3. Complete crawler sheets | Human Tutorial entry, official stats/health/Mana/Favor/numbering first; remaining sheet sections afterward | Create and play a game-specific crawler using official rules | Human entry verified; full Core Race/Class selection and custom builds implemented in 019; broader starting-creation modes remain |
 | 4. Skills and spells | Catalogs, assignments, descriptions, usage rules | Manage crawler abilities during play | Learned abilities and self-effect links implemented; broader execution remains |
 | 5. Inventory, equipment, and effects | Item definitions, owned instances, equipment, traits, supported calculations | Award and manage equipment and its effects | Inventory, equipment, tracked effects, and templates implemented |
 | 6. Encounters and combat | Monsters, encounter setup, initiative, turns, health, statuses | Run combat from a GM dashboard | Encounter turn foundation implemented; combat actions remain |
-| 7. Achievements, rewards, and progression | Awards, loot, history, controlled level-up | Award rewards and apply eligible progression | Advancement complete in 015; Third Floor selection implemented in 018 pending hosted/browser acceptance; wider rewards remain |
+| 7. Achievements, rewards, and progression | Awards, loot, history, controlled level-up | Award rewards and apply eligible progression | Advancement complete in 015; selection, verified evidence and modular System AI implemented in 019–020 pending hosted/browser acceptance; wider rewards remain |
 | 8. Release readiness | Usability, mobile layout, export/recovery, hosting, broader checks | Use the application reliably for regular sessions | Planned |
 
 Detailed game rules must be settled before implementing each feature's
@@ -359,7 +438,7 @@ Remaining before marking the update verified:
 See TUTORIAL_SETUP.md and TUTORIAL_RULES.md. Starting gear is currently notes;
 consumable quantities now have explicit inventory tracking. Attack execution and
 automatic potion effects remain future work.
-Animal entry, Third Floor creation, expanded Race/Class catalogs, portraits, rests,
+Animal entry, Third Floor starting creation, catalogs from additional books, portraits, rests,
 Dying-round countdowns, and broader progression remain future tasks. GM-controlled
 level advancement is implemented in 015; tracked effects and typed defenses have
 their own later milestones above.

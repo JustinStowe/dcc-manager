@@ -23,7 +23,10 @@ export async function executeThirdFloorCommand(workspace: CampaignWorkspace, for
   const bases = Object.fromEntries(STAT_KEYS.map(key => [key, loadout.baseline[key].base])) as Scores;
   let payload: Record<string, unknown>;
   if (input.confirmed !== true) throw new RangeError('Confirm the benefit review and table requirements.');
-  if (operation === 'review') {
+  if (operation === 'partial-review') {
+    if (state.reviewed || state.selected || sheet.floor < 3) throw new RangeError('Partial review requires an unreviewed, unselected crawler on Floor 3+.');
+    payload = { confirmed: true, reason };
+  } else if (operation === 'review') {
     const next = reconcileSelection(state, sheet.floor, sheet.advancement.humanFavor, input);
     payload = next.selected ? { mode: 'existing', raceId: next.selected.raceId, classId: next.selected.classId, raceName: next.selected.raceName, className: next.selected.className, size: next.selected.size, move: next.selected.move, step: next.selected.step, confirmed: true, reason } : { mode: 'none', confirmed: true, reason };
   } else if (operation === 'offer') {

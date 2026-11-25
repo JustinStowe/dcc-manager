@@ -5,7 +5,7 @@ export const STAGES = ['childhood', 'adolescence', 'career', 'hobby'] as const;
 export type StatKey = typeof STAT_KEYS[number];
 export type Stage = typeof STAGES[number];
 export type Scores = Record<StatKey, number>;
-export interface StatPair { readonly base: number; readonly enhanced: number }
+export interface StatPair { readonly base: number; readonly enhanced: number; readonly cap?: number }
 export type TutorialStats = Record<StatKey, StatPair>;
 export interface BackgroundChoice { readonly category: string; readonly skills: readonly string[] }
 export type BackgroundChoices = Record<Stage, BackgroundChoice>;

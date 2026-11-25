@@ -17,7 +17,7 @@ export function bounded(value: unknown, minimum: number, maximum: number): numbe
 }
 export function restoreBaseline(value: unknown): TutorialStats {
   const row = object(value);
-  return Object.fromEntries(STAT_KEYS.map((key) => { const pair = object(row[key]); return [key, { base: bounded(pair.base, 1, 10000), enhanced: bounded(pair.enhanced, 1, 10000) }]; })) as TutorialStats;
+  return Object.fromEntries(STAT_KEYS.map((key) => { const pair = object(row[key]); return [key, { base: bounded(pair.base, 1, 10000), enhanced: bounded(pair.enhanced, 1, 10000), ...(pair.cap!==undefined?{cap:bounded(pair.cap,1,10000)}:{}) }]; })) as TutorialStats;
 }
 export function restoreBonuses(value: unknown): GearBonuses {
   if (value === undefined) return { ...ZERO_BONUSES };
@@ -33,7 +33,7 @@ export function loadoutTotals(baseline: TutorialStats, items: readonly Inventory
     if (item.location === 'stored') continue;
     for (const key of Object.keys(gear) as (keyof GearBonuses)[]) gear[key] += bonuses[key];
   }
-  const stats = Object.fromEntries(STAT_KEYS.map((key) => [key, { base: reviewed[key].base, enhanced: bounded(reviewed[key].enhanced + gear[key], 1, 10000) }])) as TutorialStats;
+  const stats = Object.fromEntries(STAT_KEYS.map((key) => [key, { base: reviewed[key].base, enhanced: Math.min(reviewed[key].cap??10000,bounded(reviewed[key].enhanced + gear[key], 1, 10000)) }])) as TutorialStats;
   return { stats, gear, dr: bounded(defenseBase, 0, 10000) + gear.dr, evade: tutorialModifier(stats.dexterity.enhanced) + gear.evade };
 }
 export function hotlistSkills(profile: TutorialProfile, learned?: readonly LearnedAbility[]) {

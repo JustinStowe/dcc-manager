@@ -6,7 +6,125 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Full Floor 3 selection and modular System AI (019–020)
+
+Install the updated dependencies with `npm ci`. After migrations 001–018, apply
+`supabase/migrations/202611250019_progression_rules.sql`, then
+`supabase/migrations/202611250020_system_ai.sql`, once each. Refresh open games.
+Do not replace existing migrations or rerun their data updates.
+
+For System AI, set `GROQ_API_KEY` in `.env.local` or the hosting provider's server
+environment. `GROQ_MODEL` is optional and defaults to `openai/gpt-oss-20b`.
+The configured model must support strict JSON-schema responses. There is no
+silent model or paid-tier fallback. The existing local environment file was not
+changed. `.env.example` contains names and empty placeholders, not credentials.
+Manual selection works independently of Groq availability.
+The standard development/start commands and opt-in provider test use Node's
+system certificate store so the verified Windows connection works without
+disabling TLS certificate checks.
+
+The full Core catalog contains 30 Races and 52 Classes. It retains source pages,
+fixed benefits, bounded choices, prerequisites, individual/group Rank-20
+permissions, split bonus points, and conditional rule reminders. Earth-only
+Classes follow the printed symbols, including Santero and Herbalist even though
+their individual entries omit a box bullet. Existing 018 selections and offers
+remain readable and cannot be replayed. Outstanding 018 offers retain their
+compatibility controls until selected or revoked.
+
+Open **Third Floor Race & Class → Manage Race & Class**:
+
+1. Finish the existing advancement and Race/Class benefit reviews. The guided
+   view browses Race then Class, while authorized level points remain available
+   through **Go to level-point distribution** before or after selection.
+2. The GM verifies missing Popularity, achievements, original species/size/Race,
+   deity/Patron and club facts. Missing evidence stays unknown. The group can
+   enable optional identity restrictions. Every evidence change is audited.
+3. Record one Earth incentive decision before offering a custom Earth Race or
+   Earth Class. It covers the whole crawler's selection, not each component.
+   It never auto-adds boxes or Potion ranks; issue any reviewed reward manually.
+4. The GM curates up to three pairs. Standard validation applies by default.
+   Explicit GM waivers require a reason and are saved with the offer and history.
+   A separate rank waiver can permit granted Skills up to 20; Rank 16+ benefits
+   still wait until Floor 6. Ownership, permissions, versions and once-only
+   application cannot be waived.
+5. The owner or GM completes benefit choices and sees actual Stat, Skill, DR,
+   size and movement changes. Race/Class split bonuses are separate pools.
+   Existing grants normally stop at Rank 10 without reducing higher saved ranks.
+   Selected Stat caps include equipment/effects; later level spending above an
+   Unenhanced cap is rejected rather than silently consuming points.
+6. For a partially applied legacy package, the GM chooses **Prepare partial reconciliation** in
+   the 018 benefit review, then checks individual **Already applied** benefits in
+   the new preview. Only the GM completes that final selection; the older Human
+   Favor flag stays unchanged until that atomic save. Only missing supported changes are applied. For a
+   fully applied package, use identity-only reconciliation instead. A crawler
+   already selected under 018 never becomes selectable again on upgrade.
+
+Custom Race/Class drafts have separate 25/30 BP budgets, at most 5 usable
+detriment BP each, discarded leftover points, reviewed thematic groups,
+non-stacking defenses and a five-purchased-Passive-rank Class limit. The editor
+shows costs and rule violations. Owners can draft; the GM approves definitions
+and any explicit waivers before they become offerable. Bespoke effects require
+a GM-entered BP price and ruling and remain table-adjudicated. AI-generated
+custom builds use reviewed trait IDs only and always pass the same pure engine
+before being shown as legal.
+
+**Ask the System AI** ranks locally eligible candidates or generates a legal
+custom draft. Loading an AI draft into the editor is an explicit action;
+generation never changes crawler mechanics. Server-only `groq-sdk` orchestration
+uses purpose-specific prompts/Zod schemas, one bounded semantic repair attempt,
+compact context, request/token limits and durable cooldown/deduplication records.
+429 responses keep drafts on screen and show a retry countdown. Missing keys,
+model errors, timeouts and invalid drafts leave manual selection available.
+
+Source cautions found during full ingestion:
+
+- The Dungeon Dad example (Core p. 162) adds up to 36 BP under the printed cost
+  table against a 32 BP budget. The engine flags that excess; reproducing the
+  exact example needs an explicit GM budget/pricing ruling. Its five Passive
+  ranks still confirm the approved cap interpretation.
+- Boring Ol' Paladin prints +2 Charisma and then +1 Charisma; the catalog records
+  +3 Charisma without inventing a different Stat. Its Protective Shell grant is
+  recorded at Rank 3 as a manual effect because no casting definition is supplied
+  in the printed Spell list. The GM must review its definition/cost before casting.
+- City Elf starts with a +6 split while its later reassignment sentence says +4.
+  Initial selection uses +6; later reassignment remains a GM ruling.
+
+This selection milestone does not automate every combat/passive benefit:
+conditional Stats, alternative Health Bar Stats, Skill-specific Move/Evade
+effects, animal-to-non-animal Skill restrictions, Favored/class-specific casting
+adjustments, summons, flight, shapeshifting, cooldowns and manual rewards still
+require the table/GM controls. Their source reminders persist on the selected
+definitions. No later respec or new Animal creation mode is introduced.
+
+Verification and acceptance are recorded in `PROJECT_PLAN.md`. Run the normal
+`npm run check` chain. With administrative `psql`, run these rollback suites:
+`supabase/tests/progression_permissions.sql`, `progression_rules.sql`, and
+`system_ai_permissions.sql`; keep `progression_fixture.sql` beside them because
+the suites include it. Existing regression suites still apply. The separate
+upgrade-before/after files and `scripts/test-database-bootstrap.sql` are for an
+isolated local PostgreSQL test database only, never an existing hosted project.
+For a running isolated local server with `psql` available, the reproducible
+fresh-install/018-upgrade/12-suite runner creates a new database and refuses to
+overwrite an existing one:
+
+```powershell
+./scripts/check-database.ps1 -TestDatabase dcc_test_floor3 -Port 55439
+```
+
+The provider smoke test is opt-in and uses synthetic data only:
+
+```text
+npm run test:ai
+```
+
+After hosted migration, use separate GM/player sessions to verify unknown facts,
+standard/overridden offers, custom approval, previewed reconciliation, selection
+before/after level-point spending, one reward decision, stale/repeated writes,
+429 draft retention, reload/history, and desktop/mobile keyboard behavior.
+
 ### Third Floor Race & Class selection (018)
+
+This subsection records the original foundation; 019–020 above expand it.
 
 After migrations 001–017, apply only
 `supabase/migrations/202611250018_third_floor_selection.sql` once, then refresh

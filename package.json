@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --port 3000",
+    "dev": "node --use-system-ca scripts/run-next.mjs dev --port 3000",
     "build": "next build",
-    "start": "next start --port 3000",
+    "start": "node --use-system-ca scripts/run-next.mjs start --port 3000",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:ai": "node scripts/check-system-ai.mjs",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "check": "npm run test && npm run lint && npm run typecheck && npm run build"
@@ -19,10 +20,13 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.0",
+    "groq-sdk": "^1.6.0",
     "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "uuid": "^14.0.3"
+    "server-only": "^0.0.1",
+    "uuid": "^14.0.3",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.5",

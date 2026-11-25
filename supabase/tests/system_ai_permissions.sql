@@ -1,0 +1,21 @@
+begin;
+\ir progression_fixture.sql
+set local role authenticated;
+select set_config('request.jwt.claim.sub','c1922222-2222-4222-8222-222222222222',true);
+select set_config('dcc_test.ai_request',(public.dcc_ai_reserve(current_setting('dcc_test.pg_id')::uuid,(select version from public.dcc_crawlers where id=current_setting('dcc_test.pg_id')::uuid),'class-suggestions',repeat('a',64),'openai/gpt-oss-20b')->>'id'),true);
+select pg_temp.pg_error(format('select public.dcc_ai_reserve(%L,(select version from public.dcc_crawlers where id=%L),''class-suggestions'',repeat(''b'',64),''model'')',current_setting('dcc_test.pg_id'),current_setting('dcc_test.pg_id')),'P0001');
+select pg_temp.pg_error('update public.dcc_ai_generations set tokens=0','42501');
+select set_config('request.jwt.claim.sub','c1933333-3333-4333-8333-333333333333',true);
+select pg_temp.pg_assert(not exists(select 1 from public.dcc_ai_generations),'Another owner can read AI results.');
+select pg_temp.pg_error(format('select public.dcc_ai_finish(%L,''succeeded'',''{}'',10)',current_setting('dcc_test.ai_request')),'42501');
+select pg_temp.pg_error(format('select public.dcc_ai_reserve(%L,%L,''class-suggestions'',repeat(''b'',64),''model'')',current_setting('dcc_test.pg_id'),gen_random_uuid()),'42501');
+select set_config('request.jwt.claim.sub','c1922222-2222-4222-8222-222222222222',true);
+select public.dcc_ai_finish(current_setting('dcc_test.ai_request')::uuid,'succeeded','{"recommendations":[]}',100);
+select pg_temp.pg_assert((public.dcc_ai_reserve(current_setting('dcc_test.pg_id')::uuid,(select version from public.dcc_crawlers where id=current_setting('dcc_test.pg_id')::uuid),'class-suggestions',repeat('a',64),'openai/gpt-oss-20b')->'cached')='{"recommendations":[]}'::jsonb,'Completed request was not deduplicated.');
+select pg_temp.pg_error(format('select public.dcc_ai_finish(%L,''succeeded'',''{}'',0)',current_setting('dcc_test.ai_request')),'42501');
+select set_config('request.jwt.claim.sub','c1911111-1111-4111-8111-111111111111',true);
+select pg_temp.pg_assert((select count(*)=1 from public.dcc_ai_generations),'GM cannot read crawler AI history.');
+reset role;
+select pg_temp.pg_assert(not has_function_privilege('anon','public.dcc_ai_reserve(uuid,uuid,text,text,text)','EXECUTE'),'Anonymous AI requests allowed.');
+select 'PASS: durable AI reservation, deduplication, cooldown, actual actor scope, owner/GM visibility and completion replay protection' as result;
+rollback;

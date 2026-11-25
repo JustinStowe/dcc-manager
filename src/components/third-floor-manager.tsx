@@ -9,10 +9,14 @@ import { STAT_KEYS, type Scores } from '@/domain/tutorial';
 import type { TypedDefenses } from '@/domain/typed-defenses';
 import { SheetModal } from './sheet-modal';
 import styles from '@/styles/sheet-controls.module.css';
+import { ProgressionManager } from './progression-manager';
+import type { ProgressionState } from '@/domain/progression';
+import type { AdvancementState } from '@/domain/advancement';
 
 export interface ThirdFloorManagerProps {
   context: SheetContext; state?: ThirdFloorState; floor: number; isGm: boolean; advancementReady: boolean;
   bases: Scores; skills: readonly LearnedAbility[]; defenseBase: number; baseDefenses: TypedDefenses;
+  progression?: ProgressionState; advancement?: AdvancementState;
 }
 function pairLabel(key: string) { const pair = selectionPair(key); return `${pair.race.name} / ${pair.profession.name}`; }
 function abilityName(id: string) { return SELECTION_ABILITIES.find(row => row.id === id)?.name ?? id; }
@@ -27,7 +31,11 @@ function OptionDetails({ option }: { option: SelectionOption & { earth?: boolean
     <p>{option.notes}</p>
   </details>;
 }
-export function ThirdFloorManager({ context, state, floor, isGm, advancementReady, bases, skills, defenseBase, baseDefenses }: ThirdFloorManagerProps) {
+export function ThirdFloorManager(props: ThirdFloorManagerProps) {
+  if (props.progression && ((props.state?.reviewed && props.state.offers.length === 0) || props.progression.partialReview)) return <ProgressionManager {...props} progression={props.progression} />;
+  return <LegacyThirdFloorManager {...props} />;
+}
+function LegacyThirdFloorManager({ context, state, floor, isGm, advancementReady, bases, skills, defenseBase, baseDefenses, progression }: ThirdFloorManagerProps) {
   const [open, setOpen] = useState(false), [epoch, setEpoch] = useState(0);
   const [offers, setOffers] = useState<readonly string[]>(state?.offers ?? []);
   const [pair, setPair] = useState(state?.offers[0] ?? '');
@@ -68,6 +76,7 @@ export function ThirdFloorManager({ context, state, floor, isGm, advancementRead
     if (await mutation.save(form, version.current, element)) setOpen(false);
   }
   function review(event: FormEvent<HTMLFormElement>) { return submit('review', event); }
+  function partialReview(event: FormEvent<HTMLFormElement>) { return submit('partial-review', event); }
   function offer(event: FormEvent<HTMLFormElement>) { return submit('offer', event); }
   function select(event: FormEvent<HTMLFormElement>) { return submit('select', event); }
   function eligibility(key: string) { try { eligiblePair(key, skills, bases); return ''; } catch (error) { return error instanceof Error ? error.message : 'Requirements not met.'; } }
@@ -97,6 +106,7 @@ export function ThirdFloorManager({ context, state, floor, isGm, advancementRead
           </>}
           <Notes /><Confirmation /><button type="submit">Save benefit review</button>
         </fieldset></form> : <p>Your GM must review existing benefits before offering choices.</p>}
+        {isGm && progression && <form onSubmit={partialReview} aria-label="Prepare partial benefit reconciliation"><fieldset className={styles.fields} disabled={mutation.pending || floor < 3}><legend>Benefits were only partially applied</legend><p>Prepare a GM-only selection preview, then mark each benefit already present. This step preserves all Stats, resources, spent points and the existing Human Favor flag until the final atomic selection.</p><Notes /><Confirmation /><button type="submit">Prepare partial reconciliation</button></fieldset></form>}
       </> : <>
         {floor < 3 && <p>New selection is locked until Floor 3. Tutorial identity remains in use.</p>}
         {isGm && <form onSubmit={offer} aria-label="Offer Race/Class choices"><fieldset className={styles.fields} disabled={mutation.pending}>
