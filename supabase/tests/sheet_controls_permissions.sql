@@ -65,7 +65,16 @@ select pg_temp.s_assert(not exists(select 1 from public.dcc_crawlers where id=cu
 select set_config('request.jwt.claim.sub','c1111111-1111-1111-1111-111111111111',true);
 select pg_temp.expect_skill_error('select pg_temp.sheet_act(''name'',''{"value":"GM rename"}'')','42501');
 select pg_temp.sheet_act('favor-award','{"amount":5}');
-select pg_temp.sheet_act('level','{"value":7}');select pg_temp.sheet_act('floor','{"value":6}');select pg_temp.sheet_act('number','{"value":12345}');
+-- Migration 015 retires the metadata-level edit in favor of checked awards.
+do $$ begin
+ if to_regprocedure('public.dcc_advancement_action(uuid,uuid,text,jsonb)') is not null then
+  perform pg_temp.expect_skill_error('select pg_temp.sheet_act(''level'',''{"value":7}'')','22023');
+  perform public.dcc_advancement_action(current_setting('dcc_test.s_crawler')::uuid,
+   (select version from public.dcc_crawlers where id=current_setting('dcc_test.s_crawler')::uuid),
+   'award','{"amount":6,"source":"other","reason":"Sheet regression level fixture"}');
+ else perform pg_temp.sheet_act('level','{"value":7}');end if;
+end $$;
+select pg_temp.sheet_act('floor','{"value":6}');select pg_temp.sheet_act('number','{"value":12345}');
 select pg_temp.s_assert((select crawler_level=7 and dungeon_floor=6 and crawler_number=12345 and tutorial_profile->>'favor'='5' from public.dcc_crawlers where id=current_setting('dcc_test.s_crawler')::uuid),'GM identity/Favor save failed.');
 select pg_temp.expect_skill_error('select pg_temp.sheet_act(''level'',''{"value":0}'')','22023');
 select pg_temp.expect_skill_error('select pg_temp.sheet_act(''floor'',''{"value":19}'')','22023');
@@ -108,6 +117,7 @@ select set_config('dcc_test.sheet_stale',(select version::text from public.dcc_c
 select pg_temp.sheet_act('mana','{"value":5}');
 select pg_temp.expect_skill_error(format('select public.dcc_sheet_action(%L,%L,''mana'',''{"value":0}'')',current_setting('dcc_test.s_crawler'),current_setting('dcc_test.sheet_stale')),'40001');
 select pg_temp.s_assert((select tutorial_profile->>'mana'='6' and crawler_level=1 and dungeon_floor=1 and stat_effects='[]'::jsonb from public.dcc_crawlers where campaign_id=current_setting('dcc_test.s_other_game')::uuid),'Sheet changes leaked across games.');
+select set_config('request.jwt.claim.sub','c2222222-2222-2222-2222-222222222222',true);
 select pg_temp.s_assert((select version::text=current_setting('dcc_test.s_profile_version') from public.dcc_crawler_profiles where slot=1),'Sheet changes altered account writeup.');
 reset role;
 select 'PASS: sheet controls, typed damage, derived stats, permissions, concurrency and isolation' as result;

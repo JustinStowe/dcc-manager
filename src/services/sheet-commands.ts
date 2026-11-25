@@ -18,6 +18,7 @@ export async function executeSheetCommand(workspace:CampaignWorkspace,form:FormD
   if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new RangeError('Invalid sheet change.');
   const source=raw as Record<string,unknown>; let payload:Record<string,unknown>;
   if(['base-stats','number','level','floor','favor-award','effect-add','effect-toggle','effect-remove','defense','typed-defenses'].includes(operation)&&role!=='gm')throw new Error('Only the GM can make this change.');
+  if(operation==='level')throw new Error('Use level advancement to award levels or reconcile existing progress.');
   if(operation==='damage') {const parts=source.parts as DamagePart[];typedDamage(entry.crawler.currentSegments,official.profile.stats.constitution.enhanced,loadoutTotals(loadout.baseline,items,loadout.defenseBase).dr,parts,metadata.defenses??{});payload={parts:parts.map((part)=>({type:part.type,amount:part.amount}))};}
   else if(operation==='typed-defenses')payload={defenses:restoreDefenses(source.defenses)};
   else if(operation==='healing')payload={amount:bounded(source.amount,1,10)};

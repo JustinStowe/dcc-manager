@@ -5,6 +5,7 @@ import { HealthManager } from '@/components/health-manager';
 import { FavorManager } from '@/components/favor-manager';
 import { SheetInlineEdit } from '@/components/sheet-inline-edit';
 import { SheetAttributes } from '@/components/sheet-attributes';
+import { AdvancementManager } from '@/components/advancement-manager';
 import { TrackedEffectsView } from '@/views/tracked-effects-view';
 import type { SheetMetadata } from '@/domain/sheet';
 import type { Crawler } from '@/domain';
@@ -35,7 +36,7 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
         <div className={styles.sheetName}><span>Name</span><h2><SheetInlineEdit context={context} field="name" label="Crawler name" value={crawler.name} editable={!isGm} /></h2></div>
         <dl className={styles.identityGrid}>
           <IdentityField name="Race" value="Human" /><IdentityField name="Gender / pronouns" value={profile.pronouns || 'Not specified'} />
-          <div className={styles.identityField}><dt>Level</dt><dd><SheetInlineEdit context={context} field="level" label="Level" value={metadata?.level??1} max={1000} editable={isGm} /></dd></div><div className={styles.identityField}><dt>Crawler Number</dt><dd><SheetInlineEdit context={context} field="number" label="Crawler Number" value={number} prefix="#" editable={isGm} /></dd></div>
+          <IdentityField name="Level" value={String(metadata?.level??1)} /><div className={styles.identityField}><dt>Crawler Number</dt><dd><SheetInlineEdit context={context} field="number" label="Crawler Number" value={number} prefix="#" editable={isGm} /></dd></div>
           <IdentityField name="Class" value="Third Floor selection" /><div className={styles.identityField}><dt>Floor</dt><dd><SheetInlineEdit context={context} field="floor" label="Floor" value={floor} max={18} editable={isGm} /></dd></div>
         </dl>
       </div>
@@ -65,6 +66,7 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
       </div>
     </div>
     <div className={styles.sheetFooter}>
+      <SheetSection title="Level advancement"><AdvancementManager context={context} level={metadata?.level??1} floor={floor} isGm={isGm} state={metadata?.advancement} history={metadata?.advancementHistory} stats={profile.stats} /></SheetSection>
       <InventoryView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} items={inventory} isGm={isGm} mana={profile.mana} maxMana={profile.stats.intelligence.enhanced} healthSlots={crawler.currentSegments} baseline={baseline} templates={templates} links={metadata?.links} />
       {combat?.kind === 'spell' && <p className={styles.sheetHint}>Starting allowance: five Standard Mana Potions, granted once to new game crawlers. Existing stacks require GM effect identification; this is not a refill.</p>}
       <details className={styles.storyDetails}><summary>Story &amp; starting gear notes</summary><dl className={styles.storyGrid}>{Object.entries(profile.notes).map(([key, value]) => <div key={key}><dt>{key === 'looseEnds' ? 'Loose ends' : key === 'gear' ? 'Original starting gear' : key}</dt><dd className={styles.notes}>{value || 'Not recorded'}</dd></div>)}</dl></details>

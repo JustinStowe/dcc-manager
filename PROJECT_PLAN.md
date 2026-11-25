@@ -23,8 +23,8 @@ Preserve MVC-style separation. The reusable Nx monorepo remains paused.
 - One crawler per account per campaign is the initial shared-storage limit.
 - Players choose their initial Tutorial stats. Existing stats become GM-controlled
   after creation. Official Human crawlers use ten slots; Constitution determines
-  the threshold per slot. Player level-up adjustments come later through
-  a separate eligibility-controlled workflow.
+  the threshold per slot. Owners can spend level-up stat points only through
+  the GM-authorized saferoom advancement workflow on Floor 3 or deeper.
 - Owners and the GM can apply damage and healing. Stat edits preserve current
   health, clamp it to a lower maximum, and keep zero health at zero.
 - Legacy browser saves are preserved; their import UI was removed in the current
@@ -59,6 +59,7 @@ part of the active milestone, rather than deferred work.
 | Learned abilities and advancement marks | Implemented in milestone 008; database execution and full local/browser acceptance pending |
 | Effect templates and unified abilities | Implemented in milestone 013; user reports completion |
 | Encounter and turn tracker | Implemented in milestone 014; database and browser acceptance pending |
+| GM-controlled level advancement | Implemented in milestone 015; application/local SQL verification in progress; hosted/browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -74,7 +75,7 @@ The user reports the inventory milestone passed application checks and all
 manual acceptance tests. Potion automation, the sheet/dashboard redesign, and
 equipment/DR/Hotlist have since passed user-reported application/manual checks.
 Effect templates and unified abilities are complete by user report. Encounter
-turn tracking is the active development piece.
+turn tracking is implemented; GM-controlled level advancement is the current milestone.
 
 The verified inventory foundation adds 46 domain/service cases,
 per-game item quantities/notes, equipped locations and slot limits, explicit
@@ -83,7 +84,43 @@ The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
 
-## Current milestone: encounters and turns (014)
+## Current milestone: GM-controlled level advancement (015)
+
+Rules reviewed directly from the supplied Core Rulebook (printed pp. 128, 135,
+169–171) and Crawlers & Customization (pp. 42–44). Level awards and Skill/Spell
+rank advancement are separate. The official level cap is 250; each level gained
+after Level 1 earns three stat points. Tutorial points wait until Floor 3 or
+deeper and a saferoom. Third Floor points can be allocated before race/class
+prerequisite checks.
+
+- [x] Add GM-only, version-checked level awards with source/reason and immediate
+      level recording; leave pending points separate from current stats.
+- [x] Require one-time GM reconciliation for every existing crawler, preserving
+      current stats/resources and explicitly recording already applied points.
+      Preserve legacy over-cap levels until an explicit reviewed correction.
+- [x] Start new crawlers at Level 1 with zero spent points and no reconciliation.
+- [x] Add fixed-point saferoom authorization, revocation and automatic closure
+      when Floor changes. Additional awards never silently expand authorization.
+- [x] Let owners or the GM atomically allocate authorized points to Unenhanced
+      stats, derive Enhanced through gear/effects, and preserve current resources.
+- [x] Retire the direct Level metadata edit; preserve GM base-stat corrections.
+- [x] Record durable owner/GM-visible award, allocation and eligibility history.
+- [x] Gate Human level-gain Favor behind explicit GM confirmation of Third Floor
+      Human race selection; apply only to future gains, with no retroactive award.
+- [x] Add domain, permission-boundary, UI and database assertions, including stale
+      writes, overspending, game/writeup isolation and derived-stat rollback.
+- [ ] Finish the full application checks and isolated migration/regression checks.
+- [ ] Apply migration 015 to the hosted database and run its rollback assertions.
+- [ ] Verify authenticated two-account desktop/mobile/browser acceptance.
+
+Migration: `supabase/migrations/202611240015_level_advancement.sql`, after 001–014.
+Acceptance: `supabase/tests/level_advancement_permissions.sql` and the milestone
+015 workflow in `README.md`. No dependencies or account writeups change.
+Full race/class selection, automatic grinding/reward dice and retroactive level
+corrections remain outside this milestone. Reconciliation is an explicit one-time
+baseline review; ordinary GM stat corrections do not alter spent-point balances.
+
+## Previous milestone: encounters and turns (014)
 
 One GM-managed encounter per campaign tracks official crawlers and named
 monsters, manual initiative, the current turn, and rounds. A completed round
@@ -155,7 +192,7 @@ manual checks; 008 live database, build, and browser checks remain pending.
 | 4. Skills and spells | Catalogs, assignments, descriptions, usage rules | Manage crawler abilities during play | Learned abilities and self-effect links implemented; broader execution remains |
 | 5. Inventory, equipment, and effects | Item definitions, owned instances, equipment, traits, supported calculations | Award and manage equipment and its effects | Inventory, equipment, tracked effects, and templates implemented |
 | 6. Encounters and combat | Monsters, encounter setup, initiative, turns, health, statuses | Run combat from a GM dashboard | Encounter turn foundation implemented; combat actions remain |
-| 7. Achievements, rewards, and progression | Awards, loot, history, controlled level-up | Award rewards and apply eligible progression | Planned |
+| 7. Achievements, rewards, and progression | Awards, loot, history, controlled level-up | Award rewards and apply eligible progression | GM-controlled advancement implemented in 015; wider rewards remain |
 | 8. Release readiness | Usability, mobile layout, export/recovery, hosting, broader checks | Use the application reliably for regular sessions | Planned |
 
 Detailed game rules must be settled before implementing each feature's

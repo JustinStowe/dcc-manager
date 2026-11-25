@@ -91,6 +91,7 @@ select set_config('dcc_test.fx_legacy',(select value->>'id' from public.dcc_craw
 select pg_temp.sheet_act('effect-remove',jsonb_build_object('id',current_setting('dcc_test.fx_legacy')));
 select pg_temp.s_assert(not exists(select 1 from public.dcc_crawlers,lateral jsonb_array_elements(tracked_effects) where id=current_setting('dcc_test.s_crawler')::uuid and value->>'name'='Legacy'),'Legacy removal failed.');
 select pg_temp.s_assert((select tracked_effects='[]'::jsonb and typed_defenses='{}'::jsonb and tutorial_profile->>'mana'='6' and current_segments=10 from public.dcc_crawlers where campaign_id=current_setting('dcc_test.s_other_game')::uuid),'Effects leaked to another game.');
+select set_config('request.jwt.claim.sub','e2222222-2222-2222-2222-222222222222',true);
 select pg_temp.s_assert((select version::text=current_setting('dcc_test.s_profile_version') from public.dcc_crawler_profiles where slot=1),'Effects altered account writeup.');
 reset role;
 -- Structural checks complement the separate two-account WebSocket acceptance checks.

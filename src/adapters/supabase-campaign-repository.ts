@@ -8,6 +8,7 @@ import { validateInventory, type InventoryItem } from '@/domain/inventory';
 import { bounded, loadoutTotals, restoreBaseline, restoreHotlist, type CrawlerLoadout } from '@/domain/loadout';
 import {restoreTemplate,restoreEffectLinks} from '@/domain/effect-templates';
 import { restoreEncounter } from '@/domain/encounters';
+import { restoreAdvancement, type AdvancementEvent } from '@/domain/advancement';
 import { restoreTrackedEffects,effectiveDefenses,projectedModifiers } from '@/domain/tracked-effects';
 import { restoreDefenses } from '@/domain/typed-defenses';
 import { restoreEffects, derivedBaseline, type SheetMetadata } from '@/domain/sheet';
@@ -59,7 +60,7 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   if (campaignId !== selectedId) throw new Error('Invalid selected campaign.');
   const [membersResult, crawlersResult] = await Promise.all([
     client.from('dcc_campaign_members').select('user_id').eq('campaign_id', campaignId),
-    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version,ruleset,tutorial_profile,crawler_number,inventory,stat_baseline,defense_base,hotlist,learned_skills,crawler_level,dungeon_floor,stat_effects,typed_defenses,base_typed_defenses,tracked_effects,effect_links').eq('campaign_id', campaignId).order('name'),
+    client.from('dcc_crawlers').select('id,campaign_id,owner_user_id,name,base_segments,constitution,current_segments,version,ruleset,tutorial_profile,crawler_number,inventory,stat_baseline,defense_base,hotlist,learned_skills,crawler_level,dungeon_floor,stat_effects,typed_defenses,base_typed_defenses,tracked_effects,effect_links,advancement').eq('campaign_id', campaignId).order('name'),
   ]);
   if (membersResult.error) throw campaignDatabaseError(membersResult.error);
   if (crawlersResult.error) throw campaignDatabaseError(crawlersResult.error);
@@ -93,7 +94,7 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
         if(JSON.stringify(combined)!==JSON.stringify(effectiveDefenses(stored,[])))throw new Error('Effect defenses are out of sync.');
         const derived=derivedBaseline(Object.fromEntries(STAT_KEYS.map((key)=>[key,baseline[key].base])) as Record<StatKey,number>,effects);
         if(STAT_KEYS.some((key)=>derived[key].enhanced!==baseline[key].enhanced))throw new Error('Stat modifiers are out of sync. Refresh the sheet.');
-        sheets[crawler.id]={level:bounded(item.crawler_level,1,1000),floor:bounded(item.dungeon_floor,1,18),effects,defenses:stored,baseDefenses,trackedEffects,links:restoreEffectLinks(item.effect_links)};
+        sheets[crawler.id]={level:bounded(item.crawler_level,1,1000),floor:bounded(item.dungeon_floor,1,18),effects,defenses:stored,baseDefenses,trackedEffects,links:restoreEffectLinks(item.effect_links),advancement:restoreAdvancement(item.advancement,item.crawler_level as number)};
         const defenseBase = bounded(item.defense_base, 0, 10000);
         const totals = loadoutTotals(baseline, inventories[crawler.id], defenseBase);
         const profile = tutorials[crawler.id].profile;
@@ -111,6 +112,15 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   const templateResult=await client.from('dcc_effect_templates').select('id,campaign_id,version,repeat_policy,definition').eq('campaign_id',campaignId);
   if(templateResult.error)throw campaignDatabaseError(templateResult.error);
   const templates=(templateResult.data??[]).map((value:unknown)=>{const t=record(value);return restoreTemplate({id:t.id,campaignId:t.campaign_id,version:t.version,repeatPolicy:t.repeat_policy,definition:t.definition});});
+  const historyResult = await client.from('dcc_advancement_history').select('id,crawler_id,operation,summary,reason,created_at').eq('campaign_id',campaignId).order('created_at',{ascending:false}).order('id',{ascending:false}).limit(1000);
+  if (historyResult.error) throw campaignDatabaseError(historyResult.error);
+  const history: Record<string, AdvancementEvent[]> = {};
+  for (const value of historyResult.data ?? []) {
+    const event = record(value), crawlerId = requireUuid(field(event,'crawler_id'));
+    if (!sheets[crawlerId]) throw new Error('Invalid advancement history crawler.');
+    (history[crawlerId] ??= []).push({ id:requireUuid(field(event,'id')), operation:field(event,'operation') as AdvancementEvent['operation'], at:field(event,'created_at'), summary:field(event,'summary'), reason:field(event,'reason') });
+  }
+  for (const id of Object.keys(sheets)) sheets[id] = { ...sheets[id], advancementHistory: history[id] ?? [] };
   let encounter = null;
   if (role === 'gm') {
     const result = await client.from('dcc_encounters').select('id,campaign_id,version,active,round,current_participant_id,participants').eq('campaign_id', campaignId).maybeSingle();

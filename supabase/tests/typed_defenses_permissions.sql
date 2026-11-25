@@ -100,6 +100,7 @@ select pg_temp.sheet_act('typed-defenses','{"defenses":{"Fire":{"resistant":true
 select pg_temp.expect_skill_error(format('select public.dcc_sheet_action(%L,%L,''typed-defenses'',''{"defenses":{}}'')',current_setting('dcc_test.s_crawler'),current_setting('dcc_test.defense_stale')),'40001');
 select pg_temp.expect_skill_error(format('select public.dcc_sheet_action(%L,%L,''damage'',''{"parts":[{"type":"Fire","amount":13}]}'')',current_setting('dcc_test.s_crawler'),current_setting('dcc_test.defense_stale')),'40001');
 select pg_temp.s_assert((select typed_defenses='{}'::jsonb and tutorial_profile->>'mana'='6' and current_segments=10 from public.dcc_crawlers where campaign_id=current_setting('dcc_test.s_other_game')::uuid),'Defenses or damage leaked to another game.');
+select set_config('request.jwt.claim.sub','d2222222-2222-2222-2222-222222222222',true);
 select pg_temp.s_assert((select version::text=current_setting('dcc_test.s_profile_version') from public.dcc_crawler_profiles where slot=1),'Defense edits changed saved account writeup.');
 reset role;
 select 'PASS: typed defenses, calculation order, rounding, permissions, concurrency, and isolation' as result;

@@ -6,6 +6,58 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### GM-controlled level advancement (015)
+
+After migrations 001–014, apply only
+`supabase/migrations/202611240015_level_advancement.sql` once. Then run
+`supabase/tests/level_advancement_permissions.sql` as administrator; expect its
+final PASS with no preceding error and a fixture rollback. Refresh open sheets.
+No new dependencies or environment settings are required.
+
+Open **Level advancement → Manage advancement** on a crawler's sheet:
+
+- **Existing crawlers:** the GM reviews the current level and records how many
+  level-up stat points are already included in saved stats. This one-time review
+  preserves stats/resources and banks only the remaining entitlement. Exclude
+  race, class, potion, gear and ordinary GM corrections from previously spent
+  level-up points. Legacy levels above 250 remain readable and require an
+  explicit reviewed value; migration never clamps them. If the old records are
+  uncertain, settle the ledger with the player before confirming.
+- **New crawlers:** start reconciled at Level 1 with zero spent points. Saved
+  account writeups and crawlers in other games remain independent.
+- **Awards:** the GM records the final level count, source and reason. Levels
+  apply immediately, capped at 250, and earn three pending points per level.
+  The starting level grants none. Resolve reward dice, quest/Boss adjustments
+  and productive grinding hours at the table; this feature has no XP counter
+  or play-time scheduler. Awards target one crawler at a time.
+- **Spending:** points remain banked on Floors 1–2. On Floor 3 or deeper the GM
+  confirms a saferoom and authorizes a fixed number of pending points. The owner
+  or GM can distribute some or all of those points among the five Unenhanced
+  stats. Later awards require additional authorization. Enter 0 to revoke when
+  leaving a saferoom; changing Floor closes authorization automatically.
+- **Benefits:** Enhanced stats recalculate through existing effects and gear.
+  Health and current Mana do not refill; ranks/marks stay separate. The GM can
+  explicitly confirm the selected Human race to enable +1 Favor per future
+  level gained on Floor 3+. Tutorial Human identity alone does not enable it.
+  Full race/class selection and its other benefits remain manual; allocate
+  points before prerequisite checks when needed.
+- **Corrections/history:** the old direct Level editor is retired. General GM
+  base-stat corrections still work and do not spend/refund advancement points.
+  Reconciliation is one-time; review it carefully. Awards, reconciliation,
+  allocations, authorization changes and Human-benefit changes are recorded in
+  an owner/GM-visible history. Failed/stale writes do not change the ledger.
+
+Rules: Core Rulebook printed pp. 128, 135, 169–171; Crawlers & Customization
+pp. 42–44. Floor 3 means that floor or deeper (higher Floor numbers).
+
+Run `npm run check`. In separate GM/player browser sessions, verify legacy
+reconciliation without changing stats/resources; Tutorial awards with locked
+spending; Floor 3 saferoom authorization; partial allocation and persistence;
+new awards staying unauthorized; revocation/Floor change; selected Human Favor;
+stale dialog rejection with drafts retained; owner-only history; and unchanged
+writeups/other games. Check desktop/mobile layout, keyboard access, Cancel/Escape,
+and existing equipment, spells, templates and encounter turns.
+
 ### Encounters and turns (014)
 
 Apply `supabase/migrations/202611240014_encounters.sql` once after migrations
