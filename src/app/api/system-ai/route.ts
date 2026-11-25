@@ -6,11 +6,12 @@ import { createAiUsagePort } from '@/adapters/supabase-ai-usage';
 import { executeSystemAi } from '@/services/system-ai-commands';
 import { aiRequestSchema } from '@/lib/ai/schemas/floor-three';
 import { SystemAiError } from '@/lib/ai/systemAi';
+import { isSameOriginRequest } from '@/lib/http/request-origin';
 export const runtime='nodejs';
 export async function POST(request:Request){
  const headers={'Cache-Control':'no-store'};
  try{
-  if(request.headers.get('origin')!==new URL(request.url).origin)return Response.json({error:'Open System AI from your game.',code:'origin'},{status:403,headers});
+  if(!isSameOriginRequest(request))return Response.json({error:'The System AI request came from a different address. Refresh the game and try again.',code:'origin'},{status:403,headers});
   if(Number(request.headers.get('content-length')??0)>8000)return Response.json({error:'Request too large.'},{status:413,headers});
   const text=await request.text();if(text.length>8000)return Response.json({error:'Request too large.'},{status:413,headers});
   const parsed=aiRequestSchema.safeParse(JSON.parse(text));if(!parsed.success)return Response.json({error:'Check the System AI request.',code:'invalid-request'},{status:400,headers});

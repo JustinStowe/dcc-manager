@@ -227,7 +227,7 @@ not yet been reported. Setup and manual acceptance steps are in `README.md`.
 - [x] Pass a real strict-schema connection test and the complete Zod custom-build
       smoke test with the configured Groq account, using synthetic data only.
 - [x] Complete the final application and fresh-database verification below.
-- [ ] Apply migrations 019 then 020 to the hosted database and refresh games.
+- [x] Apply migrations 019 then 020 to the hosted database (user confirmed).
 - [ ] Complete authenticated GM/player, responsive UI and live refresh acceptance.
 
 Final verification on November 25, 2026:
@@ -251,7 +251,8 @@ Final verification on November 25, 2026:
 - `git diff --check` and whitespace inspection of new files passed. The isolated
   PostgreSQL server was stopped after verification. Local auth/realtime fixtures
   were simulated; hosted migrations, WebSocket delivery and authenticated browser
-  acceptance were not performed or claimed.
+  acceptance were not performed during implementation. The user subsequently
+  confirmed migrations 019 and 020 are applied; browser acceptance remains pending.
 
 Migration 019 extends the existing crawler JSON aggregate for evidence, approved
 definitions, offers, reward review and immutable selection provenance; it keeps
