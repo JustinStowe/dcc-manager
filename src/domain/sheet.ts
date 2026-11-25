@@ -3,12 +3,13 @@ import { resolveTypedDamage, type TypedDefenses } from './typed-defenses';
 import type { EffectLinks } from './effect-templates';
 import type { TrackedEffect } from './tracked-effects';
 import type { AdvancementState, AdvancementEvent } from './advancement';
+import type { ThirdFloorState } from './third-floor';
 import { bounded } from './loadout';
 export { DAMAGE_TYPES } from './damage-types';
 export type { DamageType, DamagePart } from './damage-types';
 import type { DamagePart } from './damage-types';
 export interface StatEffect { readonly id: string; readonly name: string; readonly active: boolean; readonly modifiers: Readonly<Record<StatKey,number>> }
-export interface SheetMetadata { readonly level: number; readonly floor: number; readonly effects: readonly StatEffect[]; readonly defenses?: TypedDefenses; readonly baseDefenses?: TypedDefenses; readonly trackedEffects?: readonly TrackedEffect[]; readonly links?: EffectLinks; readonly advancement?: AdvancementState; readonly advancementHistory?: readonly AdvancementEvent[] }
+export interface SheetMetadata { readonly level: number; readonly floor: number; readonly effects: readonly StatEffect[]; readonly defenses?: TypedDefenses; readonly baseDefenses?: TypedDefenses; readonly trackedEffects?: readonly TrackedEffect[]; readonly links?: EffectLinks; readonly advancement?: AdvancementState; readonly advancementHistory?: readonly AdvancementEvent[]; readonly thirdFloor?: ThirdFloorState }
 export function restoreEffects(value: unknown): readonly StatEffect[] {
   if (!Array.isArray(value) || value.length>100) throw new RangeError('Expected up to 100 stat modifiers.');
   const ids=new Set<string>();

@@ -20,5 +20,6 @@ export async function encounterAction(_previous: CampaignFormState, form: FormDa
     return { error: error instanceof Error ? error.message : 'Could not save encounter.', notice: null };
   }
   revalidatePath(`/games/${campaignId}`);
+  revalidatePath(`/games/${campaignId}/encounter`);
   return { error: null, notice };
 }

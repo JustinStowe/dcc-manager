@@ -39,7 +39,6 @@ export function AdvancementManager({ context, level, floor, isGm, state, history
     if (operation === 'reconcile') payload = { ...payload, level: Number(form.get('level')), spent: Number(form.get('spent')), confirmed: form.get('confirmed') === 'yes' };
     if (operation === 'award') payload = { ...payload, amount: Number(form.get('amount')), source: form.get('source') };
     if (operation === 'authorize') payload = { ...payload, amount: Number(form.get('amount')), saferoom: form.get('saferoom') === 'yes' };
-    if (operation === 'human-benefit') payload = { ...payload, enabled: form.get('enabled') === 'yes', confirmed: form.get('confirmed') === 'yes' };
     if (operation === 'allocate') payload = { allocation: Object.fromEntries(STAT_KEYS.map(key => [key, Number(form.get(key))])) };
     const command = new FormData(); command.set('operation', operation); command.set('payload', JSON.stringify(payload));
     if (await mutation.save(command, editVersion.current, element)) setOpen(false);
@@ -47,7 +46,6 @@ export function AdvancementManager({ context, level, floor, isGm, state, history
   function reconcile(event: FormEvent<HTMLFormElement>) { return submit('reconcile', event); }
   function award(event: FormEvent<HTMLFormElement>) { return submit('award', event); }
   function authorize(event: FormEvent<HTMLFormElement>) { return submit('authorize', event); }
-  function humanBenefit(event: FormEvent<HTMLFormElement>) { return submit('human-benefit', event); }
   function allocate(event: FormEvent<HTMLFormElement>) { return submit('allocate', event); }
   function changeReview(event: ChangeEvent<HTMLInputElement>) { setReviewLevel(event.target.value); }
   function changeAllocation(event: ChangeEvent<HTMLInputElement>) { setAllocation(old => ({ ...old, [event.target.name]: event.target.value })); }
@@ -87,15 +85,7 @@ export function AdvancementManager({ context, level, floor, isGm, state, history
             <p>Enter 0 to revoke. This replaces the previous authorization. Revoke when leaving the saferoom; Floor changes close it automatically. Later level awards need separate authorization.</p>
             <Reason /><button type="submit">Save authorization</button>
           </fieldset></form>
-          <details><summary>Selected Human race benefit</summary>
-            <form onSubmit={humanBenefit} aria-label="Manage Human level benefit"><fieldset className={styles.fields} disabled={mutation.pending}>
-              <legend>GM race benefit confirmation</legend>
-              <p>Starting as a Tutorial Human does not grant this benefit. Confirm Human was selected on Floor 3 before enabling +1 AI Favor per future level gained. No past Favor or other race/class bonuses are granted here.</p>
-              <label><input name="enabled" type="checkbox" value="yes" defaultChecked={state.humanFavor} disabled={floor < 3 && !state.humanFavor} /> Enable Human level-gain Favor</label>
-              <label><input name="confirmed" type="checkbox" value="yes" required /> I reviewed the crawler’s selected race.</label>
-              <Reason /><button type="submit">Save Human benefit</button>
-            </fieldset></form>
-          </details>
+          <p>Human level-gain Favor: {state.humanFavor ? 'active' : 'inactive'}. Manage this through Third Floor Race &amp; Class selection. Legacy Human confirmation remains in force until its benefit review.</p>
         </>}
         {available > 0 ? <form onSubmit={allocate} aria-label="Allocate stat points"><fieldset className={styles.fields} disabled={mutation.pending}>
           <legend>Distribute authorized points</legend>

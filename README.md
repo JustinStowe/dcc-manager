@@ -6,6 +6,70 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Third Floor Race & Class selection (018)
+
+After migrations 001–017, apply only
+`supabase/migrations/202611250018_third_floor_selection.sql` once, then refresh
+open sheets. Run the complete `supabase/tests/third_floor_permissions.sql` as
+administrator; expect its final PASS with no preceding error and fixture
+rollback. No dependencies or environment settings change.
+
+Open **Third Floor Race & Class → Manage Race & Class** on the crawler's sheet.
+
+1. Finish level-advancement reconciliation first. Existing crawlers then need a
+   one-time GM benefit review. Choose **No benefits applied**, or record the
+   existing Race/Class after confirming its bonuses already appear in the sheet.
+   The second option changes identity only; it adds no stats, Skills, defenses,
+   loot or past Favor. If benefits were partially applied, use the existing GM
+   correction tools to finish/correct them before confirming this review. Other
+   existing Races/Classes can be recorded with manual names, size and movement.
+2. On Floor 3 or deeper, the GM offers up to three eligible Race/Class pairs.
+   Clear and save the list to revoke. Changing Floor also closes unselected
+   offers. Authorized level-up points can be allocated before or after selection;
+   spend points first if needed to avoid stat penalties below the supported minimum.
+3. The owner or GM chooses a pair, completes any Class choices, reviews the actual
+   stat/rank changes and confirms. All supported grants and saved identity commit
+   together once. Existing Skill definitions/IDs are preserved; new rank bonuses
+   stop at 10 and do not reduce previously earned higher ranks. Health does not
+   refill, Mana only clamps if its maximum falls, and advancement spending stays
+   unchanged. Notes and the advancement history record the review and selection.
+4. Human level-gain Favor now follows the saved Human selection. The old toggle
+   is retired. Previously confirmed Human Favor remains active until benefit
+   reconciliation, which never awards past Favor or repeats Human stat bonuses.
+
+The reviewed starter catalog includes Human, Amazonian, Crocodilian, Igneous and
+Pterolykos; Boring Ol’ Fighter, Pit Fighter, Blizzardmancer and Monster Truck Driver.
+Amazonian and Driver prerequisites use existing learned ranks before new grants.
+Pterolykos cannot take the Earth-only Pit Fighter or Monster Truck Driver Classes.
+Optional identity restrictions, achievements and other table requirements are
+confirmed by the GM. The selected identity, size, Move and Step appear on the sheet.
+
+Supported grants are permanent stat changes, listed learned Skills/Spells,
+Fighter's reviewed Weapon/support choices, non-gear DR and listed typed defenses.
+The UI records source references and reminders for passive Skill effects (such
+as Dodge's Evade Buff), special marking eligibility, damage, cooldowns, flight,
+special Actions, coupons, loot and other conditional benefits; those remain manual.
+This milestone does not implement every published Race/Class, later respecs,
+Animal entry or new Third Floor starting-character creation.
+
+Rules reviewed: Core Rulebook printed pp. 128–129, 131, 135, 140–142, 150, 152–153,
+and the referenced granted-ability entries. Earth icons were visually checked.
+
+Validation: `npm run check` passed (897 tests across 56 files, lint, typecheck,
+production build). Nine SQL suites and the actual 017→018 upgrade passed in
+isolated PostgreSQL, including exact preservation of existing benefits/resources
+and legacy Human confirmation. Auth fixtures and realtime sending were simulated;
+hosted migration, WebSocket delivery and authenticated browser acceptance remain.
+
+For browser acceptance use separate GM/player sessions: review an existing build
+without repeating bonuses; reject early/unoffered/ineligible choices; offer and
+select a Fighter with distinct choices; verify Rank 10 bonus capping and saved
+identity; test Igneous/Blizzardmancer defenses and negative stats; confirm future
+Human Favor; verify repeat/stale saves are rejected and drafts survive errors;
+revoke offers and change Floor; reload to check persistence, history, current
+resources and isolation from other games/writeups. Check keyboard, Escape/Close
+and desktop/mobile layouts, plus spells, templates, equipment and encounter use.
+
 ### GM-controlled level advancement (015)
 
 After migrations 001–014, apply only
@@ -36,11 +100,11 @@ Open **Level advancement → Manage advancement** on a crawler's sheet:
   stats. Later awards require additional authorization. Enter 0 to revoke when
   leaving a saferoom; changing Floor closes authorization automatically.
 - **Benefits:** Enhanced stats recalculate through existing effects and gear.
-  Health and current Mana do not refill; ranks/marks stay separate. The GM can
-  explicitly confirm the selected Human race to enable +1 Favor per future
-  level gained on Floor 3+. Tutorial Human identity alone does not enable it.
-  Full race/class selection and its other benefits remain manual; allocate
-  points before prerequisite checks when needed.
+  Health and current Mana do not refill; ranks/marks stay separate. After 018,
+  selected Human identity controls +1 Favor per future level gained on Floor 3+;
+  Tutorial Human identity alone does not enable it. The selection workflow above
+  replaces 015's manual Human confirmation. Allocate points before prerequisite
+  checks when needed.
 - **Corrections/history:** the old direct Level editor is retired. General GM
   base-stat corrections still work and do not spend/refund advancement points.
   Reconciliation is one-time; review it carefully. Awards, reconciliation,
@@ -110,6 +174,13 @@ the creature's maximum; this does not calculate damage or DR automatically.
 Monsters saved before 017 can gain a catalog write-up through Manage. Attaching
 one replaces their encounter name with the official creature name and starts
 them at full Health Bar slots.
+
+The GM can also choose **Open separate window** on the dashboard or inside the
+popup. The tracker then runs at `/games/{campaignId}/encounter` in a movable,
+resizable browser window, leaving the dashboard usable on the main monitor.
+Opening it again focuses the same window. The separate window uses the same
+GM-only permissions and live updates as the dashboard. If the browser blocks
+the popup, use the offered new-tab link and move that tab to another window.
 
 
 ### Tracked effects and automatic updates (011–012)

@@ -1,5 +1,5 @@
 import { getCampaignRole } from '@/domain';
-import { allocatePoints, authorizePoints, awardLevels, reconcileAdvancement, restoreAdvancement, setHumanBenefit, advancementReason, AWARD_SOURCES, whole } from '@/domain/advancement';
+import { allocatePoints, authorizePoints, awardLevels, reconcileAdvancement, restoreAdvancement, advancementReason, AWARD_SOURCES, whole } from '@/domain/advancement';
 import { derivedBaseline } from '@/domain/sheet';
 import { loadoutTotals } from '@/domain/loadout';
 import { STAT_KEYS, type Scores } from '@/domain/tutorial';
@@ -44,9 +44,7 @@ export async function executeAdvancementCommand(workspace: CampaignWorkspace, fo
     authorizePoints(sheet.level, state, sheet.floor, amount, input.saferoom === true);
     payload = { amount, saferoom: input.saferoom === true, reason: advancementReason(input.reason) };
   } else if (operation === 'human-benefit') {
-    if (typeof input.enabled !== 'boolean') throw new RangeError('Choose the Human benefit setting.');
-    setHumanBenefit(state, sheet.floor, input.enabled, input.confirmed === true);
-    payload = { enabled: input.enabled, confirmed: true, reason: advancementReason(input.reason) };
+    throw new RangeError('Use Third Floor Race/Class selection to confirm Human benefits.');
   } else if (operation === 'allocate') {
     const bases = Object.fromEntries(STAT_KEYS.map(key => [key, loadout.baseline[key].base])) as Scores;
     const result = allocatePoints(sheet.level, state, sheet.floor, input.allocation, bases);

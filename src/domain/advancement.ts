@@ -12,7 +12,7 @@ export interface AdvancementState {
 export type AdvancementOperation = 'reconcile' | 'award' | 'authorize' | 'allocate' | 'human-benefit';
 export interface AdvancementEvent {
   readonly id: string;
-  readonly operation: AdvancementOperation;
+  readonly operation: AdvancementOperation | 'selection-review' | 'selection-offer' | 'selection-apply';
   readonly at: string;
   readonly summary: string;
   readonly reason: string;

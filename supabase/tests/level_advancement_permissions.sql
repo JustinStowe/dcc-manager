@@ -37,6 +37,11 @@ select set_config('dcc_test.a_writeup',(select version::text from public.dcc_cra
 select pg_temp.a_assert((select advancement='{"reconciled":true,"spent":0,"authorized":0,"humanFavor":false}'::jsonb from public.dcc_crawlers where id=current_setting('dcc_test.a_crawler')::uuid),'New crawler does not start ready at zero.');
 reset role;
 -- Simulate an existing crawler with manual gains and an over-cap metadata level.
+do $$ begin
+ if to_regprocedure('public.dcc_third_floor_action(uuid,uuid,text,jsonb)') is not null then
+  execute format('update public.dcc_crawlers set third_floor=''{"reviewed":false,"offers":[],"selected":null}'' where id=%L',current_setting('dcc_test.a_crawler'));
+ end if;
+end $$;
 update public.dcc_crawlers set crawler_level=300,advancement='{"reconciled":false,"spent":0,"authorized":0,"humanFavor":false}',
  stat_baseline=jsonb_set(stat_baseline,'{strength,base}','14'),current_segments=0,tutorial_profile=jsonb_set(tutorial_profile,'{mana}','2')
  where id=current_setting('dcc_test.a_crawler')::uuid;
@@ -93,7 +98,13 @@ select set_config('request.jwt.claim.sub','a1533333-3333-4333-8333-333333333333'
 select pg_temp.a_assert(not exists(select 1 from public.dcc_advancement_history),'Other player can read advancement history.');
 select pg_temp.a_error(format('select public.dcc_advancement_action(%L,%L,''award'',''{"amount":1,"source":"quest","reason":"Test"}'')',current_setting('dcc_test.a_crawler'),current_setting('dcc_test.a_stale')),'42501');
 select set_config('request.jwt.claim.sub','a1511111-1111-4111-8111-111111111111',true);
-select pg_temp.a_act('human-benefit','{"enabled":true,"confirmed":true,"reason":"Selected Human on Third Floor"}');
+do $$ begin
+ if to_regprocedure('public.dcc_third_floor_action(uuid,uuid,text,jsonb)') is not null then
+  perform public.dcc_third_floor_action(current_setting('dcc_test.a_crawler')::uuid,
+   (select version from public.dcc_crawlers where id=current_setting('dcc_test.a_crawler')::uuid),'review',
+   '{"mode":"existing","raceId":"human","classId":"fighter","confirmed":true,"reason":"Existing Human benefits reviewed for advancement regression"}');
+ else perform pg_temp.a_act('human-benefit','{"enabled":true,"confirmed":true,"reason":"Selected Human on Third Floor"}');end if;
+end $$;
 select pg_temp.a_act('award','{"amount":2,"source":"quest","reason":"Quest completed"}');
 select pg_temp.a_assert((select crawler_level=14 and tutorial_profile->>'favor'='3' from public.dcc_crawlers where id=current_setting('dcc_test.a_crawler')::uuid),'Selected Human Favor not applied per gained level.');
 select pg_temp.a_sheet('floor','{"value":4}');
@@ -101,11 +112,15 @@ select pg_temp.a_assert((select advancement->>'authorized'='0' from public.dcc_c
 select pg_temp.a_act('authorize','{"amount":3,"saferoom":true,"reason":"New saferoom"}');
 select pg_temp.a_act('authorize','{"amount":0,"reason":"Leaving room"}');
 select pg_temp.a_error('select pg_temp.a_act(''allocate'',''{"allocation":{"strength":1,"intelligence":0,"constitution":0,"dexterity":0,"charisma":0}}'')','22023');
-select pg_temp.a_act('human-benefit','{"enabled":false,"confirmed":true,"reason":"Benefit disabled"}');
+do $$ begin
+ if to_regprocedure('public.dcc_third_floor_action(uuid,uuid,text,jsonb)') is not null then
+  perform pg_temp.a_error('select pg_temp.a_act(''human-benefit'',''{"enabled":false,"confirmed":true,"reason":"Retired toggle"}'')','22023');
+ else perform pg_temp.a_act('human-benefit','{"enabled":false,"confirmed":true,"reason":"Benefit disabled"}');end if;
+end $$;
 select pg_temp.a_error('select pg_temp.a_act(''award'',''{"amount":237,"source":"other","reason":"Exceeds cap"}'')','22023');
 select pg_temp.a_act('award','{"amount":236,"source":"other","reason":"Cap boundary test"}');
 select pg_temp.a_error('select pg_temp.a_act(''award'',''{"amount":1,"source":"quest","reason":"Beyond cap"}'')','22023');
-select pg_temp.a_assert((select crawler_level=250 and tutorial_profile->>'favor'='3' from public.dcc_crawlers where id=current_setting('dcc_test.a_crawler')::uuid),'Cap or disabled Human benefit failed.');
+select pg_temp.a_assert((select crawler_level=250 and tutorial_profile->>'favor'=(case when to_regprocedure('public.dcc_third_floor_action(uuid,uuid,text,jsonb)') is not null then '239' else '3' end) from public.dcc_crawlers where id=current_setting('dcc_test.a_crawler')::uuid),'Cap or selected Human benefit failed.');
 select pg_temp.a_assert((select count(*)=3 from public.dcc_advancement_history where crawler_id=current_setting('dcc_test.a_crawler')::uuid and operation='authorize' and details->>'previousAuthorized' is null),'Authorization history missing.');
 reset role;
 -- A derived equipment overflow must roll back the balance, version, resources and history together.

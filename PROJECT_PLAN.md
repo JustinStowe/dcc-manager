@@ -59,7 +59,8 @@ part of the active milestone, rather than deferred work.
 | Learned abilities and advancement marks | Implemented in milestone 008; database execution and full local/browser acceptance pending |
 | Effect templates and unified abilities | Implemented in milestone 013; user reports completion |
 | Encounter tracker | Compact official Mob phases and optional PvP initiative implemented in 016; database and browser acceptance pending |
-| GM-controlled level advancement | Implemented in milestone 015; full application checks and isolated SQL verification passed; hosted/browser acceptance pending |
+| GM-controlled level advancement | Complete; user confirmed migration 015, checks, and working in-app advancement on November 25, 2026 |
+| Third Floor Race/Class selection | Implemented in 018 with a reviewed starter catalog and existing-benefit reconciliation; application/local SQL checks passed; hosted/browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -74,8 +75,12 @@ games to the lobby with a fixed notice; database errors remain separate.
 The user reports the inventory milestone passed application checks and all
 manual acceptance tests. Potion automation, the sheet/dashboard redesign, and
 equipment/DR/Hotlist have since passed user-reported application/manual checks.
-Effect templates and unified abilities are complete by user report. Encounter
-turn tracking is implemented; GM-controlled level advancement is the current milestone.
+Effect templates and unified abilities are complete by user report. GM-controlled
+level advancement is complete: on November 25, 2026, the user confirmed migration
+015 and its checks passed and advancement works in the app. Encounter popup and
+creature catalog work remains tracked separately in milestone 017. Third Floor
+Race/Class selection is implemented in milestone 018 below; hosted migration and
+GM/player browser acceptance remain pending.
 
 The verified inventory foundation adds 46 domain/service cases,
 per-game item quantities/notes, equipped locations and slot limits, explicit
@@ -84,7 +89,11 @@ The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
 
-## Current milestone: GM-controlled level advancement (015)
+## Completed milestone: GM-controlled level advancement (015)
+
+Completed November 25, 2026, based on the user's confirmation that migration 015
+and the checks passed and advancement works in the app. The earlier automated
+verification results below remain the implementation's recorded evidence.
 
 Rules reviewed directly from the supplied Core Rulebook (printed pp. 128, 135,
 169–171) and Crawlers & Customization (pp. 42–44). Level awards and Skill/Spell
@@ -116,8 +125,8 @@ prerequisite checks.
       changes versions, and marks existing crawlers for reconciliation.
 - [x] Pass eight SQL suites: advancement, templates, effects/live, encounters,
       sheet controls, equipment/Hotlist, learned abilities and typed defenses.
-- [ ] Apply migration 015 to the hosted database and run its rollback assertions.
-- [ ] Verify authenticated two-account desktop/mobile/browser acceptance.
+- [x] Apply migration 015 and pass its database checks (user reported).
+- [x] Verify advancement works in the app and accept the milestone (user reported).
 
 Migration: `supabase/migrations/202611240015_level_advancement.sql`, after 001–014.
 Acceptance: `supabase/tests/level_advancement_permissions.sql` and the milestone
@@ -126,12 +135,65 @@ Full race/class selection, automatic grinding/reward dice and retroactive level
 corrections remain outside this milestone. Reconciliation is an explicit one-time
 baseline review; ordinary GM stat corrections do not alter spent-point balances.
 
-Local SQL verification uses minimal Supabase-compatible auth fixtures and a
-stubbed realtime sender. It does not establish hosted Supabase/WebSocket/browser
-acceptance. Existing SQL regression checks now read private saved writeups as
-their owning player; the sheet regression uses checked level awards after 015.
+Local SQL verification used minimal Supabase-compatible auth fixtures and a
+stubbed realtime sender; hosted migration/checks and working in-app advancement
+were subsequently confirmed by the user. This completion record does not claim
+that every individual two-account, mobile, or WebSocket scenario was separately
+observed. Existing SQL regression checks now read private saved writeups as their
+owning player; the sheet regression uses checked level awards after 015.
 Lint excludes the temporary `tmp/` directory so historical scratch dependencies
 cannot interfere with application checks. Unrelated encounter changes are preserved.
+
+## Current milestone: Third Floor Race/Class selection (018)
+
+Reviewed the official Core Rulebook directly: printed pp. 128–129 (selection,
+prerequisites and Rank 10 selection bonus cap), 131, 135, 140–142, 150, 152–153
+(supported Races/Classes and Earth-only restrictions), and each granted ability's
+entry. Printed Earth icons on pp. 150 and 152 were visually checked. Rank 16+
+benefits remain subject to the existing Sixth Floor rule; this starter catalog
+does not grant Rank-20 exceptions. Encounter/catalog work remains separate.
+
+- [x] Add five reviewed Races: Human, Amazonian, Crocodilian, Igneous and Pterolykos.
+- [x] Add four reviewed Classes: Boring Ol’ Fighter, Pit Fighter, Blizzardmancer
+      and Monster Truck Driver. Fighter includes bounded Weapon/support choices.
+- [x] Let the GM offer up to three eligible pairs on Floor 3 or deeper and revoke
+      offers. Floor changes close unselected offers. The owner or GM selects an
+      offered pair, with prerequisites and compatibility rechecked before grants.
+- [x] Preview actual stat/rank changes and apply supported stat, learned-ability,
+      DR and typed-defense benefits once, atomically and with version checks.
+      Cap new rank bonuses at 10 without reducing already-earned higher ranks.
+- [x] Persist Race/Class identity, size and movement. Show source references and
+      explicit reminders for conditional/passive benefits requiring table play.
+- [x] Require GM benefit reconciliation for every existing crawler. Confirm no
+      prior grants, or record an already-applied identity without reapplying any
+      bonuses. Other manually established identities/movement can be recorded.
+- [x] Preserve existing Human Favor confirmation until review, then derive future
+      level-gain Favor from selected Human identity. Retire the independent toggle.
+- [x] Preserve health, clamp Mana only when its maximum falls, and preserve spent
+      advancement points, valid equipment/links, account writeups and other games.
+- [x] Add owner/GM-visible selection history and domain/service/UI/SQL assertions.
+- [x] Pass application checks: 897 tests across 56 files, lint, route/type
+      generation, TypeScript and production build.
+- [x] Apply 001–018 in isolated PostgreSQL and verify an actual 017→018 upgrade
+      preserves existing stats, resources, Human confirmation and saved writeups,
+      while marking existing crawlers for review and invalidating stale versions.
+- [x] Pass nine SQL suites: selection, advancement, templates, effects/live,
+      encounters, sheet controls, equipment/Hotlist, abilities and typed defenses.
+- [ ] Apply migration 018 to the hosted database and run its rollback assertions.
+- [ ] Verify authenticated GM/player desktop/mobile acceptance from `README.md`.
+
+Migration: `supabase/migrations/202611250018_third_floor_selection.sql`, after
+001–017. Assertions: `supabase/tests/third_floor_permissions.sql`. Local SQL tests
+use minimal compatible auth fixtures and a stubbed realtime sender; hosted
+Supabase/WebSocket and real browser acceptance are not claimed.
+
+This implements the proposed starter catalog, not every published Race/Class.
+Passive Skill effects (including Dodge Evade bonuses), special marking conditions,
+damage, flight, cooldowns, special Actions, loot, coupons and other conditional
+benefits remain table-adjudicated and are identified in the selection UI. Prior
+partially applied benefits must be completed/corrected with GM tools before
+recording them as already applied. Selection/review is one-time; later respecs and
+expanded catalogs are future work. No dependencies were added.
 
 ## Current milestone: encounter popup and creature catalog (017)
 
@@ -216,11 +278,11 @@ manual checks; 008 live database, build, and browser checks remain pending.
 | --- | --- | --- | --- |
 | 1. Foundation | Standalone project, MVC structure, health rules, local saves, checks | Create and track a crawler locally | Complete |
 | 2. Lobby, accounts, and shared games | Authentication, Host/Join, codes, per-game roles, ownership, database storage, conflict handling | Host or join games and resume the correct shared crawler from another device | Installed; user reports working |
-| 3. Complete crawler sheets | Human Tutorial entry, official stats/health/Mana/Favor/numbering first; remaining sheet sections afterward | Create and play a game-specific crawler using official rules | Human entry user verified; remaining sheet sections incremental |
+| 3. Complete crawler sheets | Human Tutorial entry, official stats/health/Mana/Favor/numbering first; remaining sheet sections afterward | Create and play a game-specific crawler using official rules | Human entry verified; Third Floor selection starter catalog implemented in 018; broader creation remains |
 | 4. Skills and spells | Catalogs, assignments, descriptions, usage rules | Manage crawler abilities during play | Learned abilities and self-effect links implemented; broader execution remains |
 | 5. Inventory, equipment, and effects | Item definitions, owned instances, equipment, traits, supported calculations | Award and manage equipment and its effects | Inventory, equipment, tracked effects, and templates implemented |
 | 6. Encounters and combat | Monsters, encounter setup, initiative, turns, health, statuses | Run combat from a GM dashboard | Encounter turn foundation implemented; combat actions remain |
-| 7. Achievements, rewards, and progression | Awards, loot, history, controlled level-up | Award rewards and apply eligible progression | GM-controlled advancement implemented in 015; wider rewards remain |
+| 7. Achievements, rewards, and progression | Awards, loot, history, controlled level-up | Award rewards and apply eligible progression | Advancement complete in 015; Third Floor selection implemented in 018 pending hosted/browser acceptance; wider rewards remain |
 | 8. Release readiness | Usability, mobile layout, export/recovery, hosting, broader checks | Use the application reliably for regular sessions | Planned |
 
 Detailed game rules must be settled before implementing each feature's
@@ -297,7 +359,7 @@ Remaining before marking the update verified:
 See TUTORIAL_SETUP.md and TUTORIAL_RULES.md. Starting gear is currently notes;
 consumable quantities now have explicit inventory tracking. Attack execution and
 automatic potion effects remain future work.
-Animal entry, Third Floor creation, race/class catalogs, portraits, rests,
+Animal entry, Third Floor creation, expanded Race/Class catalogs, portraits, rests,
 Dying-round countdowns, and broader progression remain future tasks. GM-controlled
 level advancement is implemented in 015; tracked effects and typed defenses have
 their own later milestones above.

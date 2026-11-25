@@ -27,6 +27,9 @@
 .resourceButton strong { font-size: 1.7rem; }
 .error { color: #a51d27; white-space: normal; }
 .hint { color: #475569; font-size: .85rem; }
+.selectionOffers { display: grid; gap: .65rem; max-height: 20rem; overflow: auto; padding: .4rem; border: 1px solid #cbd5e1; border-radius: .3rem; }
+.selectionOffers label { grid-template-columns: auto 1fr; align-items: start; }
+.selectionOffers small { grid-column: 2; color: #9f1239; }
 .modal :focus-visible,.inlineValue:focus-visible,.manage:focus-visible,.statToggle:focus-visible,.resourceButton:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 @media(max-width:480px) { .modal { padding: 1rem; } .damageRow { grid-template-columns: 1fr; } }
 

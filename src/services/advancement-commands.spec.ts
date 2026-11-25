@@ -53,11 +53,11 @@ describe('advancement command boundary', () => {
     await expect(executeAdvancementCommand(workspace(), form('award', { amount: 1, source: 'xp', reason: 'Test' }), { act })).rejects.toThrow('source');
     await expect(executeAdvancementCommand(workspace(), form('award', { amount: 1, source: 'quest', reason: ' ' }), { act })).rejects.toThrow('reason'); expect(act).toHaveBeenCalledTimes(1);
   });
-  it('requires a confirmed saferoom and supports revoke and selected Human benefits', async () => {
+  it('requires a confirmed saferoom, supports revoke and retires the independent Human toggle', async () => {
     const act = vi.fn();
     await expect(executeAdvancementCommand(workspace(), form('authorize', { amount: 3, saferoom: false, reason: 'Room' }), { act })).rejects.toThrow('saferoom');
     await executeAdvancementCommand(workspace(), form('authorize', { amount: 0, reason: 'Left room' }), { act });
-    await executeAdvancementCommand(workspace(), form('human-benefit', { enabled: true, confirmed: true, reason: 'Chose Human' }), { act }); expect(act).toHaveBeenCalledTimes(2);
+    await expect(executeAdvancementCommand(workspace(), form('human-benefit', { enabled: true, confirmed: true, reason: 'Chose Human' }), { act })).rejects.toThrow('Race/Class'); expect(act).toHaveBeenCalledTimes(1);
   });
   it('rejects effective stat and Favor overflow and propagates storage failures', async () => {
     const act = vi.fn(), w = workspace();
