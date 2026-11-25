@@ -3,6 +3,9 @@ export interface EncounterParticipant {
   readonly kind: 'crawler' | 'monster';
   readonly name: string;
   readonly initiative: number | null;
+  readonly catalogId: string | null;
+  readonly maxHealthSlots: number | null;
+  readonly currentHealthSlots: number | null;
 }
 
 export type EncounterMode = 'mob' | 'pvp';
@@ -76,7 +79,17 @@ export function restoreEncounter(value: unknown): Encounter {
   const restored: EncounterParticipant[] = participants.map((value) => {
     const p = asRecord(value);
     if (p.kind !== 'crawler' && p.kind !== 'monster') throw new Error('Invalid encounter participant kind.');
-    return { id: asUuid(p.id), kind: p.kind, name: encounterName(p.name), initiative: p.initiative === null ? null : encounterInitiative(p.initiative) };
+    const catalogId = p.catalogId === undefined || p.catalogId === null ? null : p.catalogId;
+    if (catalogId !== null && (p.kind !== 'monster' || typeof catalogId !== 'string' || !/^(core|toolkit|par)-\d+-\d+$/.test(catalogId))) throw new Error('Invalid encounter creature.');
+    const maxHealthSlots = p.maxHealthSlots === undefined || p.maxHealthSlots === null ? null : p.maxHealthSlots;
+    const currentHealthSlots = p.currentHealthSlots === undefined || p.currentHealthSlots === null ? null : p.currentHealthSlots;
+    if (catalogId === null ? (maxHealthSlots !== null || currentHealthSlots !== null) :
+      (!Number.isSafeInteger(maxHealthSlots) || (maxHealthSlots as number) < 1 || (maxHealthSlots as number) > 100 ||
+       !Number.isSafeInteger(currentHealthSlots) || (currentHealthSlots as number) < 0 || (currentHealthSlots as number) > (maxHealthSlots as number))) {
+      throw new Error('Invalid encounter creature health.');
+    }
+    return { id: asUuid(p.id), kind: p.kind, name: encounterName(p.name), initiative: p.initiative === null ? null : encounterInitiative(p.initiative),
+      catalogId: catalogId as string | null, maxHealthSlots: maxHealthSlots as number | null, currentHealthSlots: currentHealthSlots as number | null };
   });
   if (new Set(restored.map((p) => p.id)).size !== restored.length) throw new Error('Duplicate encounter participant.');
   const currentParticipantId = row.current_participant_id === null ? null : asUuid(row.current_participant_id);

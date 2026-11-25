@@ -1,10 +1,11 @@
 import { getCampaignRole } from '@/domain';
-import { encounterInitiative, encounterName, nextTurn, type Encounter, type EncounterMode } from '@/domain/encounters';
+import { encounterInitiative, nextTurn, type Encounter, type EncounterMode } from '@/domain/encounters';
+import { getCreature } from '@/domain/creature-catalog';
 import { requireUuid, type CampaignWorkspace } from './campaign-workspace';
 
-export type EncounterOperation = 'start' | 'add-crawler' | 'add-monster' | 'initiative' | 'remove' | 'next' | 'end';
+export type EncounterOperation = 'start' | 'add-crawler' | 'add-monster' | 'assign-creature' | 'monster-health' | 'initiative' | 'remove' | 'next' | 'end';
 export interface EncounterWritePort {
-  act(input: { campaignId: string; version: string | null; operation: EncounterOperation; participantId?: string; name?: string; initiative?: number; mode?: EncounterMode }): Promise<void>;
+  act(input: { campaignId: string; version: string | null; operation: EncounterOperation; participantId?: string; name?: string; initiative?: number; mode?: EncounterMode; catalogId?: string; healthSlots?: number }): Promise<void>;
 }
 
 function required(form: FormData, name: string): string {
@@ -40,8 +41,27 @@ export async function executeEncounterCommand(workspace: CampaignWorkspace, form
   if (operation === 'add-monster') {
     if (encounter.mode !== 'mob') throw new RangeError('PvP encounters contain crawlers only.');
     if (encounter.participants.length >= 50) throw new RangeError('Encounter is full.');
-    await port.act({ ...base, operation, name: encounterName(required(form, 'name'), 100) });
+    const catalogId = required(form, 'catalogId');
+    if (!getCreature(catalogId)) throw new RangeError('Choose a creature from the official catalog.');
+    await port.act({ ...base, operation, catalogId });
     return 'Monster added to encounter.';
+  }
+  if (operation === 'assign-creature' || operation === 'monster-health') {
+    const participantId = requireUuid(required(form, 'participantId'));
+    const participant = encounter.participants.find((entry) => entry.id === participantId);
+    if (!participant || participant.kind !== 'monster') throw new RangeError('Monster is no longer in the encounter.');
+    if (operation === 'assign-creature') {
+      if (participant.catalogId) throw new RangeError('This monster already has a creature write-up.');
+      const catalogId = required(form, 'catalogId');
+      if (!getCreature(catalogId)) throw new RangeError('Choose a creature from the official catalog.');
+      await port.act({ ...base, operation, participantId, catalogId });
+      return 'Creature write-up attached.';
+    }
+    if (participant.maxHealthSlots === null) throw new RangeError('Attach a creature write-up before tracking health.');
+    const healthSlots = Number(required(form, 'healthSlots'));
+    if (!Number.isSafeInteger(healthSlots) || healthSlots < 0 || healthSlots > participant.maxHealthSlots) throw new RangeError(`Enter remaining Health Bar slots from 0 to ${participant.maxHealthSlots}.`);
+    await port.act({ ...base, operation, participantId, healthSlots });
+    return 'Monster health saved.';
   }
   if (operation === 'initiative' || operation === 'remove') {
     if (operation === 'initiative' && encounter.mode !== 'pvp') throw new RangeError('Mob combat does not use initiative.');

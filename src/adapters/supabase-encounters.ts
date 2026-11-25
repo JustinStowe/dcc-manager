@@ -15,6 +15,8 @@ export async function createEncounterPort(): Promise<EncounterWritePort> {
         p_name: input.name ?? null,
         p_initiative: input.initiative ?? null,
         p_mode: input.mode ?? null,
+        p_catalog_id: input.catalogId ?? null,
+        p_health_slots: input.healthSlots ?? null,
       });
       if (error) throw campaignDatabaseError(error);
     },

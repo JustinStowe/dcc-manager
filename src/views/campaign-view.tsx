@@ -10,6 +10,7 @@ import { formatGameCode, type HostSettings } from '@/services/game-lobby';
 import { SavedCrawlerChoices } from '@/components/saved-crawler-choices';
 import { DeleteGame } from '@/components/delete-game';
 import { EncounterView } from '@/views/encounter-view';
+import { EncounterDialog } from '@/components/encounter-dialog';
 import type { SavedCrawlerProfile } from '@/services/crawler-profiles';
 
 export function CampaignView({ workspace, userId, storageError, hostSettings, profiles, creationOnly = false, selectedCrawlerId }: {
@@ -59,7 +60,7 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
               </div>
             </section>
           )}
-          {!creationOnly && role === 'gm' && <EncounterView campaign={campaign} encounter={workspace?.encounter ?? null} />}
+          {!creationOnly && role === 'gm' && <EncounterDialog campaignId={campaign.id} active={workspace?.encounter?.active ?? false} round={workspace?.encounter?.round ?? null}><EncounterView campaign={campaign} encounter={workspace?.encounter ?? null} /></EncounterDialog>}
           {crawlers.length === 0 && <p>No crawlers are available to your account yet.</p>}
           {!creationOnly && crawlers.length > 0 && <nav className={styles.crawlerTabs} aria-label={role === 'gm' ? 'Select a crawler' : 'Your crawler'}>
             {crawlers.map(({ crawler }) => <Link key={crawler.id} href={`/games/${campaign.id}?crawler=${crawler.id}#crawler-record`} prefetch={false} aria-current={selected?.crawler.id === crawler.id ? 'page' : undefined}>{crawler.name}</Link>)}

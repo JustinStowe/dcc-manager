@@ -133,6 +133,18 @@ their owning player; the sheet regression uses checked level awards after 015.
 Lint excludes the temporary `tmp/` directory so historical scratch dependencies
 cannot interfere with application checks. Unrelated encounter changes are preserved.
 
+## Current milestone: encounter popup and creature catalog (017)
+
+The GM encounter tracker opens in a popup. A searchable catalog contains 304
+stat blocks from the supplied Core Rulebook, Game Master's Toolkit, and Par for
+the Course PDFs. Newly added monsters retain a catalog reference and
+encounter-specific remaining Health Bar slots. Their Manage area shows the
+stat block excerpt and source page, with a bounded health editor. Existing
+free-text monsters can attach an official entry. Migration 017 validates
+catalog selections and health changes in the database. Apply it after 016 and
+run the encounter SQL assertions. Automated damage and attacks remain future
+combat work.
+
 ## Previous milestone: encounters and turns (014, corrected in 016)
 
 One GM-managed encounter per campaign tracks official crawlers and named
@@ -143,7 +155,7 @@ fresh rolls after each round. A completed round advances active timed effects
 once for participating crawlers in the same transaction. GM-only reads and
 version-checked writes preserve per-game permissions. Migration 016 converts
 existing encounter rosters from the former numeric order to Mob phases;
-monster health, attacks, targeting and damage remain future work. Apply 016
+monster attacks, targeting and damage remain future work. Apply 016
 and run the updated SQL assertions and browser checks in `README.md`.
 
 ## Previous milestone: effect templates and unified abilities (013)

@@ -94,8 +94,22 @@ Rules reference: Core Rulebook, printed p. 87.
 Check both flows in GM and player sessions, stale saves in a second GM tab,
 effect expiry at round end, mobile layout, and the current marker. The GM can
 still advance effects manually, so avoid doing that for a round already
-advanced in the encounter tracker. Monster health, attacks, targeting and
-damage remain later combat work.
+advanced in the encounter tracker. Automated attacks, targeting and damage
+remain later combat work.
+
+### Encounter popup and official creature catalog (017)
+
+Apply `supabase/migrations/202611250017_creature_catalog.sql` once after 016,
+then run `supabase/tests/encounter_permissions.sql` as administrator. Its
+fixtures roll back and it prints PASS. Run `npm run check` afterward. The GM
+opens the encounter tracker as a popup from the game dashboard. In Mob combat,
+search the supplied official creature stat blocks when adding a monster. The
+monster's Manage area shows its defenses, stats, attack and note excerpts, source PDF
+page, and remaining Health Bar slots. The GM sets remaining slots from zero to
+the creature's maximum; this does not calculate damage or DR automatically.
+Monsters saved before 017 can gain a catalog write-up through Manage. Attaching
+one replaces their encounter name with the official creature name and starts
+them at full Health Bar slots.
 
 
 ### Tracked effects and automatic updates (011–012)

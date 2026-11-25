@@ -38,14 +38,14 @@ describe('encounter commands', () => {
   it('adds Mob participants without assigning initiative', async () => {
     const p = port();
     await executeEncounterCommand(workspace(), form('add-crawler', { participantId: CRAWLER }), p);
-    await executeEncounterCommand(workspace(), form('add-monster', { name: 'Goblin' }), p);
+    await executeEncounterCommand(workspace(), form('add-monster', { catalogId: 'core-269-1' }), p);
     expect(p.act).toHaveBeenNthCalledWith(1, { campaignId: GAME, version: VERSION, operation: 'add-crawler', participantId: CRAWLER });
-    expect(p.act).toHaveBeenNthCalledWith(2, { campaignId: GAME, version: VERSION, operation: 'add-monster', name: 'Goblin' });
+    expect(p.act).toHaveBeenNthCalledWith(2, { campaignId: GAME, version: VERSION, operation: 'add-monster', catalogId: 'core-269-1' });
     await expect(executeEncounterCommand(workspace(), form('initiative', { participantId: CRAWLER, initiative: '12' }), p)).rejects.toThrow('does not use initiative');
   });
   it('restricts PvP to crawlers and validates the recorded total', async () => {
     const p = port();
-    const current: Encounter = { ...encounter, mode: 'pvp', phase: null, participants: [{ id: CRAWLER, kind: 'crawler', name: 'Carl', initiative: null }] };
+    const current: Encounter = { ...encounter, mode: 'pvp', phase: null, participants: [{ id: CRAWLER, kind: 'crawler', name: 'Carl', initiative: null, catalogId: null, maxHealthSlots: null, currentHealthSlots: null }] };
     await expect(executeEncounterCommand(workspace(GM, current), form('add-monster', { name: 'Goblin' }), p)).rejects.toThrow('crawlers only');
     await expect(executeEncounterCommand(workspace(GM, current), form('next'), p)).rejects.toThrow('fresh');
     await executeEncounterCommand(workspace(GM, current), form('initiative', { participantId: CRAWLER, initiative: '17' }), p);
@@ -53,10 +53,21 @@ describe('encounter commands', () => {
   });
   it('requires confirmation for removal and ending', async () => {
     const p = port();
-    const current: Encounter = { ...encounter, participants: [{ id: CRAWLER, kind: 'crawler', name: 'Carl', initiative: null }] };
+    const current: Encounter = { ...encounter, participants: [{ id: CRAWLER, kind: 'crawler', name: 'Carl', initiative: null, catalogId: null, maxHealthSlots: null, currentHealthSlots: null }] };
     await expect(executeEncounterCommand(workspace(GM, current), form('remove', { participantId: CRAWLER }), p)).rejects.toThrow('Confirm');
     await expect(executeEncounterCommand(workspace(), form('end'), p)).rejects.toThrow('Confirm');
     await executeEncounterCommand(workspace(GM, current), form('next'), p);
     expect(p.act).toHaveBeenCalledWith({ campaignId: GAME, version: VERSION, operation: 'next' });
+  });
+  it('attaches catalog write-ups to legacy monsters and bounds remaining health', async () => {
+    const p = port();
+    const legacy = { id: CRAWLER, kind: 'monster' as const, name: 'Legacy monster', initiative: null, catalogId: null, maxHealthSlots: null, currentHealthSlots: null };
+    await executeEncounterCommand(workspace(GM, { ...encounter, participants: [legacy] }), form('assign-creature', { participantId: CRAWLER, catalogId: 'core-269-1' }), p);
+    expect(p.act).toHaveBeenCalledWith({ campaignId: GAME, version: VERSION, operation: 'assign-creature', participantId: CRAWLER, catalogId: 'core-269-1' });
+    const attached = { ...legacy, name: 'Bad Llama', catalogId: 'core-269-1', maxHealthSlots: 3, currentHealthSlots: 3 };
+    const current = workspace(GM, { ...encounter, participants: [attached] });
+    await executeEncounterCommand(current, form('monster-health', { participantId: CRAWLER, healthSlots: '0' }), p);
+    expect(p.act).toHaveBeenLastCalledWith({ campaignId: GAME, version: VERSION, operation: 'monster-health', participantId: CRAWLER, healthSlots: 0 });
+    await expect(executeEncounterCommand(current, form('monster-health', { participantId: CRAWLER, healthSlots: '4' }), p)).rejects.toThrow('0 to 3');
   });
 });

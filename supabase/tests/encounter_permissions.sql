@@ -1,4 +1,4 @@
--- Run as administrator after migration 016. All fixture changes roll back.
+-- Run as administrator after migration 017. All fixture changes roll back.
 begin;
 create function pg_temp.encounter_assert(ok boolean, message text) returns void language plpgsql as $$
 begin if ok is distinct from true then raise exception '%', message; end if; end $$;
@@ -11,12 +11,12 @@ begin
   end;
   raise exception 'Unexpected success: %', statement;
 end $$;
-create function pg_temp.encounter_act(op text, participant uuid default null, name text default null, initiative integer default null, mode text default null) returns void
+create function pg_temp.encounter_act(op text, participant uuid default null, name text default null, initiative integer default null, mode text default null, catalog_id text default null, health_slots integer default null) returns void
 language plpgsql security invoker as $$
 begin
   perform public.dcc_encounter_action(current_setting('dcc_test.encounter_game')::uuid,
     (select version from public.dcc_encounters where campaign_id = current_setting('dcc_test.encounter_game')::uuid),
-    op, participant, name, initiative, mode);
+    op, participant, name, initiative, mode, catalog_id, health_slots);
 end $$;
 insert into auth.users(id,email,email_confirmed_at) values
   ('f1111111-1111-4111-8111-111111111111','encounter-gm@example.invalid',now()),
@@ -51,12 +51,26 @@ select pg_temp.encounter_assert((select active and mode='mob' and phase='mob-dec
 select pg_temp.encounter_error(format('select public.dcc_encounter_action(%L,%L,''end'')',
   current_setting('dcc_test.encounter_game'),'00000000-0000-4000-8000-000000000000'),'40001');
 select pg_temp.encounter_act('add-crawler',current_setting('dcc_test.encounter_crawler')::uuid);
-select pg_temp.encounter_act('add-monster',null,'Goblin');
+select pg_temp.encounter_act('add-monster',null,null,null,null,'core-269-1');
 select pg_temp.encounter_assert((select participants->0->>'id'=current_setting('dcc_test.encounter_crawler')
-  and participants->1->>'name'='Goblin' and participants->0->'initiative'='null'::jsonb and current_participant_id is null
+  and participants->1->>'name'='Bad Llama' and participants->1->>'catalogId'='core-269-1'
+  and (participants->1->>'currentHealthSlots')::integer=3 and participants->0->'initiative'='null'::jsonb and current_participant_id is null
   from public.dcc_encounters where campaign_id=current_setting('dcc_test.encounter_game')::uuid),'Mob roster or no-initiative rule incorrect.');
+select set_config('dcc_test.encounter_monster',(select participants->1->>'id' from public.dcc_encounters where campaign_id=current_setting('dcc_test.encounter_game')::uuid),true);
+select pg_temp.encounter_act('monster-health',current_setting('dcc_test.encounter_monster')::uuid,null,null,null,null,1);
+select pg_temp.encounter_assert((select (participants->1->>'currentHealthSlots')::integer=1 from public.dcc_encounters where campaign_id=current_setting('dcc_test.encounter_game')::uuid),'Monster health did not update.');
+select pg_temp.encounter_error(format('select pg_temp.encounter_act(''monster-health'',%L,null,null,null,null,4)',current_setting('dcc_test.encounter_monster')),'22023');
+select pg_temp.encounter_error('select count(*) from dcc_private.creature_catalog','42501');
+reset role;
+update public.dcc_encounters set participants = participants || '[{"id":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","kind":"monster","name":"Legacy monster","initiative":null}]'::jsonb
+  where campaign_id=current_setting('dcc_test.encounter_game')::uuid;
+set local role authenticated;
+select pg_temp.encounter_act('assign-creature','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',null,null,null,'core-269-1');
+select pg_temp.encounter_assert((select participants->2->>'catalogId'='core-269-1' and (participants->2->>'currentHealthSlots')::integer=3
+  from public.dcc_encounters where campaign_id=current_setting('dcc_test.encounter_game')::uuid),'Legacy monster write-up did not attach.');
+select pg_temp.encounter_error('select pg_temp.encounter_act(''assign-creature'',''aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'',null,null,null,''core-269-1'')','22023');
 select pg_temp.encounter_error(format('select pg_temp.encounter_act(''add-crawler'',%L)',current_setting('dcc_test.encounter_crawler')),'22023');
-select pg_temp.encounter_error('select pg_temp.encounter_act(''add-monster'',null,repeat(''X'',101))','22023');
+select pg_temp.encounter_error('select pg_temp.encounter_act(''add-monster'',null,null,null,null,''not-an-official-id'')','22023');
 select pg_temp.encounter_error(format('select pg_temp.encounter_act(''initiative'',%L,null,12)',current_setting('dcc_test.encounter_crawler')),'22023');
 select public.dcc_encounter_action(current_setting('dcc_test.encounter_other')::uuid,null,'start',null,null,null,'mob');
 select pg_temp.encounter_error(format('select public.dcc_encounter_action(%L,(select version from public.dcc_encounters where campaign_id=%L),''add-crawler'',%L)',

@@ -9,13 +9,13 @@ const pvp: Encounter = {
   id: GAME, campaignId: GAME, version: GAME, active: true, mode: 'pvp', phase: null,
   round: 3, currentParticipantId: FIRST,
   participants: [
-    { id: FIRST, kind: 'crawler', name: 'Carl', initiative: 18 },
-    { id: SECOND, kind: 'crawler', name: 'Donut', initiative: 18 },
-    { id: THIRD, kind: 'crawler', name: 'Mongo', initiative: 12 },
+    { id: FIRST, kind: 'crawler', name: 'Carl', initiative: 18, catalogId: null, maxHealthSlots: null, currentHealthSlots: null },
+    { id: SECOND, kind: 'crawler', name: 'Donut', initiative: 18, catalogId: null, maxHealthSlots: null, currentHealthSlots: null },
+    { id: THIRD, kind: 'crawler', name: 'Mongo', initiative: 12, catalogId: null, maxHealthSlots: null, currentHealthSlots: null },
   ],
 };
 const mob: Encounter = { ...pvp, mode: 'mob', phase: 'mob-declaration', currentParticipantId: null,
-  participants: [{ id: FIRST, kind: 'crawler', name: 'Carl', initiative: null }, { id: THIRD, kind: 'monster', name: 'Goblin', initiative: null }] };
+  participants: [{ id: FIRST, kind: 'crawler', name: 'Carl', initiative: null, catalogId: null, maxHealthSlots: null, currentHealthSlots: null }, { id: THIRD, kind: 'monster', name: 'Goblin', initiative: null, catalogId: null, maxHealthSlots: null, currentHealthSlots: null }] };
 
 describe('official encounter flow', () => {
   it('steps through Mob phases, wrapping only after Clean up', () => {
@@ -42,5 +42,7 @@ describe('official encounter flow', () => {
     expect(() => restoreEncounter({ ...raw, mode: 'pvp', phase: null })).toThrow('PvP');
     expect(() => restoreEncounter({ ...raw, participants: [mob.participants[0], mob.participants[0]] })).toThrow('Duplicate');
     expect(() => restoreEncounter({ ...raw, current_participant_id: FIRST })).toThrow('phase');
+    expect(restoreEncounter({ ...raw, participants: [{ ...mob.participants[1], catalogId: 'core-269-1', maxHealthSlots: 3, currentHealthSlots: 1 }] }).participants[0].currentHealthSlots).toBe(1);
+    expect(() => restoreEncounter({ ...raw, participants: [{ ...mob.participants[1], catalogId: 'core-269-1', maxHealthSlots: 3, currentHealthSlots: 4 }] })).toThrow('health');
   });
 });
