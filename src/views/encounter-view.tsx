@@ -4,58 +4,70 @@ import { CampaignForm } from '@/components/campaign-form';
 import { encounterAction } from '@/app/campaign/encounter-actions';
 import styles from '@/styles/campaign.module.css';
 
+const PHASE_LABELS = {
+  'mob-declaration': 'Mob action declaration',
+  'crawler-reaction': 'Crawler reaction',
+  'mob-resolution': 'Mob action resolution',
+  'crawler-action': 'Crawler action',
+  cleanup: 'Clean up',
+} as const;
+
 export function EncounterView({ campaign, encounter }: { campaign: Campaign; encounter: Encounter | null }) {
   const available = campaign.crawlers.filter(({ crawler }) => crawler.ruleset === 'tutorial-v1' && !encounter?.participants.some((entry) => entry.id === crawler.id));
   return <section className={styles.panel} aria-label="Encounter tracker">
     <div className={styles.encounterHeading}>
-      <div><h2>Encounter tracker</h2><p>Set initiative at the table. The GM controls turns and rounds for this game.</p></div>
-      {encounter?.active && <strong>Round {encounter.round}</strong>}
+      <div><h2>Encounter tracker</h2>{encounter?.active && <span className={styles.encounterRound}>Round {encounter.round} · {encounter.mode === 'mob' ? PHASE_LABELS[encounter.phase!] : 'PvP'}</span>}</div>
+      {encounter?.active && encounter.participants.length > 0 && <CampaignForm campaignId={campaign.id} label="Advance encounter turn" submitAction={encounterAction}>
+        <input type="hidden" name="operation" value="next" /><input type="hidden" name="version" value={encounter.version} />
+        <button type="submit">{encounter.mode === 'mob' ? encounter.phase === 'cleanup' ? 'Finish round' : 'Next phase' : encounter.currentParticipantId === null ? 'Start turns' : 'Next turn'}</button>
+      </CampaignForm>}
     </div>
     {!encounter?.active ? <>
-      {encounter && <p>Previous encounter ended at round {encounter.round}.</p>}
       <CampaignForm campaignId={campaign.id} label="Start encounter" submitAction={encounterAction}>
         <input type="hidden" name="operation" value="start" />
+        <label>Combat flow <select name="mode" defaultValue="mob"><option value="mob">Mob combat · official phases</option><option value="pvp">Optional PvP · initiative</option></select></label>
         <button type="submit">Start encounter</button>
       </CampaignForm>
     </> : <>
-      <p>Add participants and set initiative, then start turns. Advancing past the last participant starts the next round and advances timed effects on participating crawlers. Keep using each crawler’s sheet for health and actions.</p>
-      <ol className={styles.encounterList}>
-        {encounter.participants.map((entry) => <li key={entry.id} className={entry.id === encounter.currentParticipantId ? styles.encounterCurrent : undefined}>
-          <div><strong>{entry.name}</strong> <span>({entry.kind})</span>{entry.id === encounter.currentParticipantId && <b> · Current turn</b>}</div>
-          <div>Initiative {entry.initiative}</div>
+      <p className={styles.encounterHint}>{encounter.mode === 'mob' ? 'Mob combat has no initiative. The marker shows which group is acting; crawlers choose their own order. Finish Clean up to advance timed effects.' : 'Each round, enter d20 + Dex totals. Tied crawlers act simultaneously. A sneak attacker rolls the first round with Advantage.'}</p>
+      <ul className={styles.encounterList} aria-label="Encounter participants">
+        {encounter.participants.map((entry) => {
+          const active = encounter.mode === 'mob'
+            ? encounter.phase !== 'cleanup' && (encounter.phase === 'crawler-reaction' || encounter.phase === 'crawler-action' ? entry.kind === 'crawler' : entry.kind === 'monster')
+            : encounter.currentParticipantId !== null && entry.initiative !== null && entry.initiative === encounter.participants.find((p) => p.id === encounter.currentParticipantId)?.initiative;
+          return <li key={entry.id} className={active ? styles.encounterCurrent : undefined}>
+          <span className={styles.encounterName}>{active && <span className={styles.encounterMarker} aria-label={encounter.mode === 'mob' ? 'Acting group' : 'Current turn'}>▶</span>}<strong>{entry.name}</strong> <small>{entry.kind}</small></span>
+          <span className={styles.encounterInitiative}>Initiative <strong>{entry.initiative ?? '—'}</strong></span>
+          <details className={styles.encounterManage}><summary>Manage</summary>
           <div className={styles.encounterRowActions}>
+            {encounter.mode === 'pvp' &&
             <CampaignForm campaignId={campaign.id} label={`Change ${entry.name} initiative`} submitAction={encounterAction}>
               <input type="hidden" name="operation" value="initiative" /><input type="hidden" name="version" value={encounter.version} /><input type="hidden" name="participantId" value={entry.id} />
-              <label>Initiative <input name="initiative" type="number" min={-1000} max={1000} step={1} defaultValue={entry.initiative} required /></label>
+              <label>d20 + Dex total <input name="initiative" type="number" min={1} max={10020} step={1} defaultValue={entry.initiative ?? ''} required /></label>
               <button type="submit">Save initiative</button>
-            </CampaignForm>
+            </CampaignForm>}
             <CampaignForm campaignId={campaign.id} label={`Remove ${entry.name}`} submitAction={encounterAction}>
               <input type="hidden" name="operation" value="remove" /><input type="hidden" name="version" value={encounter.version} /><input type="hidden" name="participantId" value={entry.id} />
               <label><input type="checkbox" name="confirmed" value="yes" required /> Confirm removal</label>
               <button type="submit">Remove</button>
             </CampaignForm>
           </div>
-        </li>)}
-      </ol>
-      {encounter.participants.length === 0 && <p>Add a crawler or monster to set the first turn.</p>}
-      {encounter.participants.length > 0 && <CampaignForm campaignId={campaign.id} label="Advance encounter turn" submitAction={encounterAction}>
-        <input type="hidden" name="operation" value="next" /><input type="hidden" name="version" value={encounter.version} />
-        <button type="submit">{encounter.currentParticipantId === null ? 'Start turns' : 'Next turn'}</button>
-      </CampaignForm>}
-      <div className={styles.encounterAdd}>
+          </details>
+        </li>;})}
+      </ul>
+      {encounter.participants.length === 0 && <p>Add a participant to begin.</p>}
+      <details className={styles.encounterAddDetails}><summary>Add participant</summary><div className={styles.encounterAdd}>
         {available.length > 0 && encounter.participants.length < 50 && <CampaignForm campaignId={campaign.id} label="Add crawler to encounter" submitAction={encounterAction}>
           <input type="hidden" name="operation" value="add-crawler" /><input type="hidden" name="version" value={encounter.version} />
           <label>Crawler <select name="participantId" required>{available.map(({ crawler }) => <option key={crawler.id} value={crawler.id}>{crawler.name}</option>)}</select></label>
-          <label>Initiative <input name="initiative" type="number" min={-1000} max={1000} step={1} defaultValue={0} required /></label>
           <button type="submit">Add crawler</button>
         </CampaignForm>}
-        {encounter.participants.length < 50 && <CampaignForm campaignId={campaign.id} label="Add monster to encounter" submitAction={encounterAction}>
+        {encounter.mode === 'mob' && encounter.participants.length < 50 && <CampaignForm campaignId={campaign.id} label="Add monster to encounter" submitAction={encounterAction}>
           <input type="hidden" name="operation" value="add-monster" /><input type="hidden" name="version" value={encounter.version} />
           <label>Monster name <input name="name" maxLength={100} required /></label>
-          <label>Initiative <input name="initiative" type="number" min={-1000} max={1000} step={1} defaultValue={0} required /></label>
           <button type="submit">Add monster</button>
         </CampaignForm>}
-      </div>
+      </div></details>
       <details className={styles.dangerZone}><summary>End encounter</summary>
         <CampaignForm campaignId={campaign.id} label="End encounter" submitAction={encounterAction}>
           <input type="hidden" name="operation" value="end" /><input type="hidden" name="version" value={encounter.version} />

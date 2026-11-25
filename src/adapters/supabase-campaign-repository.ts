@@ -123,7 +123,7 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   for (const id of Object.keys(sheets)) sheets[id] = { ...sheets[id], advancementHistory: history[id] ?? [] };
   let encounter = null;
   if (role === 'gm') {
-    const result = await client.from('dcc_encounters').select('id,campaign_id,version,active,round,current_participant_id,participants').eq('campaign_id', campaignId).maybeSingle();
+    const result = await client.from('dcc_encounters').select('id,campaign_id,version,active,mode,phase,round,current_participant_id,participants').eq('campaign_id', campaignId).maybeSingle();
     if (result.error) throw campaignDatabaseError(result.error);
     encounter = result.data ? restoreEncounter(result.data) : null;
     if (encounter && encounter.campaignId !== campaignId) throw new Error('Invalid campaign encounter.');

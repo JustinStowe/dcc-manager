@@ -1,6 +1,6 @@
 # Dungeon Crawler Carl Manager — Project Plan
 
-Last updated: November 24, 2026
+Last updated: November 25, 2026
 
 ## Goal
 
@@ -58,8 +58,8 @@ part of the active milestone, rather than deferred work.
 | Typed defenses | Implemented in milestone 010; full local/database/browser acceptance pending |
 | Learned abilities and advancement marks | Implemented in milestone 008; database execution and full local/browser acceptance pending |
 | Effect templates and unified abilities | Implemented in milestone 013; user reports completion |
-| Encounter and turn tracker | Implemented in milestone 014; database and browser acceptance pending |
-| GM-controlled level advancement | Implemented in milestone 015; application/local SQL verification in progress; hosted/browser acceptance pending |
+| Encounter tracker | Compact official Mob phases and optional PvP initiative implemented in 016; database and browser acceptance pending |
+| GM-controlled level advancement | Implemented in milestone 015; full application checks and isolated SQL verification passed; hosted/browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -109,7 +109,13 @@ prerequisite checks.
       Human race selection; apply only to future gains, with no retroactive award.
 - [x] Add domain, permission-boundary, UI and database assertions, including stale
       writes, overspending, game/writeup isolation and derived-stat rollback.
-- [ ] Finish the full application checks and isolated migration/regression checks.
+- [x] Pass `npm run check`: 855 tests across 52 files, ESLint, route/type
+      generation, TypeScript, and the Next.js production build.
+- [x] Apply 001–015 in isolated PostgreSQL and verify the actual 014→015 upgrade
+      preserves existing crawler fields/resources, over-cap levels and writeups,
+      changes versions, and marks existing crawlers for reconciliation.
+- [x] Pass eight SQL suites: advancement, templates, effects/live, encounters,
+      sheet controls, equipment/Hotlist, learned abilities and typed defenses.
 - [ ] Apply migration 015 to the hosted database and run its rollback assertions.
 - [ ] Verify authenticated two-account desktop/mobile/browser acceptance.
 
@@ -120,15 +126,25 @@ Full race/class selection, automatic grinding/reward dice and retroactive level
 corrections remain outside this milestone. Reconciliation is an explicit one-time
 baseline review; ordinary GM stat corrections do not alter spent-point balances.
 
-## Previous milestone: encounters and turns (014)
+Local SQL verification uses minimal Supabase-compatible auth fixtures and a
+stubbed realtime sender. It does not establish hosted Supabase/WebSocket/browser
+acceptance. Existing SQL regression checks now read private saved writeups as
+their owning player; the sheet regression uses checked level awards after 015.
+Lint excludes the temporary `tmp/` directory so historical scratch dependencies
+cannot interfere with application checks. Unrelated encounter changes are preserved.
+
+## Previous milestone: encounters and turns (014, corrected in 016)
 
 One GM-managed encounter per campaign tracks official crawlers and named
-monsters, manual initiative, the current turn, and rounds. A completed round
-advances active timed effects once for participating crawlers in the same
-transaction. GM-only reads and version-checked writes preserve per-game
-permissions. Monster health, attacks, targeting, and damage remain future work.
-Apply migration 014 and run its SQL assertions and browser checks in `README.md`
-before marking it verified.
+monsters in a compact list. Standard Mob combat follows declaration, reaction,
+resolution, crawler action and Clean up phases without initiative. Optional PvP
+records d20 + Dex totals each round, marks ties simultaneously, and requires
+fresh rolls after each round. A completed round advances active timed effects
+once for participating crawlers in the same transaction. GM-only reads and
+version-checked writes preserve per-game permissions. Migration 016 converts
+existing encounter rosters from the former numeric order to Mob phases;
+monster health, attacks, targeting and damage remain future work. Apply 016
+and run the updated SQL assertions and browser checks in `README.md`.
 
 ## Previous milestone: effect templates and unified abilities (013)
 
@@ -269,8 +285,10 @@ Remaining before marking the update verified:
 See TUTORIAL_SETUP.md and TUTORIAL_RULES.md. Starting gear is currently notes;
 consumable quantities now have explicit inventory tracking. Attack execution and
 automatic potion effects remain future work.
-Animal entry, Third Floor creation, race/class catalogs, portraits, automated
-Buffs/defenses, rests, Dying-round countdowns, and advancement remain future tasks.
+Animal entry, Third Floor creation, race/class catalogs, portraits, rests,
+Dying-round countdowns, and broader progression remain future tasks. GM-controlled
+level advancement is implemented in 015; tracked effects and typed defenses have
+their own later milestones above.
 
 ## Architecture
 

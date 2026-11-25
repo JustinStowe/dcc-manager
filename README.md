@@ -58,26 +58,44 @@ stale dialog rejection with drafts retained; owner-only history; and unchanged
 writeups/other games. Check desktop/mobile layout, keyboard access, Cancel/Escape,
 and existing equipment, spells, templates and encounter turns.
 
-### Encounters and turns (014)
+Local verification for 015 passed: `npm run check` (855 tests across 52 files,
+lint, typecheck and production build); the actual 014→015 upgrade with existing
+crawlers, including an over-cap legacy level; and eight SQL suites covering
+advancement, templates, effects/live, encounters, sheet controls, equipment,
+learned abilities and typed defenses. PostgreSQL used minimal compatible auth
+fixtures and a stubbed realtime sender. Hosted migration, real WebSocket
+delivery and authenticated browser acceptance remain pending. Earlier SQL
+writeup-isolation assertions now run as the owning player rather than the GM.
 
-Apply `supabase/migrations/202611240014_encounters.sql` once after migrations
-001–013. Run `supabase/tests/encounter_permissions.sql` as administrator in the
-SQL Editor; its fixtures roll back and it should print a final PASS. Then run
-`npm run check` and `npm run dev`.
+### Official encounter flow (016)
 
-In a GM session, start an encounter, add two official crawlers and a named
-monster, set their initiative, and start turns. The highest initiative acts
-first; ties use a stable participant ID order. Advance through a full round
-and verify only participating crawlers' timed effects lose one round at the
-wrap. Change initiative during combat and confirm the current turn stays on
-the same participant. Remove the current participant, then end and restart
-the encounter; a new encounter begins empty at round 1. Check a second GM tab
-for stale-save protection, a player tab for GM-only visibility, and mobile
-layout. The GM can still advance a crawler's effects manually, so avoid doing
-that for a round already advanced in the encounter tracker.
+Apply `supabase/migrations/202611240016_encounter_rules.sql` once after 014
+and 015. Run the updated `supabase/tests/encounter_permissions.sql` as
+administrator in the SQL Editor; its fixtures roll back and it should print
+a final PASS. Then run `npm run check` and `npm run dev`. Existing encounter
+rosters and round numbers are preserved, but their old numeric order is
+cleared and they resume using the official Mob combat phases.
 
-This slice records monster names and initiative. Monster health, attack rolls,
-targeting, damage, and action timing remain later combat work.
+For regular Mob combat, the compact list shows crawlers and monsters with an
+active-group marker. The five phases are Mob declaration, crawler reaction,
+Mob resolution, crawler action and Clean up. The GM advances phases with one
+button. Crawlers act in any order within their phase; numeric initiative is
+unused. Finishing Clean up starts the next round and advances participating
+crawlers' timed effects atomically. Adjudicate surprise before normal phases.
+Rules reference: Core Rulebook, printed pp. 80–86; Rules for Survival, pp. 32–34.
+
+Optional PvP uses a list of crawlers only. Enter each crawler's d20 + Dex
+total at the start of every round; a sneak attacker has Advantage on the first
+round's roll. Higher totals act first and ties act simultaneously. The next
+turn button skips the rest of a tied group, then clears totals when the round
+ends so the GM can enter fresh rolls. The UI tracks order, not action costs.
+Rules reference: Core Rulebook, printed p. 87.
+
+Check both flows in GM and player sessions, stale saves in a second GM tab,
+effect expiry at round end, mobile layout, and the current marker. The GM can
+still advance effects manually, so avoid doing that for a round already
+advanced in the encounter tracker. Monster health, attacks, targeting and
+damage remain later combat work.
 
 
 ### Tracked effects and automatic updates (011–012)
@@ -268,7 +286,7 @@ Mana, AI Favor, and atomic Heal. The GM edits existing stats and awards Favor.
 Old prototype crawlers require explicit GM review and conversion. Their original
 rows are archived and zero health remains zero. See TUTORIAL_RULES.md for the
 rulebook mapping. Animal entry, Third Floor creation, full inventory/combat,
-advancement, and the remaining sheet sections are still roadmap work.
+broader progression, and the remaining sheet sections are still roadmap work.
 
 ## Architecture
 
