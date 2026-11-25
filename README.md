@@ -6,6 +6,28 @@ and resume the crawler saved for each game.
 
 ## Setup
 
+### Encounters and turns (014)
+
+Apply `supabase/migrations/202611240014_encounters.sql` once after migrations
+001–013. Run `supabase/tests/encounter_permissions.sql` as administrator in the
+SQL Editor; its fixtures roll back and it should print a final PASS. Then run
+`npm run check` and `npm run dev`.
+
+In a GM session, start an encounter, add two official crawlers and a named
+monster, set their initiative, and start turns. The highest initiative acts
+first; ties use a stable participant ID order. Advance through a full round
+and verify only participating crawlers' timed effects lose one round at the
+wrap. Change initiative during combat and confirm the current turn stays on
+the same participant. Remove the current participant, then end and restart
+the encounter; a new encounter begins empty at round 1. Check a second GM tab
+for stale-save protection, a player tab for GM-only visibility, and mobile
+layout. The GM can still advance a crawler's effects manually, so avoid doing
+that for a round already advanced in the encounter tracker.
+
+This slice records monster names and initiative. Monster health, attack rolls,
+targeting, damage, and action timing remain later combat work.
+
+
 ### Tracked effects and automatic updates (011–012)
 
 Follow [EFFECTS_LIVE_SETUP.md](Docs/EFFECTS_LIVE_SETUP.md). After 001–010, apply

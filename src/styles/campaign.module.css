@@ -58,6 +58,14 @@
 .gameManagement { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 2rem; }
 .gameManagement .gameCode { font-size: 1rem; }
 .gameManagement ul { padding-left: 1.2rem; }
+.encounterHeading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.encounterHeading strong { background: #19376d; color: white; padding: 0.5rem 0.8rem; border-radius: 0.5rem; }
+.encounterList { padding-left: 2rem; display: grid; gap: 0.6rem; }
+.encounterList li { padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; background: white; }
+.encounterCurrent { border-color: #19376d !important; box-shadow: inset 4px 0 #19376d; }
+.encounterRowActions, .encounterAdd { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 0.7rem; }
+.encounterRowActions .form, .encounterAdd .form { margin-top: 0.5rem; }
+.encounterRowActions .fields, .encounterAdd .fields { height: 100%; }
 .countBadge { font-size: 0.8rem; background: #e2e8f0; border-radius: 1rem; padding: 0.15rem 0.5rem; }
 .dangerZone { margin-top: 1.5rem; color: #991b1b; }
 .dangerZone summary { cursor: pointer; padding: 0.5rem 0; }

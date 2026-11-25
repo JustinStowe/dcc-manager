@@ -1,6 +1,6 @@
 # Dungeon Crawler Carl Manager — Project Plan
 
-Last updated: November 14, 2026
+Last updated: November 24, 2026
 
 ## Goal
 
@@ -57,6 +57,8 @@ part of the active milestone, rather than deferred work.
 | Collapsible sheet and direct ability management | User reports application/manual verification passed |
 | Typed defenses | Implemented in milestone 010; full local/database/browser acceptance pending |
 | Learned abilities and advancement marks | Implemented in milestone 008; database execution and full local/browser acceptance pending |
+| Effect templates and unified abilities | Implemented in milestone 013; user reports completion |
+| Encounter and turn tracker | Implemented in milestone 014; database and browser acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -71,7 +73,8 @@ games to the lobby with a fixed notice; database errors remain separate.
 The user reports the inventory milestone passed application checks and all
 manual acceptance tests. Potion automation, the sheet/dashboard redesign, and
 equipment/DR/Hotlist have since passed user-reported application/manual checks.
-The active development piece is learned abilities and advancement marks.
+Effect templates and unified abilities are complete by user report. Encounter
+turn tracking is the active development piece.
 
 The verified inventory foundation adds 46 domain/service cases,
 per-game item quantities/notes, equipped locations and slot limits, explicit
@@ -80,7 +83,23 @@ The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
 
-## Current milestone: tracked effects and automatic updates (011–012)
+## Current milestone: encounters and turns (014)
+
+One GM-managed encounter per campaign tracks official crawlers and named
+monsters, manual initiative, the current turn, and rounds. A completed round
+advances active timed effects once for participating crawlers in the same
+transaction. GM-only reads and version-checked writes preserve per-game
+permissions. Monster health, attacks, targeting, and damage remain future work.
+Apply migration 014 and run its SQL assertions and browser checks in `README.md`
+before marking it verified.
+
+## Previous milestone: effect templates and unified abilities (013)
+
+The user reports completion of reusable GM effect templates, self-effect links
+for eligible Spells and consumables, and the unified ability list. See
+`Docs/TEMPLATES_ABILITIES_SETUP.md` for its acceptance workflow.
+
+## Previous milestone: tracked effects and automatic updates (011–012)
 
 GM-managed named effects carry sources, visible notes, active stat modifiers,
 typed-defense flags and optional manual round countdowns. Existing modifiers
@@ -133,9 +152,9 @@ manual checks; 008 live database, build, and browser checks remain pending.
 | 1. Foundation | Standalone project, MVC structure, health rules, local saves, checks | Create and track a crawler locally | Complete |
 | 2. Lobby, accounts, and shared games | Authentication, Host/Join, codes, per-game roles, ownership, database storage, conflict handling | Host or join games and resume the correct shared crawler from another device | Installed; user reports working |
 | 3. Complete crawler sheets | Human Tutorial entry, official stats/health/Mana/Favor/numbering first; remaining sheet sections afterward | Create and play a game-specific crawler using official rules | Human entry user verified; remaining sheet sections incremental |
-| 4. Skills and spells | Catalogs, assignments, descriptions, usage rules | Manage crawler abilities during play | Planned |
-| 5. Inventory, equipment, and effects | Item definitions, owned instances, equipment, traits, supported calculations | Award and manage equipment and its effects | Current; item tracking and equipment occupancy implemented, effects deferred |
-| 6. Encounters and combat | Monsters, encounter setup, initiative, turns, health, statuses | Run combat from a GM dashboard | Planned |
+| 4. Skills and spells | Catalogs, assignments, descriptions, usage rules | Manage crawler abilities during play | Learned abilities and self-effect links implemented; broader execution remains |
+| 5. Inventory, equipment, and effects | Item definitions, owned instances, equipment, traits, supported calculations | Award and manage equipment and its effects | Inventory, equipment, tracked effects, and templates implemented |
+| 6. Encounters and combat | Monsters, encounter setup, initiative, turns, health, statuses | Run combat from a GM dashboard | Encounter turn foundation implemented; combat actions remain |
 | 7. Achievements, rewards, and progression | Awards, loot, history, controlled level-up | Award rewards and apply eligible progression | Planned |
 | 8. Release readiness | Usability, mobile layout, export/recovery, hosting, broader checks | Use the application reliably for regular sessions | Planned |
 
@@ -242,16 +261,16 @@ actual role even when called directly through the Data API.
 5. Run applicable database and manual multi-session checks.
 6. Update this plan with actual implementation and verification status.
 
-For each ZIP/patch, include installation steps, expected test count, completed
-verification, and checks that still require the user's environment.
+For each implementation, include installation steps, completed verification,
+and checks that still require the user's environment. Edit project files directly.
 
 ## Open work and decisions
 
 - Remaining sheet sections and later creation modes, using the supplied books.
 - Membership removal, ownership transfer, game archiving, code rotation, and
   crawler deletion behavior.
-- Future realtime updates; current shared pages use explicit refresh and version
-  checks to reject stale writes.
+- Private live refresh is implemented; continue testing reconnect behavior and
+  version checks across multiple sessions.
 - Hosting provider and deployment configuration. Supabase is selected for auth
   and PostgreSQL storage.
 - Detailed skill, spell, effect, inventory, combat, reward, and progression rules.

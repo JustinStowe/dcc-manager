@@ -7,6 +7,7 @@ import { restoreTutorialProfile } from '@/domain/tutorial';
 import { validateInventory, type InventoryItem } from '@/domain/inventory';
 import { bounded, loadoutTotals, restoreBaseline, restoreHotlist, type CrawlerLoadout } from '@/domain/loadout';
 import {restoreTemplate,restoreEffectLinks} from '@/domain/effect-templates';
+import { restoreEncounter } from '@/domain/encounters';
 import { restoreTrackedEffects,effectiveDefenses,projectedModifiers } from '@/domain/tracked-effects';
 import { restoreDefenses } from '@/domain/typed-defenses';
 import { restoreEffects, derivedBaseline, type SheetMetadata } from '@/domain/sheet';
@@ -110,7 +111,14 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
   const templateResult=await client.from('dcc_effect_templates').select('id,campaign_id,version,repeat_policy,definition').eq('campaign_id',campaignId);
   if(templateResult.error)throw campaignDatabaseError(templateResult.error);
   const templates=(templateResult.data??[]).map((value:unknown)=>{const t=record(value);return restoreTemplate({id:t.id,campaignId:t.campaign_id,version:t.version,repeatPolicy:t.repeat_policy,definition:t.definition});});
-  return { userId, campaign, versions, tutorials, inventories, loadouts, skills, sheets, templates };
+  let encounter = null;
+  if (role === 'gm') {
+    const result = await client.from('dcc_encounters').select('id,campaign_id,version,active,round,current_participant_id,participants').eq('campaign_id', campaignId).maybeSingle();
+    if (result.error) throw campaignDatabaseError(result.error);
+    encounter = result.data ? restoreEncounter(result.data) : null;
+    if (encounter && encounter.campaignId !== campaignId) throw new Error('Invalid campaign encounter.');
+  }
+  return { userId, campaign, versions, tutorials, inventories, loadouts, skills, sheets, templates, encounter };
 }
 
 export async function createCampaignWritePort(): Promise<CampaignWritePort> {
