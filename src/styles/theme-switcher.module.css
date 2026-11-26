@@ -1,0 +1,12 @@
+.switcher { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; color: var(--text); font: 400 .8rem/1.4 system-ui, sans-serif; text-transform: none; letter-spacing: normal; }
+.bar { min-height: 3.6rem; justify-content: flex-end; padding: .65rem max(1rem, calc((100% - 1248px) / 2)); background: var(--surface-soft); border-bottom: 1px solid var(--border); }
+.compact { justify-content: flex-end; margin: 0 0 1rem; }
+.label { color: var(--text-muted); font-size: .72rem; }
+.switcher > div { display: flex; flex-wrap: wrap; gap: .3rem; }
+.switcher.switcher button { min-height: 2.3rem; padding: .4rem .7rem; border: 1px solid var(--border-strong); border-radius: .4rem; color: var(--text); background: var(--surface); font: inherit; cursor: pointer; }
+.switcher.switcher button[aria-pressed=true] { background: var(--primary); color: var(--primary-contrast); border-color: var(--primary); font-weight: 700; }
+.switcher.switcher button[aria-pressed=true]:hover { background: var(--primary-hover); color: var(--primary-contrast); border-color: var(--primary-hover); }
+.switcher.switcher button:hover { border-color: var(--focus); }
+.switcher.switcher button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+@media (max-width: 420px) { .bar { min-height: 3.6rem; justify-content: center; } .label { font-size: .7rem; } }
+@media print { .switcher { display: none; } }

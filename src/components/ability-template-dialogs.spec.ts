@@ -5,7 +5,7 @@ import {EffectTemplateLink} from './effect-template-link';
 import type {LearnedAbility} from '@/domain/abilities';
 import type {EffectTemplate} from '@/domain/effect-templates';
 const shared=vi.hoisted(()=>({state:[] as unknown[],cursor:0,save:vi.fn(),pending:false,error:null as string|null}));
-vi.mock('react',()=>({useState(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]=initial;return[shared.state[i],(v:unknown)=>{shared.state[i]=v;}];},useRef(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]={current:initial};return shared.state[i];},useEffect(){},useId(){return 'dialog';}}));
+vi.mock('react', async (importOriginal) => ({ ...(await importOriginal<typeof import('react')>()),useState(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]=initial;return[shared.state[i],(v:unknown)=>{shared.state[i]=v;}];},useRef(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]={current:initial};return shared.state[i];},useEffect(){},useId(){return 'dialog';}}));
 vi.mock('@/controllers/use-dialog-action',()=>({useDialogAction:()=>({save:shared.save,pending:shared.pending,error:shared.error,clearError:vi.fn()})}));
 vi.mock('@/app/campaign/skill-actions',()=>({skillAction:vi.fn()}));
 vi.mock('@/app/campaign/template-actions',()=>({templateAction:vi.fn()}));

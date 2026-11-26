@@ -1,6 +1,6 @@
 # Dungeon Crawler Carl Manager — Project Plan
 
-Last updated: November 25, 2026
+Last updated: November 26, 2026
 
 ## Goal
 
@@ -62,6 +62,7 @@ part of the active milestone, rather than deferred work.
 | GM-controlled level advancement | Complete; user confirmed migration 015, checks, and working in-app advancement on November 25, 2026 |
 | Third Floor Race/Class selection | Expanded in 019 to the full Core catalog, custom builds, verified evidence, GM rulings and per-benefit reconciliation; hosted/browser acceptance pending |
 | Modular System AI (Groq) | Implemented in 020 with strict schemas, legal drafts, suggestions and durable request limits; synthetic live provider test passed; hosted/browser acceptance pending |
+| App-wide Light mode / Dark mode themes | Implemented November 26, 2026; persistent browser preference, synchronized windows, themed dialogs and full local checks |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -89,6 +90,35 @@ consumable quantity use, and one-time potions for newly created spellcasters.
 The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
+
+## App-wide themes (November 26, 2026)
+
+- Light mode is the default and follows the original main-app light/printed-sheet
+  appearance. Dark mode extends the Floor 3 dark, cyan/amber appearance
+  throughout the app. Race & Class now follows the same global choice.
+- Added Appearance controls to the root layout, sheet dialogs and encounter
+  dialog. Both choices are keyboard accessible and expose their selected state.
+  Switching does not navigate, save crawler data or reset open forms/drafts.
+- A validated `dcc-theme` cookie saves the preference for one year on this
+  browser/site. The async root layout reads it before rendering to avoid a
+  wrong-theme first paint. Preferences do not require a login or database change.
+  Open tabs/encounter windows on the same origin synchronize via BroadcastChannel;
+  unsupported browsers can still switch locally and restore on page load.
+- Shared semantic CSS variables cover auth, lobby, creation, sheets, inventory,
+  Hotlist, effect/ability controls, encounter dialogs/popups and Floor 3. Tailwind
+  inventory/Hotlist colors use the same variables. Health indicators retain their
+  meaningful red-to-green colors; printing uses a light palette in either theme.
+- Reused existing components and server actions. No crawler records, progression
+  grants, credentials, migrations or unrelated behavior are changed.
+
+Verification: `npm run check` passed 1,191 tests (three opt-in live AI tests
+skipped), lint, typecheck and production build. Theme preference tests cover
+unknown/missing values, the two supported choices and HTTP/HTTPS cookie settings.
+Browser checks verified live login/signup switching, refresh/navigation persistence,
+cross-tab updates, and preserved inventory search/selection allocation drafts.
+A local fixture rendered the real sheet, inventory, Hotlist, Floor 3 and encounter
+components with synthetic data and all saving disabled; desktop/mobile appearance
+checks do not constitute authenticated game-save acceptance.
 
 ## Completed milestone: GM-controlled level advancement (015)
 

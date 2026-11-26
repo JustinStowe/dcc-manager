@@ -4,7 +4,7 @@ import { INITIAL_ADVANCEMENT } from '@/domain/advancement';
 import { createTutorialProfile } from '@/domain/tutorial';
 import { tutorialDraftFixture } from '@/test/tutorial-fixture';
 const shared = vi.hoisted(() => ({ state: [] as unknown[], cursor: 0, save: vi.fn(), error: null as string | null }));
-vi.mock('react', () => ({
+vi.mock('react', async (importOriginal) => ({ ...(await importOriginal<typeof import('react')>()),
   useState(initial: unknown) { const i = shared.cursor++; if (!(i in shared.state)) shared.state[i] = initial; return [shared.state[i], (value: unknown) => { shared.state[i] = typeof value === 'function' ? (value as (previous: unknown) => unknown)(shared.state[i]) : value; }]; },
   useRef(initial: unknown) { const i = shared.cursor++; if (!(i in shared.state)) shared.state[i] = { current: initial }; return shared.state[i]; },
 }));

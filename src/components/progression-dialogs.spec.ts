@@ -6,7 +6,7 @@ import { INITIAL_ADVANCEMENT } from '@/domain/advancement';
 import { INITIAL_PROGRESSION } from '@/domain/progression';
 import { progressionFixture,PG_IDS as I } from '@/test/progression-fixture';
 const shared=vi.hoisted(()=>({state:[]as unknown[],cursor:0,save:vi.fn(),pending:false,error:null as string|null}));
-vi.mock('react',()=>({useState(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]=initial;return[shared.state[i],(v:unknown)=>{shared.state[i]=typeof v==='function'?(v as (old:unknown)=>unknown)(shared.state[i]):v;}];},useRef(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]={current:initial};return shared.state[i];},useEffect(){}}));
+vi.mock('react', async (importOriginal) => ({ ...(await importOriginal<typeof import('react')>()),useState(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]=initial;return[shared.state[i],(v:unknown)=>{shared.state[i]=typeof v==='function'?(v as (old:unknown)=>unknown)(shared.state[i]):v;}];},useRef(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]={current:initial};return shared.state[i];},useEffect(){}}));
 vi.mock('@/controllers/use-dialog-action',()=>({useDialogAction:()=>({save:shared.save,pending:shared.pending,error:shared.error,clearError:vi.fn()})}));
 vi.mock('@/app/campaign/progression-actions',()=>({progressionAction:vi.fn()}));
 type Node={type:unknown;props:Record<string,unknown>};

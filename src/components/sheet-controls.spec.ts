@@ -6,7 +6,7 @@ import { SheetAttributes } from './sheet-attributes';
 import { createTutorialProfile } from '@/domain/tutorial';
 import { tutorialDraftFixture } from '@/test/tutorial-fixture';
 const shared=vi.hoisted(()=>({state:[] as unknown[],cursor:0,save:vi.fn(),pending:false,error:null as string|null}));
-vi.mock('react',()=>({useState(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]=typeof initial==='function'?(initial as ()=>unknown)():initial;return [shared.state[i],(value:unknown)=>{shared.state[i]=typeof value==='function'?(value as (old:unknown)=>unknown)(shared.state[i]):value;}];},useRef(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]={current:initial};return shared.state[i];},useEffect(){},useId(){return 'test-modal';}}));
+vi.mock('react', async (importOriginal) => ({ ...(await importOriginal<typeof import('react')>()),useState(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]=typeof initial==='function'?(initial as ()=>unknown)():initial;return [shared.state[i],(value:unknown)=>{shared.state[i]=typeof value==='function'?(value as (old:unknown)=>unknown)(shared.state[i]):value;}];},useRef(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]={current:initial};return shared.state[i];},useEffect(){},useId(){return 'test-modal';}}));
 vi.mock('@/controllers/use-sheet-mutation',()=>({useSheetMutation:()=>({save:shared.save,pending:shared.pending,error:shared.error,clearError:vi.fn()})}));
 const context={campaignId:'game',crawlerId:'crawler',version:'version'};
 type Node={type:unknown;props:Record<string,unknown>};

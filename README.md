@@ -532,3 +532,12 @@ pending as described in TUTORIAL_SETUP.md. No database migration has been run by
 the assistant against the user's Supabase project.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for scope, milestone status, and next steps.
+
+## Appearance
+
+Use **Appearance → Light mode / Dark mode** at the top of any page or inside
+an open sheet/encounter dialog. Light mode is the default; Dark mode applies the dark cyan/amber style across the entire app, including Race
+& Class. Switching preserves open forms. The choice is saved for a year in this
+browser/site and synchronizes other open windows on the same origin. It is a
+browser preference, not an account setting shared across devices. Printing uses
+the light palette in either theme. No database migration is required.

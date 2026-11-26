@@ -2,7 +2,7 @@ import {beforeEach,afterEach,describe,expect,it,vi} from 'vitest';
 import {EffectsManager} from './effects-manager';
 import type {TrackedEffect} from '@/domain/tracked-effects';
 const shared=vi.hoisted(()=>({state:[] as unknown[],cursor:0,save:vi.fn(),pending:false,error:null as string|null}));
-vi.mock('react',()=>({useState(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]=initial;return[shared.state[i],(value:unknown)=>{shared.state[i]=value;}];},useRef(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]={current:initial};return shared.state[i];},useEffect(){},useId(){return'effect-dialog';}}));
+vi.mock('react', async (importOriginal) => ({ ...(await importOriginal<typeof import('react')>()),useState(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]=initial;return[shared.state[i],(value:unknown)=>{shared.state[i]=value;}];},useRef(initial:unknown){const i=shared.cursor++;if(!(i in shared.state))shared.state[i]={current:initial};return shared.state[i];},useEffect(){},useId(){return'effect-dialog';}}));
 vi.mock('@/controllers/use-effect-dialog-mutation',()=>({useEffectDialogMutation:()=>({save:shared.save,pending:shared.pending,error:shared.error,clearError:vi.fn()})}));
 const context={campaignId:'game',crawlerId:'crawler',version:'opening-version'};
 const effect:TrackedEffect={id:'one',name:'Buff',kind:'buff',source:'Spell',notes:'Notes',active:true,remainingRounds:1,modifiers:{strength:2,intelligence:0,constitution:0,dexterity:0,charisma:0},defenses:{}};

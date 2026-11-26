@@ -1,0 +1,104 @@
+/* Shared roles keep CSS Modules, Tailwind views, and native dialogs in sync. */
+:root {
+  color-scheme: light;
+  --app-background: #fff;
+  --surface: #fff;
+  --surface-soft: #f8fafc;
+  --surface-muted: #f1f5f9;
+  --surface-inset: #e2e8f0;
+  --surface-selected: #eff6ff;
+  --panel-background: #f8fafc;
+  --sheet-background: #fff;
+  --input-background: #fff;
+  --text: #1e293b;
+  --text-strong: #171717;
+  --text-muted: #475569;
+  --text-subtle: #64748b;
+  --border: #cbd5e1;
+  --border-strong: #64748b;
+  --sheet-border: #252525;
+  --primary: #19376d;
+  --primary-hover: #1e3a64;
+  --primary-contrast: #fff;
+  --link: #1d4ed8;
+  --focus: #2563eb;
+  --selection-border: #3b82f6;
+  --header-background: #171717;
+  --header-text: #fff;
+  --display-font: Impact, 'Arial Narrow', sans-serif;
+  --label-font: system-ui, sans-serif;
+  --success: #14532d;
+  --success-background: #f0fdf4;
+  --success-border: #86bda3;
+  --danger: #991b1b;
+  --danger-background: #fef2f2;
+  --danger-border: #dc7b8b;
+  --danger-button: #991b1b;
+  --danger-button-text: #fff;
+  --warning: #854d0e;
+  --warning-background: #fefce8;
+  --warning-border: #a89058;
+  --shadow-soft: #1720330d;
+  --shadow-dialog: #0005;
+  --backdrop: #0f172a99;
+  --accent-glow: transparent;
+  --health-ink: #171717;
+  --health-empty: #f2f2ee;
+  --mana-background: #f2f6ff;
+}
+
+:root[data-theme='terminal'] {
+  color-scheme: dark;
+  --app-background: radial-gradient(ellipse at top left, #10314566, transparent 55%), #080d16;
+  --surface: #0e1726;
+  --surface-soft: #101a2b;
+  --surface-muted: #172235;
+  --surface-inset: #080f1b;
+  --surface-selected: #123445;
+  --panel-background: linear-gradient(155deg, #172237, #0e1726 70%);
+  --sheet-background: linear-gradient(155deg, #111e30, #0c1421 70%);
+  --input-background: #080f1b;
+  --text: #e2e8f0;
+  --text-strong: #f1f5f9;
+  --text-muted: #a0b1c7;
+  --text-subtle: #9eb1c6;
+  --border: #2a394e;
+  --border-strong: #41536b;
+  --sheet-border: #36596c;
+  --primary: #67e8f9;
+  --primary-hover: #a5f3fc;
+  --primary-contrast: #07141e;
+  --link: #a5e4f2;
+  --focus: #67e8f9;
+  --selection-border: #55d8ef;
+  --header-background: #123445;
+  --header-text: #d5f9fe;
+  --display-font: system-ui, sans-serif;
+  --label-font: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --success: #89e5c7;
+  --success-background: #11352e66;
+  --success-border: #28594f;
+  --danger: #fda4af;
+  --danger-background: #401e2c66;
+  --danger-border: #693b49;
+  --danger-button: #881337;
+  --warning: #e8d393;
+  --warning-background: #392a16;
+  --warning-border: #696036;
+  --shadow-soft: #0003;
+  --shadow-dialog: #0009;
+  --backdrop: #020617c9;
+  --accent-glow: #22d3ee12;
+  --health-empty: #172235;
+  --mana-background: #123445;
+}
+
+body { min-height: 100dvh; background: var(--app-background); background-attachment: fixed; color: var(--text); }
+input, select, textarea { color: var(--text); background-color: var(--input-background); accent-color: var(--primary); }
+input::placeholder, textarea::placeholder { color: var(--text-subtle); opacity: 1; }
+summary:hover { background-color: var(--surface-muted); }
+::selection { background: var(--primary); color: var(--primary-contrast); }
+
+@media print {
+  :root[data-theme] { color-scheme: light; --app-background: #fff; --sheet-background: #fff; --panel-background: #fff; --surface: #fff; --surface-soft: #fff; --surface-muted: #eee; --surface-inset: #eee; --input-background: #fff; --text: #171717; --text-strong: #171717; --text-muted: #475569; --text-subtle: #475569; --border: #aaa; --border-strong: #64748b; --sheet-border: #252525; --primary: #19376d; --primary-contrast: #fff; --header-background: #171717; --header-text: #fff; --health-empty: #f2f2ee; --surface-selected: #eff6ff; --mana-background: #f2f6ff; --link: #1d4ed8; --success: #14532d; --success-background: #f0fdf4; --danger: #991b1b; --danger-background: #fef2f2; --warning: #854d0e; --warning-background: #fefce8; }
+}

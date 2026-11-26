@@ -469,7 +469,7 @@ summary {
   transition-duration: 150ms;
 }
 summary:hover {
-  background-color: rgba(243, 244, 246, 1);
+  background-color: var(--surface-muted);
 }
 summary svg {
   height: 1.5rem;

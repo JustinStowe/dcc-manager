@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ReactNode } from 'react';
 import styles from '@/styles/campaign.module.css';
+import { ThemeSwitcher } from './theme-provider';
 
 export function EncounterDialog({ campaignId, active, round, children }: {
   campaignId: string; active: boolean; round: number | null; children: ReactNode;
@@ -38,6 +39,7 @@ export function EncounterDialog({ campaignId, active, round, children }: {
     <dialog ref={dialog} id={id} className={styles.encounterDialog} aria-label="Encounter tracker"
       onClose={dialogClosed}>
       <div className={styles.encounterDialogTop}>
+        <ThemeSwitcher compact />
         <button type="button" onClick={openWindow}>Open separate window</button>
         <button type="button" onClick={closeDialog}>Close</button>
       </div>

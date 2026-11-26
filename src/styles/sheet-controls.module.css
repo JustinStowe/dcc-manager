@@ -1,39 +1,39 @@
-.modal { font: 400 1rem/1.5 system-ui, sans-serif; text-transform: none; text-align: left; width: min(40rem, calc(100vw - 2rem)); max-height: 85dvh; padding: 1.5rem; border: 1px solid #64748b; border-radius: .75rem; background: #fff; color: #172033; overflow: auto; box-shadow: 0 1.5rem 5rem #0005; }
-.modal::backdrop { background: #0f172a99; }
+.modal { font: 400 1rem/1.5 system-ui, sans-serif; text-transform: none; text-align: left; width: min(40rem, calc(100vw - 2rem)); max-height: 85dvh; padding: 1.5rem; border: 1px solid var(--border-strong); border-radius: .75rem; background: var(--surface); color: var(--text); overflow: auto; box-shadow: 0 1.5rem 5rem var(--shadow-dialog); }
+.modal::backdrop { background: var(--backdrop); }
 .modal h2 { margin: 0 0 1rem; font-size: 1.35rem; }
 .modal p { margin: .75rem 0; line-height: 1.5; }
-.modal button { border: 1px solid #64748b; border-radius: .35rem; padding: .5rem .8rem; background: #f8fafc; cursor: pointer; font: inherit; color: inherit; }
-.modal button[type=submit] { background: #1e3a64; color: #fff; }
+.modal button { border: 1px solid var(--border-strong); border-radius: .35rem; padding: .5rem .8rem; background: var(--surface-soft); cursor: pointer; font: inherit; color: inherit; }
+.modal button[type=submit] { background: var(--primary); color: var(--primary-contrast); }
 .modal button:disabled { opacity: .5; cursor: wait; }
 .tabs,.actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: .8rem 0; }
 .tabs button { flex: 1; }
-.tabs button[aria-pressed=true] { background: #1e3a64; color: #fff; }
+.tabs button[aria-pressed=true] { background: var(--primary); color: var(--primary-contrast); }
 .fields { display: grid; gap: .8rem; border: 0; padding: 0; margin: 1rem 0; min-width: 0; }
 .fields label { display: grid; gap: .3rem; }
-.fields input,.fields select { width: 100%; border: 1px solid #64748b; border-radius: .3rem; padding: .5rem; box-sizing: border-box; font: inherit; color: inherit; background: #fff; }
+.fields input,.fields select { width: 100%; border: 1px solid var(--border-strong); border-radius: .3rem; padding: .5rem; box-sizing: border-box; font: inherit; color: inherit; background: var(--surface); }
 .fields input[type=checkbox] { width: auto; justify-self: start; }
 .damageRow { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: .75rem; }
 .manage { font: inherit; font-size: inherit; text-transform: inherit; color: inherit; background: transparent; border: 1px solid currentColor; padding: .05rem .4rem; cursor: pointer; margin-left: .6rem; }
 .statHeading { display: flex; align-items: center; justify-content: space-between; gap: .3rem; }
-.statToggle { font: inherit; font-size: .75rem; border: 1px solid #64748b; padding: .2rem .4rem; border-radius: .2rem; color: #172033; background: #f8fafc; cursor: pointer; }
-.statInput { width: 4rem; font: inherit; font-size: 1.4rem; border: 1px solid #64748b; box-sizing: border-box; color: inherit; background: #fff; }
+.statToggle { font: inherit; font-size: .75rem; border: 1px solid var(--border-strong); padding: .2rem .4rem; border-radius: .2rem; color: var(--text); background: var(--surface-soft); cursor: pointer; }
+.statInput { width: 4rem; font: inherit; font-size: 1.4rem; border: 1px solid var(--border-strong); box-sizing: border-box; color: inherit; background: var(--surface); }
 .inlineWrap { display: inline-block; max-width: 100%; }
 .inlineValue { appearance: none; border: 0; background: none; color: inherit; font: inherit; text-align: inherit; padding: 0; cursor: text; max-width: 100%; overflow-wrap: anywhere; }
-.inlineInput { width: 8ch; max-width: 100%; box-sizing: border-box; font: inherit; color: inherit; background: #fff; border: 1px solid #64748b; padding: .15rem; }
+.inlineInput { width: 8ch; max-width: 100%; box-sizing: border-box; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border-strong); padding: .15rem; }
 .inlineInput[type=text] { width: min(25ch, 100%); }
 .inlineWrap small { display: block; font: 400 .8rem/1.4 system-ui,sans-serif; text-transform: none; }
 .resourceButton { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: .3rem; width: 100%; height: 100%; cursor: pointer; color: inherit; background: transparent; border: 0; padding: 0; font: inherit; }
 .resourceButton span { text-transform: uppercase; font-size: .66rem; font-weight: 800; }
 .resourceButton strong { font-size: 1.7rem; }
-.error { color: #a51d27; white-space: normal; }
-.hint { color: #475569; font-size: .85rem; }
-.selectionOffers { display: grid; gap: .65rem; max-height: 20rem; overflow: auto; padding: .4rem; border: 1px solid #cbd5e1; border-radius: .3rem; }
+.error { color: var(--danger); white-space: normal; }
+.hint { color: var(--text-muted); font-size: .85rem; }
+.selectionOffers { display: grid; gap: .65rem; max-height: 20rem; overflow: auto; padding: .4rem; border: 1px solid var(--border); border-radius: .3rem; }
 .selectionOffers label { grid-template-columns: auto 1fr; align-items: start; }
-.selectionOffers small { grid-column: 2; color: #9f1239; }
-.modal :focus-visible,.inlineValue:focus-visible,.manage:focus-visible,.statToggle:focus-visible,.resourceButton:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.selectionOffers small { grid-column: 2; color: var(--danger); }
+.modal :focus-visible,.inlineValue:focus-visible,.manage:focus-visible,.statToggle:focus-visible,.resourceButton:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 @media(max-width:480px) { .modal { padding: 1rem; } .damageRow { grid-template-columns: 1fr; } }
 
 .tableScroll { max-width: 100%; overflow-x: auto; }
 .defenseTable { border-collapse: collapse; width: 100%; margin: .5rem 0; font-size: .85rem; }
-.defenseTable th,.defenseTable td { padding: .45rem; text-align: left; border-bottom: 1px solid #cbd5e1; white-space: nowrap; }
+.defenseTable th,.defenseTable td { padding: .45rem; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
 .fields .defenseTable input[type=checkbox] { width: 1.1rem; height: 1.1rem; }
