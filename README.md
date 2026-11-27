@@ -286,7 +286,7 @@ remain later combat work.
 Apply `supabase/migrations/202611250017_creature_catalog.sql` once after 016,
 then run `supabase/tests/encounter_permissions.sql` as administrator. Its
 fixtures roll back and it prints PASS. Run `npm run check` afterward. The GM
-opens the encounter tracker as a popup from the game dashboard. In Mob combat,
+opens the encounter tracker in a separate browser window from the game dashboard. In Mob combat,
 search the supplied official creature stat blocks when adding a monster. The
 monster's Manage area shows its defenses, stats, attack and note excerpts, source PDF
 page, and remaining Health Bar slots. The GM sets remaining slots from zero to
@@ -295,8 +295,8 @@ Monsters saved before 017 can gain a catalog write-up through Manage. Attaching
 one replaces their encounter name with the official creature name and starts
 them at full Health Bar slots.
 
-The GM can also choose **Open separate window** on the dashboard or inside the
-popup. The tracker then runs at `/games/{campaignId}/encounter` in a movable,
+The **Encounter tracker** button on the dashboard opens the tracker at
+`/games/{campaignId}/encounter` in a movable,
 resizable browser window, leaving the dashboard usable on the main monitor.
 Opening it again focuses the same window. The separate window uses the same
 GM-only permissions and live updates as the dashboard. If the browser blocks
@@ -557,3 +557,24 @@ controls after checking what is already included. Original benefits are preserve
 See [selection menu setup and acceptance](Docs/SELECTION_MENUS_SETUP.md).
 Use `npm run test:ai:selection` for the opt-in synthetic live combined-match check;
 it is separate from `npm run test:ai` to respect provider quotas.
+
+## HUD, table alerts and floor timers
+
+Apply **022** (`supabase/migrations/202611270022_hud_notifications.sql`) after
+021. The game HUD keeps the existing character sheet in place. **Notifications**
+opens a private persistent log with unread/read controls. The GM's **Broadcast**
+shortcut sends a categorized alert to All Crawlers or one crawler; the GM also
+receives a copy. Achievement-tagged alerts use a gold banner but do not yet award
+an achievement record or reward.
+
+**Floor Collapse** displays the selected crawler's floor timer. The GM can set,
+start, pause, resume or clear it; players can only view it. Timers start unset,
+survive refresh/disconnection and do not automatically change game state at zero.
+Private automatic alerts cover saferoom point authorization, resolved marked
+Skill advancement and crossing below 30% Health. HUD updates preserve sheet edits.
+
+Safe Room loot/achievement records, Crawler Menus/chat and Exploration Radar remain
+the approved later phases; their HUD buttons are unavailable for now. Both themes
+are supported. No existing crawler data is rewritten by 022.
+
+See [HUD setup and acceptance](Docs/HUD_NOTIFICATIONS_SETUP.md).

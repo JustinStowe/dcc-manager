@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { requireCurrentUser } from '@/adapters/supabase-authentication';
 import { loadCampaignWorkspace } from '@/adapters/supabase-campaign-repository';
@@ -23,7 +22,6 @@ export default async function EncounterPage({ params }: { params: Promise<{ camp
   return <main className={`${styles.page} ${styles.encounterWindow}`}>
     <div className={styles.encounterWindowHeader}>
       <div><p className={styles.eyebrow}>{workspace.campaign.name}</p><h1>Encounter window</h1></div>
-      <Link href={`/games/${campaignId}`}>Game dashboard</Link>
     </div>
     <CampaignLive userId={user.id} />
     <EncounterView campaign={workspace.campaign} encounter={workspace.encounter ?? null} />

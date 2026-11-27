@@ -10,6 +10,7 @@ next-env.d.ts
 .DS_Store
 Docs/*
 !Docs/SELECTION_MENUS_SETUP.md
+!Docs/HUD_NOTIFICATIONS_SETUP.md
 AGENTS.md
 SourceFiles/
 tmp/

@@ -11,6 +11,9 @@ import { CampaignView } from '@/views/campaign-view';
 import { signOut } from '@/app/auth/actions';
 import { loadCrawlerProfiles } from '@/adapters/supabase-crawler-profiles';
 import type { SavedCrawlerProfile } from '@/services/crawler-profiles';
+import { createHudPort } from '@/adapters/supabase-hud';
+import { getDashboardCrawlers } from '@/models/campaign-dashboard';
+import type { HudSnapshot } from '@/domain/hud';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,10 +39,17 @@ export default async function GamePage({ params, searchParams }: { params: Promi
     redirect(`/games/${campaignId}/create`);
   }
   const selectedCrawlerId = (await searchParams)?.crawler;
+  let hud: HudSnapshot | null = null, hudError: string | null = null;
+  if (workspace?.campaign && !storageError) {
+    const selected = getDashboardCrawlers(workspace.campaign, user.id, selectedCrawlerId).selected;
+    const floor = selected ? workspace.sheets?.[selected.crawler.id]?.floor ?? 1 : 1;
+    try { hud = await (await createHudPort()).snapshot(campaignId, floor); }
+    catch (error) { hudError = error instanceof Error ? error.message : 'Could not load table alerts.'; }
+  }
   return (
     <>
       <AccountBarView liveUserId={user.id} email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
-      <CampaignView workspace={workspace} userId={user.id} storageError={storageError} hostSettings={settings} profiles={profiles} selectedCrawlerId={selectedCrawlerId} />
+      <CampaignView workspace={workspace} userId={user.id} storageError={storageError} hostSettings={settings} profiles={profiles} selectedCrawlerId={selectedCrawlerId} hud={hud} hudError={hudError} />
     </>
   );
 }

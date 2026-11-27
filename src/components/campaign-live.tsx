@@ -14,7 +14,7 @@ export function CampaignLive({userId}:{userId:string}){
   const queue=createLiveRefreshQueue({blocked:()=>document.visibilityState!=='visible'||refreshing.current||writes>0||guard.blocked(),refresh:()=>{lastRefresh=Date.now();startTransition(()=>router.refresh());},waiting:setWaiting,schedule:run=>window.setTimeout(run,250),cancel:timer=>window.clearTimeout(timer as number)});
   function request(){queue.request();}
   function writeStart(){writes++;}function writeEnd(){writes=Math.max(0,writes-1);queue.flush();}
-  const connection=createLiveConnection(client as unknown as LiveClient,userId,request,state=>{connected=state==='SUBSCRIBED';setStatus(connected?'live':'reconnecting');if(connected)queue.request();});
+  const connection=createLiveConnection(client as unknown as LiveClient,userId,()=>{document.dispatchEvent(new CustomEvent('dcc:live-signal',{detail:'changed'}));request();},state=>{connected=state==='SUBSCRIBED';setStatus(connected?'live':'reconnecting');if(connected){document.dispatchEvent(new CustomEvent('dcc:live-signal',{detail:'sync'}));queue.request();}});
   function connect(){lastAttempt=Date.now();void connection.connect();}
   const timer=window.setInterval(()=>{queue.flush();if(Date.now()-lastRefresh>=(connected?60000:15000))queue.request();if(Date.now()-lastAttempt>=30000)connect();},1000);
   window.addEventListener('focus',request);window.addEventListener('online',request);document.addEventListener('visibilitychange',request);document.addEventListener('focusout',request);document.addEventListener('close',request,true);document.addEventListener('dcc:form-saved',request);document.addEventListener('dcc:save-start',writeStart);document.addEventListener('dcc:save-end',writeEnd);

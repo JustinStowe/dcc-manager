@@ -9,16 +9,18 @@ import Link from 'next/link';
 import { formatGameCode, type HostSettings } from '@/services/game-lobby';
 import { SavedCrawlerChoices } from '@/components/saved-crawler-choices';
 import { DeleteGame } from '@/components/delete-game';
-import { EncounterView } from '@/views/encounter-view';
 import { SelectionMenusView } from './selection-menus-view';
-import { EncounterDialog } from '@/components/encounter-dialog';
+import { EncounterLauncher } from '@/components/encounter-launcher';
 import type { SavedCrawlerProfile } from '@/services/crawler-profiles';
+import { GameHudShell } from '@/components/game-hud-shell';
+import type { HudSnapshot } from '@/domain/hud';
 
-export function CampaignView({ workspace, userId, storageError, hostSettings, profiles, creationOnly = false, selectedCrawlerId }: {
+export function CampaignView({ workspace, userId, storageError, hostSettings, profiles, creationOnly = false, selectedCrawlerId, hud = null, hudError = null }: {
   workspace: CampaignWorkspace | null; userId: string; storageError: string | null;
   hostSettings?: HostSettings | null; creationOnly?: boolean;
   profiles?: readonly SavedCrawlerProfile[];
   selectedCrawlerId?: string;
+  hud?: HudSnapshot | null; hudError?: string | null;
 }) {
   const campaign = workspace?.campaign ?? null;
   const role = campaign ? getCampaignRole(campaign, userId) : null;
@@ -26,7 +28,7 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
   const hasOwnCrawler = crawlers.some((entry) => entry.ownerUserId === userId);
   const ownerIds = campaign ? [campaign.gmUserId, ...campaign.playerUserIds] : [];
   const availableOwnerIds = ownerIds.filter((id) => !crawlers.some((entry) => entry.ownerUserId === id));
-  return (
+  const view = (
     <main className={`${styles.page} ${styles.dashboard}`}>
       <Link href="/" className={styles.backLink}>Back to game lobby</Link>
       <div className={styles.dashboardHeader}>
@@ -39,8 +41,9 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
         <>
           <p className={styles.dashboardHint}>Changes save to this game and update automatically across signed-in sessions.</p>
           {role === 'gm' && (
-            <section className={`${styles.panel} ${styles.gameManagement}`} aria-label="Game management">
-              <div>
+            <details className={`${styles.panel} ${styles.gameManagement}`} open>
+              <summary className={styles.gameManagementSummary}>Game management</summary>
+              <div className={styles.gameManagementBody}><div>
               {hostSettings && (
                 <>
                   <h2>Game Code</h2>
@@ -58,10 +61,10 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
               <p>Players join with your Game Code and can view only their own crawler. New arrivals appear automatically.</p>
               <ul>{campaign.playerUserIds.map((id) => <li key={id}>{campaign.crawlers.find((entry) => entry.ownerUserId === id)?.crawler.name ?? 'Awaiting crawler creation'}</li>)}</ul>
               <details className={styles.dangerZone}><summary>Delete this game</summary><DeleteGame game={{ id: campaign.id, name: campaign.name }} /></details>
-              </div>
-            </section>
+              </div></div>
+            </details>
           )}
-          {!creationOnly && role === 'gm' && <EncounterDialog campaignId={campaign.id} active={workspace?.encounter?.active ?? false} round={workspace?.encounter?.round ?? null}><EncounterView campaign={campaign} encounter={workspace?.encounter ?? null} /></EncounterDialog>}
+          {!creationOnly && role === 'gm' && <EncounterLauncher campaignId={campaign.id} active={workspace?.encounter?.active ?? false} round={workspace?.encounter?.round ?? null} />}
           {crawlers.length === 0 && <p>No crawlers are available to your account yet.</p>}
           {!creationOnly && crawlers.length > 0 && <nav className={styles.crawlerTabs} aria-label={role === 'gm' ? 'Select a crawler' : 'Your crawler'}>
             {crawlers.map(({ crawler }) => <Link key={crawler.id} href={`/games/${campaign.id}?crawler=${crawler.id}#crawler-record`} prefetch={false} aria-current={selected?.crawler.id === crawler.id ? 'page' : undefined}>{crawler.name}</Link>)}
@@ -89,4 +92,6 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
       )}
     </main>
   );
+  const floor = selected ? workspace?.sheets?.[selected.crawler.id]?.floor ?? 1 : 1;
+  return campaign && workspace && !creationOnly && !storageError ? <GameHudShell key={`${campaign.id}:${floor}`} campaignId={campaign.id} floor={floor} isGm={role === 'gm'} crawlers={role === 'gm' ? crawlers.map(e => ({ id: e.crawler.id, name: e.crawler.name })) : []} initial={hud} initialError={hudError}>{view}</GameHudShell> : view;
 }

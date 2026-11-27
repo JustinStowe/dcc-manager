@@ -1,7 +1,10 @@
 .terminal {
   color-scheme: inherit;
-  width: min(1280px, calc(100vw - 2rem));
-  max-height: 94dvh;
+  width: calc(100vw - 2rem);
+  height: calc(100dvh - 2rem);
+  max-width: none;
+  max-height: none;
+  margin: auto;
   padding: 1.4rem;
   border: 1px solid var(--border);
   border-radius: 1rem;
@@ -52,7 +55,7 @@
 .panel { border: 1px solid var(--border); border-radius: .8rem; padding: 1.1rem; background: var(--panel-background); box-shadow: 0 6px 25px var(--shadow-soft); min-width: 0; }
 .codex { display: grid; grid-template-columns: minmax(200px, .8fr) minmax(0, 1.2fr); gap: 1rem; align-items: start; }
 .search { margin: .7rem 0; font-size: .75rem; color: var(--text-muted); }
-.catalogList { display: grid; gap: .45rem; max-height: 30rem; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border-strong) var(--surface-soft); padding: .2rem; }
+.catalogList { display: grid; gap: .45rem; max-height: max(30rem, calc(100dvh - 22rem)); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border-strong) var(--surface-soft); padding: .2rem; }
 .terminal .catalogCard { display: flex; justify-content: space-between; gap: .6rem; width: 100%; text-align: left; background: var(--surface); border-color: var(--border); }
 .catalogCard strong, .catalogCard small { display: block; }
 .catalogCard small { font-size: .65rem; color: var(--text-muted); margin-top: .2rem; }
@@ -92,7 +95,7 @@
 .footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1.5rem; }
 @media (max-width: 1050px) { .workspace { grid-template-columns: minmax(0, 1fr) 255px; } .codex { grid-template-columns: 1fr; } .catalogList { max-height: 16rem; } }
 @media (max-width: 760px) {
-  .terminal { width: calc(100vw - .75rem); max-height: 96dvh; padding: .85rem; }
+  .terminal { width: calc(100vw - .75rem); height: calc(100dvh - .75rem); padding: .85rem; }
   .workspace { grid-template-columns: minmax(0, 1fr); }
   .sidebar { position: static; }
   .header { align-items: flex-start; } .header h3 { font-size: 1.1rem; } .status { white-space: normal; }

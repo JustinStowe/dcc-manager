@@ -1,6 +1,6 @@
 # Dungeon Crawler Carl Manager — Project Plan
 
-Last updated: November 26, 2026
+Last updated: November 27, 2026
 
 ## Goal
 
@@ -64,6 +64,10 @@ part of the active milestone, rather than deferred work.
 | Modular System AI (Groq) | Implemented in 020 with strict schemas, legal drafts, suggestions and durable request limits; synthetic live provider test passed; hosted/browser acceptance pending |
 | App-wide Light mode / Dark mode themes | Implemented November 26, 2026; persistent browser preference, synchronized windows, themed dialogs and full local checks |
 | GM-pushed Class specialization menus | Implemented in 021 for Floors 6, 9 and 12 with private per-crawler choices and immutable history; GM-authored benefits are applied manually; hosted acceptance pending |
+| HUD Phase 1: notifications, banners and floor timers | Implemented in 022; private history/read states, GM broadcasts and per-floor countdowns; local checks passed; hosted migration and GM/player acceptance pending |
+| Safe Room loot and Achievements Codex | Approved Phase 2; implementation pending |
+| Crawler Menus and Haptic Link | Approved Phase 3; implementation pending |
+| Exploration Radar | Approved Phase 4; implementation pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -91,6 +95,53 @@ consumable quantity use, and one-time potions for newly created spellcasters.
 The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
+
+## HUD Phase 1 (022, November 27, 2026)
+
+The approved HUD/Safe Room roadmap keeps the character sheet as the primary
+workspace. Phase 1 adds a sticky, themed game HUD, private notifications and GM
+floor timers. Loot/achievements follow in Phase 2; the roster/story drawer and
+Haptic Link in Phase 3; abstract exploration maps in Phase 4. Future HUD buttons
+are visibly unavailable until their corresponding phase is implemented.
+
+- Wrapped the existing game view without replacing its sheet, encounter,
+  inventory, advancement or pushed Race/Class/specialization controls.
+- Added GM broadcasts to All Crawlers or one crawler, with System AI,
+  Achievement, Floor Alert and Loot categories. All Crawlers means current crawler
+  owners plus the GM; targeted alerts are visible only to that owner and the GM.
+- Persisted a private, cursor-paginated alert history with account-specific read
+  state, unread badges, individual acknowledgement and watermark-safe Mark All Read.
+  Repeating a broadcast request does not duplicate it; GM broadcasts are limited
+  to 20 per minute per game. Text is rendered as text, not HTML.
+- Added short, dismissible live banners and gold Achievement announcements.
+  Initial/reconnected history is restored silently. Alerts are notifications only;
+  achievement records and reward grants are intentionally Phase 2 work.
+- Added automatic private owner/GM alerts for changed positive saferoom stat-point
+  authorizations, successfully resolved marked-Skill advancement attempts (including
+  held ranks), and an official crawler crossing from at least 30% to below 30% Health.
+  Repeated low-health saves or simply unmarking a Skill do not create alerts.
+- Added per-floor timers (1–18), initially unset, with GM edit/start/pause/resume/
+  clear and stale-version protection. Shared server deadlines survive navigation,
+  refresh and disconnected clients. Expiry clamps at zero and leaves collapse to
+  the GM; no crawler state is changed by a timer.
+- Reused private 012 invalidation signals. The HUD has an independent read queue
+  and 15-second recovery polling, so badges/banners can update without refreshing
+  or replacing an unfinished sheet form. Modern browsers show nonmodal banners
+  above sheet dialogs; fixed banners remain the fallback. Existing sheet refresh
+  guards stay in place. No AI provider calls or dependencies were added.
+
+Verification: 1,243 source tests passed (four optional provider tests skipped),
+plus lint, typecheck and production build. Thirteen isolated SQL suites passed,
+including HUD permissions, automatic events, pagination/rate limits, existing
+inventory/effects/advancement/selection/encounter behavior and private helper ACLs.
+An isolated 021→022 upgrade preserved complete crawler/profile rows and versions,
+and created no unsolicited alerts or timers. Browser preview with real components
+and synthetic storage verified GM broadcasts, unread/read controls, timer actions,
+player read-only controls, draft preservation and both themes at desktop/mobile
+sizes. Hosted migration and authenticated multi-account acceptance remain pending.
+
+Apply migration 022 after 021. See `Docs/HUD_NOTIFICATIONS_SETUP.md` for setup and
+the GM/player acceptance checklist. Existing crawler data needs no reconciliation.
 
 ## GM-pushed milestone menus (021, November 26, 2026)
 
