@@ -1,6 +1,6 @@
 import { pendingSelectionMenu } from '@/domain/selection-menus';
 import { getCampaignRole } from '@/domain';
-import { advancementReason, allocatePoints } from '@/domain/advancement';
+import { advancementReason, allocatePoints, spendableAdvancement } from '@/domain/advancement';
 import { parseCustomBuild, validateCustomBuild } from '@/domain/custom-build';
 import { pairIssues, previewProgression, resolveProgressionPair, restoreEvidence, restoreProgression } from '@/domain/progression';
 import { object, shortText } from '@/domain/third-floor';
@@ -53,7 +53,7 @@ export async function executeProgressionCommand(workspace:CampaignWorkspace,form
   const choices=object(input.choices) as Record<string,string[]>,split=object(input.split) as Record<string,Partial<Scores>>,skip=strings(input.skip),allocation=input.allocation;
   if(skip.length&&!c.isGm)throw new Error('Only the GM can reconcile individual benefits already applied.');
   let stats=c.stats;
-  if(allocation!==undefined)stats=allocatePoints(c.sheet.level,c.sheet.advancement!,c.sheet.floor,allocation,c.stats).bases;
+  if(allocation!==undefined)stats=allocatePoints(c.sheet.level,spendableAdvancement(c.sheet.level,c.sheet.advancement!,c.sheet.floor,c.sheet.saferoom===true),c.sheet.floor,allocation,c.stats).bases;
   const result=previewProgression(selectionState,c.sheet.thirdFloor!,c.sheet.floor,offerId,choices,split,{stats,skills:c.skills},c.loadout.defenseBase,c.sheet.baseDefenses??{},skip);
   loadoutTotals(derivedBaseline(result.stats,c.sheet.effects),c.items,result.dr);
   payload={...payload,...(catalog?{raceId,classId}:{offerId}),choices,split,skip,...(allocation!==undefined?{allocation}: {})};

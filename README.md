@@ -214,11 +214,11 @@ Open **Level advancement → Manage advancement** on a crawler's sheet:
   The starting level grants none. Resolve reward dice, quest/Boss adjustments
   and productive grinding hours at the table; this feature has no XP counter
   or play-time scheduler. Awards target one crawler at a time.
-- **Spending:** points remain banked on Floors 1–2. On Floor 3 or deeper the GM
-  confirms a saferoom and authorizes a fixed number of pending points. The owner
-  or GM can distribute some or all of those points among the five Unenhanced
-  stats. Later awards require additional authorization. Enter 0 to revoke when
-  leaving a saferoom; changing Floor closes authorization automatically.
+- **Spending:** points remain banked on Floors 1–2. On Floor 3 or deeper, while
+  the GM has the crawler's saferoom open (024, below), the owner or GM can
+  distribute any pending points among the five Unenhanced stats without further
+  GM steps. The older per-crawler authorization of a fixed number of points still
+  works. Changing Floor closes both automatically.
 - **Benefits:** Enhanced stats recalculate through existing effects and gear.
   Health and current Mana do not refill; ranks/marks stay separate. After 018,
   selected Human identity controls +1 Favor per future level gained on Floor 3+;
@@ -599,3 +599,14 @@ Skill Potions and unsupported effects require GM resolution; no automatic stat,
 rank, level, currency, Favor or resource award is inferred from an item name.
 
 See [Safe Room setup, rulings and acceptance](Docs/SAFE_ROOM_SETUP.md).
+
+### Saferoom status for several crawlers (024)
+
+Apply **024** (`supabase/migrations/202611270024_saferoom_status.sql`) after 023,
+then run `supabase/tests/saferoom_status_permissions.sql` in an isolated database.
+In **Game management**, the GM ticks one or more crawlers under **Saferoom
+status** and chooses **Open saferoom** or **Close saferoom**. While it is open on
+the crawler's current floor, the owner can open and claim loot boxes and, on
+Floor 3+, spend every pending stat point (in Level advancement or Race & Class
+selection) with no other GM step. Opening notifies the owner and GM. Changing
+floors closes it. The migration opens no saferooms and changes no points.

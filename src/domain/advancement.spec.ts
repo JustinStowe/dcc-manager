@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allocatePoints, authorizePoints, awardLevels, earnedPoints, INITIAL_ADVANCEMENT, pendingPoints, reconcileAdvancement, restoreAdvancement, setHumanBenefit } from './advancement';
+import { allocatePoints, authorizePoints, awardLevels, earnedPoints, INITIAL_ADVANCEMENT, pendingPoints, reconcileAdvancement, restoreAdvancement, setHumanBenefit, spendableAdvancement } from './advancement';
 const legacy = { ...INITIAL_ADVANCEMENT, reconciled: false };
 const bases = { strength: 2, intelligence: 6, constitution: 3, dexterity: 5, charisma: 4 };
 const allocation = { strength: 2, intelligence: 1, constitution: 0, dexterity: 0, charisma: 0 };
@@ -58,6 +58,16 @@ describe('level advancement rules', () => {
     expect(() => allocatePoints(2, state, 2, allocation, bases)).toThrow('saferoom');
     expect(() => allocatePoints(2, INITIAL_ADVANCEMENT, 3, allocation, bases)).toThrow('authorize');
     expect(() => allocatePoints(2, state, 3, allocation, { ...bases, strength: 9999 })).toThrow();
+  });
+  it('lets an open saferoom on Floor 3+ spend every pending point without GM authorization', () => {
+    const state = { ...INITIAL_ADVANCEMENT, spent: 6 };
+    const open = spendableAdvancement(9, state, 3, true);
+    expect(open.authorized).toBe(18);
+    expect(allocatePoints(9, open, 3, { ...allocation, strength: 17 }, bases).points).toBe(18);
+    expect(() => allocatePoints(9, open, 3, { ...allocation, strength: 18 }, bases)).toThrow();
+    expect(spendableAdvancement(9, state, 3, false)).toBe(state);
+    expect(spendableAdvancement(9, state, 2, true)).toBe(state);
+    expect(spendableAdvancement(9, legacy, 3, true)).toBe(legacy);
   });
   it('only grants Human Favor after explicit selected-race confirmation and on future gains', () => {
     expect(() => setHumanBenefit(INITIAL_ADVANCEMENT, 2, true, true)).toThrow();

@@ -1,5 +1,5 @@
 import { getCampaignRole } from '@/domain';
-import { allocatePoints, authorizePoints, awardLevels, reconcileAdvancement, restoreAdvancement, advancementReason, AWARD_SOURCES, whole } from '@/domain/advancement';
+import { allocatePoints, authorizePoints, awardLevels, reconcileAdvancement, restoreAdvancement, advancementReason, spendableAdvancement, AWARD_SOURCES, whole } from '@/domain/advancement';
 import { derivedBaseline } from '@/domain/sheet';
 import { loadoutTotals } from '@/domain/loadout';
 import { STAT_KEYS, type Scores } from '@/domain/tutorial';
@@ -47,7 +47,7 @@ export async function executeAdvancementCommand(workspace: CampaignWorkspace, fo
     throw new RangeError('Use Third Floor Race/Class selection to confirm Human benefits.');
   } else if (operation === 'allocate') {
     const bases = Object.fromEntries(STAT_KEYS.map(key => [key, loadout.baseline[key].base])) as Scores;
-    const result = allocatePoints(sheet.level, state, sheet.floor, input.allocation, bases);
+    const result = allocatePoints(sheet.level, spendableAdvancement(sheet.level, state, sheet.floor, sheet.saferoom === true), sheet.floor, input.allocation, bases);
     const items = workspace.inventories?.[crawlerId];
     if (!items) throw new Error('Inventory unavailable.');
     loadoutTotals(derivedBaseline(result.bases, sheet.effects), items, loadout.defenseBase);

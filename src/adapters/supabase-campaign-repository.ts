@@ -124,6 +124,15 @@ export async function loadCampaignWorkspace(userId: string, selectedCampaignId: 
     (history[crawlerId] ??= []).push({ id:requireUuid(field(event,'id')), operation:field(event,'operation') as AdvancementEvent['operation'], at:field(event,'created_at'), summary:field(event,'summary'), reason:field(event,'reason') });
   }
   for (const id of Object.keys(sheets)) sheets[id] = { ...sheets[id], advancementHistory: history[id] ?? [] };
+  if (Object.keys(sheets).length) {
+    const accessResult = await client.from('dcc_safe_room_access').select('crawler_id,floor,allowed').in('crawler_id', Object.keys(sheets));
+    // Before migration 023 the table does not exist; every saferoom is then closed.
+    if (accessResult.error && !['42P01', 'PGRST205'].includes(accessResult.error.code ?? '')) throw campaignDatabaseError(accessResult.error);
+    for (const value of accessResult.data ?? []) {
+      const access = record(value), crawlerId = requireUuid(field(access, 'crawler_id'));
+      if (sheets[crawlerId]) sheets[crawlerId] = { ...sheets[crawlerId], saferoom: access.allowed === true && access.floor === sheets[crawlerId].floor };
+    }
+  }
   let encounter = null;
   if (role === 'gm') {
     const result = await client.from('dcc_encounters').select('id,campaign_id,version,active,mode,phase,round,current_participant_id,participants').eq('campaign_id', campaignId).maybeSingle();

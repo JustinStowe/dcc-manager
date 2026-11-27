@@ -23,9 +23,11 @@ creates no rewards and grants no saferoom permission.
    That records an opened/claimed historical box, adds no inventory items and does
    not replay a new gold achievement banner. It can document a reward whose items
    have since been consumed or removed; no matching inventory entry is required.
-4. Confirm saferoom access for the current crawler/floor. This is separate from
-   level-up point authorization and works on tutorial Floors 1–2 as well as later
-   floors. Owners can browse their queue/Codex outside a saferoom but cannot open
+4. Confirm saferoom access for the current crawler/floor, or open it for several
+   crawlers at once from **Saferoom status** in Game management (migration 024).
+   It works on tutorial Floors 1–2 as well as later floors; on Floor 3+ an open
+   saferoom also lets the owner spend every pending level-up stat point without a
+   separate authorization. Owners can browse their queue/Codex outside a saferoom but cannot open
    or claim. Changing floors clears access permanently until the GM confirms it
    again, even if the crawler returns to the previous floor.
 5. A player selects an unlocked box and clicks **Open box**. Its short unsealing
@@ -117,7 +119,8 @@ Use GM, owner A and owner B in separate sessions in the same game:
   and that inventory/resources did not change. Reconcile a previously fulfilled
   Earth incentive and verify a second incentive grant is rejected.
 - Change floors, then return. Saferoom access must stay closed until reconfirmed.
-  Changing it must not open or close the separate stat-point authorization.
+  After 024, an open saferoom on Floor 3+ lets the owner spend pending stat points;
+  closing it or changing floors stops that spending.
 - Test both themes, keyboard navigation, reduced-motion preference and phone
   width. Send live updates during an unfinished GM award draft; preserve its data.
 

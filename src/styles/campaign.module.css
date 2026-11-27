@@ -60,6 +60,11 @@
 .gameManagementBody { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 2rem; }
 .gameManagement .gameCode { font-size: 1rem; }
 .gameManagement ul { padding-left: 1.2rem; }
+.page .saferoomList { display: grid; gap: 0.4rem; }
+.page .saferoomList label { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; }
+.page .saferoomList input[type="checkbox"] { width: auto; }
+.saferoomHint { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+.saferoomActions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .encounterHeading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
 .encounterLaunchers { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.8rem 0; }
 .page .encounterTrigger { display: inline-block; }

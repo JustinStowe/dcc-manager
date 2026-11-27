@@ -9,6 +9,8 @@ import { getCampaignRole } from '@/domain';
 import { setGameJoining } from '@/adapters/supabase-game-lobby';
 import { createTutorialPort } from '@/adapters/supabase-tutorial';
 import { executeTutorialCommand } from '@/services/tutorial-commands';
+import { createSaferoomStatusPort } from '@/adapters/supabase-safe-room';
+import { executeSaferoomStatusCommand } from '@/services/safe-room-commands';
 
 export async function campaignAction(_previous: CampaignFormState, form: FormData): Promise<CampaignFormState> {
   const user = await requireCurrentUser();
@@ -27,6 +29,8 @@ export async function campaignAction(_previous: CampaignFormState, form: FormDat
       if (accepting !== 'true' && accepting !== 'false') throw new RangeError('Choose a joining state.');
       await setGameJoining(campaignId, accepting === 'true');
       notice = accepting === 'true' ? 'Game Code joining is open.' : 'Game Code joining is paused. Existing members keep access.';
+    } else if (form.get('operation') === 'set-saferoom') {
+      notice = await executeSaferoomStatusCommand(workspace, form, await createSaferoomStatusPort());
     } else {
       notice = await executeCampaignCommand(workspace, form, await createCampaignWritePort());
     }

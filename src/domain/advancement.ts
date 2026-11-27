@@ -39,6 +39,10 @@ export function pendingPoints(level: number, state: AdvancementState): number {
   if (!state.reconciled) throw new RangeError('The GM must reconcile existing advancement first.');
   return earnedPoints(level) - state.spent;
 }
+/** An open saferoom on Floor 3+ makes every pending point spendable without a separate GM authorization. */
+export function spendableAdvancement(level: number, state: AdvancementState, floor: number, saferoom: boolean): AdvancementState {
+  return saferoom && floor >= 3 && state.reconciled ? { ...state, authorized: pendingPoints(level, state) } : state;
+}
 export function reconcileAdvancement(state: AdvancementState, level: number, spent: number, confirmed: boolean): AdvancementState {
   if (state.reconciled) throw new RangeError('This crawler has already been reconciled.');
   if (!confirmed) throw new RangeError('Confirm the existing stats and points already spent.');

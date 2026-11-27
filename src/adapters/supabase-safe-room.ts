@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { safeRoomSnapshotSchema } from '@/domain/safe-room';
-import type { SafeRoomPort } from '@/services/safe-room-commands';
+import type { SafeRoomPort, SaferoomStatusPort } from '@/services/safe-room-commands';
 import { campaignDatabaseError } from './supabase-campaign-repository';
 function safeRoomError(error: { code?: string }) {
   if (error.code === '40001') return new Error('This crawler or reward changed. Refresh the Safe Room and try again.');
@@ -15,5 +15,15 @@ export async function createSafeRoomPort(): Promise<SafeRoomPort> {
   return {
     async snapshot(crawlerId, query) { const { data, error } = await client.rpc('dcc_safe_room_snapshot', { p_crawler_id: crawlerId, p_query: query }); if (error) throw safeRoomError(error); return safeRoomSnapshotSchema.parse(data); },
     async act(crawlerId, command) { const { operation, ...payload } = command; const { error } = await client.rpc('dcc_safe_room_action', { p_crawler_id: crawlerId, p_operation: operation, p_payload: payload }); if (error) throw safeRoomError(error); },
+  };
+}
+export async function createSaferoomStatusPort(): Promise<SaferoomStatusPort> {
+  const client = createClient(await cookies());
+  return {
+    async setSaferoom(campaignId, crawlerIds, allowed) {
+      const { error } = await client.rpc('dcc_set_saferoom', { p_campaign_id: campaignId, p_crawler_ids: crawlerIds, p_allowed: allowed });
+      if (error?.code === 'PGRST202') throw new Error('Saferoom status is unavailable. Apply migration 024 and reload.');
+      if (error) throw safeRoomError(error);
+    },
   };
 }

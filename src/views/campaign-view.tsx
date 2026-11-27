@@ -28,6 +28,7 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
   const hasOwnCrawler = crawlers.some((entry) => entry.ownerUserId === userId);
   const ownerIds = campaign ? [campaign.gmUserId, ...campaign.playerUserIds] : [];
   const availableOwnerIds = ownerIds.filter((id) => !crawlers.some((entry) => entry.ownerUserId === id));
+  const saferoomCrawlers = campaign?.crawlers.filter((entry) => entry.crawler.ruleset === 'tutorial-v1') ?? [];
   const view = (
     <main className={`${styles.page} ${styles.dashboard}`}>
       <Link href="/" className={styles.backLink}>Back to game lobby</Link>
@@ -60,6 +61,15 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
               <h2>Players <span className={styles.countBadge}>{campaign.playerUserIds.length}</span></h2>
               <p>Players join with your Game Code and can view only their own crawler. New arrivals appear automatically.</p>
               <ul>{campaign.playerUserIds.map((id) => <li key={id}>{campaign.crawlers.find((entry) => entry.ownerUserId === id)?.crawler.name ?? 'Awaiting crawler creation'}</li>)}</ul>
+              {saferoomCrawlers.length > 0 && <CampaignForm campaignId={campaign.id} label="Saferoom status">
+                <input type="hidden" name="operation" value="set-saferoom" />
+                <div className={styles.saferoomList}>{saferoomCrawlers.map(({ crawler }) => {
+                  const sheet = workspace?.sheets?.[crawler.id];
+                  return <label key={crawler.id}><input type="checkbox" name="crawlerId" value={crawler.id} /> {crawler.name} · Floor {sheet?.floor ?? 1} · <strong>{sheet?.saferoom ? 'Saferoom open' : 'Closed'}</strong></label>;
+                })}</div>
+                <p className={styles.saferoomHint}>Open: selected crawlers can open and claim loot boxes and, on Floor 3+, spend all pending stat points themselves. Changing floors closes it automatically.</p>
+                <div className={styles.saferoomActions}><button type="submit" name="allowed" value="true">Open saferoom</button><button type="submit" name="allowed" value="false">Close saferoom</button></div>
+              </CampaignForm>}
               <details className={styles.dangerZone}><summary>Delete this game</summary><DeleteGame game={{ id: campaign.id, name: campaign.name }} /></details>
               </div></div>
             </details>

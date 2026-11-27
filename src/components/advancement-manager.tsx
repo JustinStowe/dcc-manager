@@ -10,11 +10,11 @@ import styles from '@/styles/sheet-controls.module.css';
 
 export interface AdvancementManagerProps {
   context: SheetContext; level: number; floor: number; isGm: boolean;
-  state?: AdvancementState; history?: readonly AdvancementEvent[]; stats: TutorialStats;
+  state?: AdvancementState; history?: readonly AdvancementEvent[]; stats: TutorialStats; saferoom?: boolean;
 }
 const labels = { strength: 'Strength', intelligence: 'Intelligence', constitution: 'Constitution', dexterity: 'Dexterity', charisma: 'Charisma' };
 function Reason() { return <label>Reason / table notes<input name="reason" required maxLength={500} /></label>; }
-export function AdvancementManager({ context, level, floor, isGm, state, history = [], stats }: AdvancementManagerProps) {
+export function AdvancementManager({ context, level, floor, isGm, state, history = [], stats, saferoom = false }: AdvancementManagerProps) {
   const [open, setOpen] = useState(false);
   const [allocation, setAllocation] = useState<Record<string, string>>({});
   const [reviewLevel, setReviewLevel] = useState(String(level));
@@ -23,7 +23,8 @@ export function AdvancementManager({ context, level, floor, isGm, state, history
   const mutation = useDialogAction(advancementAction, { ...context });
   const ready = state?.reconciled === true;
   const pending = state && ready ? pendingPoints(level, state) : 0;
-  const available = ready && floor >= 3 ? state.authorized : 0;
+  const openSaferoom = saferoom && floor >= 3;
+  const available = ready && floor >= 3 ? (openSaferoom ? pending : state.authorized) : 0;
   const selected = STAT_KEYS.reduce((sum, key) => sum + Number(allocation[key] || 0), 0);
   const validAllocation = selected > 0 && selected <= available && STAT_KEYS.every(key => Number.isSafeInteger(Number(allocation[key] || 0)) && Number(allocation[key] || 0) >= 0 && stats[key].base + Number(allocation[key] || 0) <= 10000);
   const reviewMaximum = Number.isSafeInteger(Number(reviewLevel)) && Number(reviewLevel) >= 1 && Number(reviewLevel) <= 250 ? earnedPoints(Number(reviewLevel)) : 0;
@@ -50,7 +51,7 @@ export function AdvancementManager({ context, level, floor, isGm, state, history
   function changeReview(event: ChangeEvent<HTMLInputElement>) { setReviewLevel(event.target.value); }
   function changeAllocation(event: ChangeEvent<HTMLInputElement>) { setAllocation(old => ({ ...old, [event.target.name]: event.target.value })); }
   return <>
-    <p>{ready ? `${pending} pending stat points · ${available} authorized for saferoom spending` : 'GM reconciliation required before level awards or stat spending.'}</p>
+    <p>{ready ? openSaferoom ? `${pending} pending stat points · saferoom open, all spendable` : `${pending} pending stat points · ${available} authorized for saferoom spending` : 'GM reconciliation required before level awards or stat spending.'}</p>
     <button type="button" className={styles.statToggle} onClick={show}>Manage advancement</button>
     <SheetModal open={open} title="Level advancement" pending={mutation.pending} onClose={close}>
       <div key={epoch}>
@@ -67,8 +68,9 @@ export function AdvancementManager({ context, level, floor, isGm, state, history
           <button type="submit">Confirm reconciliation</button>
         </fieldset></form> : <p>Your GM must complete reconciliation. Current stats remain in use.</p>}
       </> : <>
-        <p>Earned: {earnedPoints(level)} · Spent: {state.spent} · Pending: {pending} · Authorized: {available}</p>
-        {floor < 3 && <p>Stat points stay banked on Tutorial Floors 1–2. They become spendable in a GM-authorized saferoom on Floor 3 or deeper, including before race/class prerequisite checks.</p>}
+        <p>Earned: {earnedPoints(level)} · Spent: {state.spent} · Pending: {pending} · {openSaferoom ? 'Saferoom open: all pending points spendable' : `Authorized: ${available}`}</p>
+        {saferoom && floor < 3 && <p>Saferoom open for loot boxes.</p>}
+        {floor < 3 && <p>Stat points stay banked on Tutorial Floors 1–2. They become spendable in a GM-opened saferoom on Floor 3 or deeper, including before race/class prerequisite checks.</p>}
         {isGm && <>
           <form onSubmit={award} aria-label="Award levels"><fieldset className={styles.fields} disabled={mutation.pending || level >= 250}>
             <legend>GM level award</legend>
@@ -80,7 +82,8 @@ export function AdvancementManager({ context, level, floor, isGm, state, history
           {level >= 250 && <p>Maximum level reached.</p>}
           <form onSubmit={authorize} aria-label="Authorize saferoom spending"><fieldset className={styles.fields} disabled={mutation.pending}>
             <legend>GM saferoom authorization</legend>
-            <label>Total points authorized now<input name="amount" type="number" min={0} max={floor >= 3 ? pending : 0} step={1} defaultValue={available} required /></label>
+            <p>Prefer <strong>Saferoom status</strong> in Game management: while it is open, the crawler can spend every pending point on Floor 3+ without this form.</p>
+            <label>Total points authorized now<input name="amount" type="number" min={0} max={floor >= 3 ? pending : 0} step={1} defaultValue={state.authorized} required /></label>
             <label><input name="saferoom" type="checkbox" value="yes" /> Crawler is in a saferoom on Floor 3 or deeper (required to authorize points).</label>
             <p>Enter 0 to revoke. This replaces the previous authorization. Revoke when leaving the saferoom; Floor changes close it automatically. Later level awards need separate authorization.</p>
             <Reason /><button type="submit">Save authorization</button>
@@ -88,12 +91,12 @@ export function AdvancementManager({ context, level, floor, isGm, state, history
           <p>Human level-gain Favor: {state.humanFavor ? 'active' : 'inactive'}. Manage this through Third Floor Race &amp; Class selection. Legacy Human confirmation remains in force until its benefit review.</p>
         </>}
         {available > 0 ? <form onSubmit={allocate} aria-label="Allocate stat points"><fieldset className={styles.fields} disabled={mutation.pending}>
-          <legend>Distribute authorized points</legend>
+          <legend>{openSaferoom ? 'Distribute pending points' : 'Distribute authorized points'}</legend>
           {STAT_KEYS.map(key => <label key={key}>{labels[key]} · Unenhanced {stats[key].base} → {stats[key].base + Number(allocation[key] || 0)}<input name={key} type="number" min={0} max={Math.min(available, 10000 - stats[key].base)} step={1} required value={allocation[key] ?? '0'} onChange={changeAllocation} /></label>)}
-          <p role="status">Selected: {selected} / {available}. Remaining authorized: {available - selected}.</p>
-          <p>Apply some or all authorized points. Enhanced stats recalculate with your current effects and gear. Health and current Mana do not refill.</p>
+          <p role="status">Selected: {selected} / {available}. Remaining: {available - selected}.</p>
+          <p>Apply some or all {openSaferoom ? 'pending' : 'authorized'} points. Enhanced stats recalculate with your current effects and gear. Health and current Mana do not refill.</p>
           <button type="submit" disabled={!validAllocation}>Apply stat points</button>
-        </fieldset></form> : <p>No points are currently authorized for spending.</p>}
+        </fieldset></form> : <p>{openSaferoom ? 'No pending points to spend.' : 'No points are currently spendable. The GM opens a saferoom to allow spending.'}</p>}
         {isGm && <p>Use this allocation form for level-up spending. General GM stat corrections do not spend or refund advancement points.</p>}
       </>}
       <details><summary>Recent advancement history</summary>

@@ -36,6 +36,14 @@ describe('advancement command boundary', () => {
     await executeAdvancementCommand(workspace(user), form('allocate', { allocation, spent: 0, authorized: 747, health: 10, bases: { strength: 999 }, enhanced: 999 }), { act });
     expect(act).toHaveBeenCalledWith({ crawlerId: ID, version: VERSION, operation: 'allocate', payload: { allocation } });
   });
+  it('lets an owner spend unauthorized pending points only while the saferoom is open', async () => {
+    const act = vi.fn(), big = { ...allocation, strength: 20 }, w = workspace(PLAYER);
+    const closed = { ...w, sheets: { [ID]: { ...w.sheets![ID], advancement: { ...INITIAL_ADVANCEMENT, authorized: 0 } } } };
+    await expect(executeAdvancementCommand(closed, form('allocate', { allocation: big }), { act })).rejects.toThrow('authorize');
+    const open = { ...closed, sheets: { [ID]: { ...closed.sheets[ID], saferoom: true } } };
+    await executeAdvancementCommand(open, form('allocate', { allocation: big }), { act });
+    expect(act).toHaveBeenCalledTimes(1);
+  });
   it('requires reconciliation and rejects overspending before persistence', async () => {
     const act = vi.fn();
     await expect(executeAdvancementCommand(workspace(GM, false), form('award', { amount: 1, source: 'quest', reason: 'Quest' }), { act })).rejects.toThrow('reconcile');
