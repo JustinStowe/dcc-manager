@@ -11,6 +11,7 @@ next-env.d.ts
 Docs/*
 !Docs/SELECTION_MENUS_SETUP.md
 !Docs/HUD_NOTIFICATIONS_SETUP.md
+!Docs/SAFE_ROOM_SETUP.md
 AGENTS.md
 SourceFiles/
 tmp/

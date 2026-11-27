@@ -64,8 +64,8 @@ part of the active milestone, rather than deferred work.
 | Modular System AI (Groq) | Implemented in 020 with strict schemas, legal drafts, suggestions and durable request limits; synthetic live provider test passed; hosted/browser acceptance pending |
 | App-wide Light mode / Dark mode themes | Implemented November 26, 2026; persistent browser preference, synchronized windows, themed dialogs and full local checks |
 | GM-pushed Class specialization menus | Implemented in 021 for Floors 6, 9 and 12 with private per-crawler choices and immutable history; GM-authored benefits are applied manually; hosted acceptance pending |
-| HUD Phase 1: notifications, banners and floor timers | Implemented in 022; private history/read states, GM broadcasts and per-floor countdowns; local checks passed; hosted migration and GM/player acceptance pending |
-| Safe Room loot and Achievements Codex | Approved Phase 2; implementation pending |
+| HUD Phase 1: notifications, banners and floor timers | Complete; user confirmed migration 022 applied and tests check out on November 27, 2026 |
+| Safe Room loot and Achievements Codex | Phase 2 implemented in 023; private queue, atomic existing-inventory claims, Codex and prior-reward reconciliation; local checks passed; apply 023 and complete hosted acceptance |
 | Crawler Menus and Haptic Link | Approved Phase 3; implementation pending |
 | Exploration Radar | Approved Phase 4; implementation pending |
 
@@ -95,6 +95,51 @@ consumable quantity use, and one-time potions for newly created spellcasters.
 The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
+
+## Safe Room Phase 2 (023, November 27, 2026)
+
+Phase 1 is complete by user confirmation: migration 022 is applied and its tests
+check out. The next approved phase adds the Safe Room terminal through the HUD,
+keeping the existing character sheet and its single inventory as the main workspace.
+
+- Added six named/color-coded box tiers, tier filters, Hide Claimed, a short
+  reduced-motion-aware unsealing animation, individual Claim and atomic Claim All.
+  The HUD badge counts the owner's unopened boxes (all visible game boxes for GM).
+- Added a compact GM award form for achievements, boxes or a linked pair, with
+  reviewed item quantities/equipment bonuses/potion effects, flavor/commentary,
+  an optional existing source achievement and GM-released audience vote locks.
+  Tier/category defaults survive repeat awards; completed submissions clear content.
+- GM confirms saferoom access per crawler/current floor, independently of level-up
+  point authorization. Opening and claiming both require access; floor changes
+  revoke it, including leaving and returning to the same floor. Sealed contents
+  are hidden by database policies and the checked snapshot, not just by the UI.
+- Claims append stored entries to the existing inventory using permanent receipt
+  IDs. Existing stacks are not merged or replayed. Retry, concurrent/stale request,
+  consumed/deleted-item and capacity cases cannot duplicate loot. Full Claim All
+  failures change nothing. Claiming never equips gear, refills resources or awards
+  stats, ranks, levels or Favor; unsupported mechanics remain explicit GM rulings.
+- Added searchable/paginated achievement history with Floor 1/2/3/4+ and Unread/
+  With Box filters, per-account read state, watermark-safe Mark All Read and linked
+  box/card jumps that also work outside the current queue filters. Real awards
+  integrate with Phase 1 notifications; historical imports avoid a new gold banner.
+- Added Record Past Reward without inventory changes. The existing 019 Earth
+  incentive decision stays intact; a separate once-only fulfillment review blocks
+  duplicate boxes and records previously fulfilled manual rewards. Skill Potion
+  ranks remain GM-applied through the existing controls after checking old benefits.
+- Added migration 023 and isolated privacy, query/capacity and upgrade fixtures.
+  No old crawler/profile data or Phase 1 timers/logs are rewritten, no rewards are
+  auto-imported and no AI calls or dependencies were added. Story/party/chat and
+  Exploration Radar remain the approved later phases.
+
+Verification: `npm run check` passes 1,271 cases (four opt-in provider cases skipped),
+lint, typecheck and production build. Fifteen isolated SQL suites passed, including
+all thirteen Phase 1 regressions and the two new Safe Room suites. An actual
+022→023 upgrade preserved complete crawler/profile rows, versions, existing timers,
+notifications and recipient read states. Browser preview used real components and
+synthetic storage to verify access, reveal/claim, existing inventory integration,
+player vote locks, GM linked awards, Codex search/read/deep links, both themes and
+390px phone layout. Hosted migration and authenticated GM/player acceptance remain
+pending. Apply 023 after 022; see `Docs/SAFE_ROOM_SETUP.md`.
 
 ## HUD Phase 1 (022, November 27, 2026)
 
@@ -138,7 +183,8 @@ An isolated 021→022 upgrade preserved complete crawler/profile rows and versio
 and created no unsolicited alerts or timers. Browser preview with real components
 and synthetic storage verified GM broadcasts, unread/read controls, timer actions,
 player read-only controls, draft preservation and both themes at desktop/mobile
-sizes. Hosted migration and authenticated multi-account acceptance remain pending.
+sizes. The user subsequently confirmed migration 022 applied and tests check out
+on November 27, 2026, and accepted moving to Phase 2.
 
 Apply migration 022 after 021. See `Docs/HUD_NOTIFICATIONS_SETUP.md` for setup and
 the GM/player acceptance checklist. Existing crawler data needs no reconciliation.

@@ -7,6 +7,8 @@ import { formatCountdown, timerSeconds, type FloorTimer, type HudSnapshot } from
 import { BroadcastForm, TimerControls, useHudMutation } from './hud-controls';
 import { SheetModal } from './sheet-modal';
 import styles from '@/styles/game-hud.module.css';
+import rewardStyles from '@/styles/safe-room.module.css';
+import { SafeRoomPanel } from './safe-room-panel';
 
 function BannerRegion({ count, children }: { count: number; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -69,18 +71,20 @@ export function Notifications({ campaignId, floor, snapshot, isGm, crawlers, ref
   </>;
 }
 
-export function GameHudShell({ campaignId, floor, isGm, crawlers, initial, initialError, children }: {
+export function GameHudShell({ campaignId, floor, isGm, crawlers, initial, initialError, children, crawlerId, crawlerName = 'Your crawler' }: {
   campaignId: string; floor: number; isGm: boolean; crawlers: readonly { id: string; name: string }[];
   initial: HudSnapshot | null; initialError: string | null; children: ReactNode;
+  crawlerId?: string; crawlerName?: string;
 }) {
   const hud = useHud(campaignId, floor, initial, initialError);
-  const [drawer, setDrawer] = useState<'notifications' | 'timer' | null>(null);
+  const [drawer, setDrawer] = useState<'notifications' | 'timer' | 'safe-room' | null>(null);
   const [saving, setSaving] = useState(false);
   const [compose, setCompose] = useState(false);
   const [timerOpening, setTimerOpening] = useState<FloorTimer | null>(null);
   function showTimer() { setTimerOpening(hud.snapshot?.timer ?? null); setDrawer('timer'); }
   function showNotifications() { setCompose(false); setDrawer('notifications'); }
   function showBroadcast() { setCompose(true); setDrawer('notifications'); }
+  function showSafeRoom() { if (crawlerId) setDrawer('safe-room'); }
   function closeDrawer() { if (!saving) setDrawer(null); }
   function dismiss(event: MouseEvent<HTMLButtonElement>) { hud.dismissBanner(event.currentTarget.dataset.sequence!); }
   function viewBanner(event: MouseEvent<HTMLButtonElement>) { showNotifications(); dismiss(event); }
@@ -90,7 +94,7 @@ export function GameHudShell({ campaignId, floor, isGm, crawlers, initial, initi
       <div className={styles.tools}>
         <button type="button" aria-haspopup="dialog" aria-expanded={drawer === 'notifications'} onClick={showNotifications}>Notifications <span className={styles.badge} aria-label={`${hud.snapshot?.unread ?? 0} unread`}>{hud.snapshot ? hud.snapshot.unread > 99 ? '99+' : hud.snapshot.unread : '—'}</span></button>
         <button type="button" disabled title="Crawler Menus will be available in a future update">Crawler Menus</button>
-        <button type="button" disabled title="Safe Room loot and achievements will be available in a future update">Safe Room / Loot</button>
+        <button type="button" disabled={!crawlerId} aria-haspopup="dialog" aria-expanded={drawer === 'safe-room'} onClick={showSafeRoom} title={isGm ? 'Unopened boxes across this game' : 'Your unopened boxes'}>Safe Room / Loot <span className={styles.badge} aria-label={`${hud.snapshot?.unopenedBoxes ?? 0} unopened boxes`}>{hud.snapshot?.unopenedBoxes ?? '—'}</span></button>
         <button type="button" disabled title="Exploration Radar will be available in a future update">Map</button>
         {isGm && <button type="button" aria-haspopup="dialog" onClick={showBroadcast}>Broadcast</button>}
       </div>
@@ -106,10 +110,11 @@ export function GameHudShell({ campaignId, floor, isGm, crawlers, initial, initi
       </aside>)}
     </BannerRegion>
     {children}
-    <SheetModal open={drawer !== null} title={drawer === 'timer' ? `Floor ${floor} · Floor Collapse` : 'Notifications'} pending={saving} onClose={closeDrawer} className={styles.drawer}>
+    <SheetModal open={drawer !== null} title={drawer === 'timer' ? `Floor ${floor} · Floor Collapse` : drawer === 'safe-room' ? 'Safe Room · Loot & Achievements' : 'Notifications'} pending={saving} onClose={closeDrawer} className={drawer === 'safe-room' ? rewardStyles.modal : styles.drawer}>
       <fieldset disabled={saving} className={styles.drawerContent}>
       {drawer === 'notifications' && <Notifications campaignId={campaignId} floor={floor} snapshot={hud.snapshot} isGm={isGm} crawlers={crawlers} refresh={hud.refresh} onPending={setSaving} compose={compose} />}
       {drawer === 'timer' && <><div className={styles.timerSummary}>{hud.snapshot && <Countdown key={hud.snapshot.serverNow} timer={hud.snapshot.timer} serverNow={hud.snapshot.serverNow} />}</div>{isGm ? hud.snapshot && <TimerControls campaignId={campaignId} floor={floor} timer={timerOpening} onSaved={hud.refresh} onPending={setSaving} /> : <p>The GM controls the shared countdown. Resolve floor collapse at the table.</p>}</>}
+      {drawer === 'safe-room' && crawlerId && <SafeRoomPanel campaignId={campaignId} crawlerId={crawlerId} crawlerName={crawlerName} isGm={isGm} crawlers={crawlers} onPending={setSaving} onChanged={hud.refresh} />}
       </fieldset>
       <button type="button" className={styles.close} disabled={saving} onClick={closeDrawer}>Close</button>
     </SheetModal>

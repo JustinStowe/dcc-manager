@@ -15,6 +15,7 @@ export const notificationSchema = z.strictObject({
 export const hudSnapshotSchema = z.strictObject({
   events: z.array(notificationSchema).max(30), unread: z.number().int().nonnegative(),
   head: sequenceSchema, hasMore: z.boolean(), serverNow: date, timer: floorTimerSchema.nullable(),
+  unopenedBoxes: z.number().int().nonnegative().optional(),
 });
 export type FloorTimer = z.infer<typeof floorTimerSchema>;
 export type TableNotification = z.infer<typeof notificationSchema>;

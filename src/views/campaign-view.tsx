@@ -93,5 +93,5 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
     </main>
   );
   const floor = selected ? workspace?.sheets?.[selected.crawler.id]?.floor ?? 1 : 1;
-  return campaign && workspace && !creationOnly && !storageError ? <GameHudShell key={`${campaign.id}:${floor}`} campaignId={campaign.id} floor={floor} isGm={role === 'gm'} crawlers={role === 'gm' ? crawlers.map(e => ({ id: e.crawler.id, name: e.crawler.name })) : []} initial={hud} initialError={hudError}>{view}</GameHudShell> : view;
+  return campaign && workspace && !creationOnly && !storageError ? <GameHudShell key={`${campaign.id}:${floor}`} campaignId={campaign.id} floor={floor} crawlerId={selected?.crawler.id} crawlerName={selected?.crawler.name} isGm={role === 'gm'} crawlers={role === 'gm' ? crawlers.map(e => ({ id: e.crawler.id, name: e.crawler.name })) : []} initial={hud} initialError={hudError}>{view}</GameHudShell> : view;
 }

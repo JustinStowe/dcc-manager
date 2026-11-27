@@ -573,8 +573,29 @@ survive refresh/disconnection and do not automatically change game state at zero
 Private automatic alerts cover saferoom point authorization, resolved marked
 Skill advancement and crossing below 30% Health. HUD updates preserve sheet edits.
 
-Safe Room loot/achievement records, Crawler Menus/chat and Exploration Radar remain
-the approved later phases; their HUD buttons are unavailable for now. Both themes
+Crawler Menus/chat and Exploration Radar remain the approved later phases; their
+HUD buttons are unavailable for now. Safe Room rewards are added by 023. Both themes
 are supported. No existing crawler data is rewritten by 022.
 
 See [HUD setup and acceptance](Docs/HUD_NOTIFICATIONS_SETUP.md).
+
+## Safe Room loot and Achievements Codex
+
+Apply **023** (`supabase/migrations/202611270023_safe_room_rewards.sql`) after
+022. Open **Safe Room / Loot** in the HUD. The GM can select a crawler, award a box,
+an achievement or both, and confirm saferoom access on that crawler's current
+floor. Players can browse anytime; opening and claiming require that access.
+
+The queue supports Bronze, Silver, Gold, Platinum, Legendary and Celestial tiers,
+vote locks, Hide Claimed, commentary and Claim / Claim All. Claims add stored
+items directly to the existing inventory, with permanent receipts preventing
+duplicate grants. Sealed contents are private until opening. The Codex supports
+search, floor/status filters, private read states and linked reward-box jumps.
+
+For existing rewards, use **Record a past reward already received** rather than
+granting them again. The Custom Earth incentive has a separate once-only
+fulfillment check that preserves the earlier Race/Class decision. Text rewards,
+Skill Potions and unsupported effects require GM resolution; no automatic stat,
+rank, level, currency, Favor or resource award is inferred from an item name.
+
+See [Safe Room setup, rulings and acceptance](Docs/SAFE_ROOM_SETUP.md).
