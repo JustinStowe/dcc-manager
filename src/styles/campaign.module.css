@@ -41,6 +41,14 @@
 .page .danger { background: var(--danger-button); }
 .actionLink { display: inline-block; padding: 0.7rem 1rem; min-height: 2.8rem; border-radius: 0.4rem; background: var(--primary); color: var(--primary-contrast); text-decoration: none; }
 .gameList li > button { display: block; margin-top: 0.5rem; }
+/* Lobby: the game opens from a button; Delete is a distant, low-emphasis link on the same row. */
+.page .lobbyGames { padding-left: 0; list-style: none; }
+.page .lobbyGames li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 2.5rem; }
+.page .lobbyGames li > a { display: inline-flex; align-items: center; min-height: 2.8rem; padding: 0.6rem 1.2rem; border-radius: 0.4rem; background: var(--primary); color: var(--primary-contrast); font-weight: 700; text-decoration: none; }
+.page .lobbyGames li > a:hover { background: var(--primary-hover); }
+.page .lobbyGames li > a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.page .lobbyGames li > button { display: inline; min-height: 0; margin: 0; padding: 0.25rem 0; border: 0; background: none; color: var(--danger); font-size: 0.9rem; text-decoration: underline; }
+.page .lobbyGames li > form { flex-basis: 100%; }
 .profileSlots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 0.75rem; margin: 1.5rem 0; }
 .profileSlots a { padding: 0.75rem; border-bottom: 2px solid var(--border); color: var(--primary); overflow-wrap: anywhere; }
 .profileSlots a[aria-current="page"] { border-color: var(--success); font-weight: 700; }

@@ -41,7 +41,7 @@ export function LobbyView({ lobby, error, profiles, profileError, notice }: {
           </details>
           <details className={styles.submenu}>
           <summary className={styles.subchoice}>Existing Game</summary>
-          {lobby.hosted.length ? <ul className={styles.gameList}>{lobby.hosted.map((game) => <li key={game.id}><Link href={`/games/${game.id}`}>{game.name}</Link><DeleteGame game={game} /></li>)}</ul> : <p>You have not hosted any games yet.</p>}
+          {lobby.hosted.length ? <ul className={`${styles.gameList} ${styles.lobbyGames}`}>{lobby.hosted.map((game) => <li key={game.id}><Link href={`/games/${game.id}`}>{game.name}</Link><DeleteGame game={game} /></li>)}</ul> : <p>You have not hosted any games yet.</p>}
           </details>
         </details>
         <details className={styles.panel}>
@@ -55,7 +55,7 @@ export function LobbyView({ lobby, error, profiles, profileError, notice }: {
           </details>
           <details className={styles.submenu}>
           <summary className={styles.subchoice}>Existing Game</summary>
-          {lobby.joined.length ? <ul className={styles.gameList}>{lobby.joined.map((game) => <li key={game.id}><Link href={`/games/${game.id}`}>{game.name}</Link></li>)}</ul> : <p>You have not joined any games yet.</p>}
+          {lobby.joined.length ? <ul className={`${styles.gameList} ${styles.lobbyGames}`}>{lobby.joined.map((game) => <li key={game.id}><Link href={`/games/${game.id}`}>{game.name}</Link></li>)}</ul> : <p>You have not joined any games yet.</p>}
           </details>
         </details>
       </div>
