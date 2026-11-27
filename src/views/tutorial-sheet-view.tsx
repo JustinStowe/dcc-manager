@@ -6,11 +6,11 @@ import { FavorManager } from '@/components/favor-manager';
 import { SheetInlineEdit } from '@/components/sheet-inline-edit';
 import { SheetAttributes } from '@/components/sheet-attributes';
 import { AdvancementManager } from '@/components/advancement-manager';
-import { ThirdFloorManager } from '@/components/third-floor-manager';
+import { latestSpecialization } from '@/domain/selection-menus';
 import { TrackedEffectsView } from '@/views/tracked-effects-view';
 import type { SheetMetadata } from '@/domain/sheet';
 import type { Crawler } from '@/domain';
-import { STAT_KEYS, TUTORIAL_CATALOG, tutorialModifier, type Scores, type TutorialProfile } from '@/domain/tutorial';
+import { STAT_KEYS, TUTORIAL_CATALOG, tutorialModifier, type TutorialProfile } from '@/domain/tutorial';
 import styles from '@/styles/campaign.module.css';
 import type { InventoryItem } from '@/domain/inventory';
 import { InventoryView } from '@/views/inventory-view';
@@ -29,6 +29,7 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
   const context={campaignId:crawler.campaignId,crawlerId:crawler.id,version};
   const floor=metadata?.floor??1;
   const selection = metadata?.thirdFloor?.selected;
+  const specialization = latestSpecialization(metadata?.selectionMenus);
   const baseline = loadout?.baseline ?? profile.stats;
   const totals = loadoutTotals(baseline, inventory, loadout?.defenseBase ?? 0);
   return <section className={styles.sheet} id="crawler-record" aria-label={`${crawler.name} character sheet`}>
@@ -39,7 +40,7 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
         <dl className={styles.identityGrid}>
           <IdentityField name="Race" value={selection?.raceName ?? 'Human (Tutorial)'} /><IdentityField name="Gender / pronouns" value={profile.pronouns || 'Not specified'} />
           <IdentityField name="Level" value={String(metadata?.level??1)} /><div className={styles.identityField}><dt>Crawler Number</dt><dd><SheetInlineEdit context={context} field="number" label="Crawler Number" value={number} prefix="#" editable={isGm} /></dd></div>
-          <IdentityField name="Class" value={selection?.className ?? 'Third Floor selection'} /><div className={styles.identityField}><dt>Floor</dt><dd><SheetInlineEdit context={context} field="floor" label="Floor" value={floor} max={18} editable={isGm} /></dd></div>
+          <IdentityField name="Class" value={selection?.className ?? 'Third Floor selection'} />{specialization&&<IdentityField name="Specialization" value={specialization.name}/>}<div className={styles.identityField}><dt>Floor</dt><dd><SheetInlineEdit context={context} field="floor" label="Floor" value={floor} max={18} editable={isGm} /></dd></div>
         </dl>
       </div>
     </header>
@@ -69,7 +70,6 @@ export function TutorialSheetView({ crawler, profile, number, version, isGm, inv
     </div>
     <div className={styles.sheetFooter}>
       <div id="level-advancement"><SheetSection title="Level advancement"><AdvancementManager context={context} level={metadata?.level??1} floor={floor} isGm={isGm} state={metadata?.advancement} history={metadata?.advancementHistory} stats={profile.stats} /></SheetSection></div>
-      <SheetSection title="Third Floor Race & Class"><ThirdFloorManager crawlerName={crawler.name} level={metadata?.level??1} context={context} state={metadata?.thirdFloor} progression={metadata?.progression} advancement={metadata?.advancement} floor={floor} isGm={isGm} advancementReady={metadata?.advancement?.reconciled === true} bases={Object.fromEntries(STAT_KEYS.map(key => [key, baseline[key].base])) as Scores} skills={learned ?? []} defenseBase={loadout?.defenseBase ?? 0} baseDefenses={metadata?.baseDefenses ?? {}} /></SheetSection>
       <InventoryView campaignId={crawler.campaignId} crawlerId={crawler.id} version={version} items={inventory} isGm={isGm} mana={profile.mana} maxMana={profile.stats.intelligence.enhanced} healthSlots={crawler.currentSegments} baseline={baseline} templates={templates} links={metadata?.links} />
       {combat?.kind === 'spell' && <p className={styles.sheetHint}>Starting allowance: five Standard Mana Potions, granted once to new game crawlers. Existing stacks require GM effect identification; this is not a refill.</p>}
       <details className={styles.storyDetails}><summary>Story &amp; starting gear notes</summary><dl className={styles.storyGrid}>{Object.entries(profile.notes).map(([key, value]) => <div key={key}><dt>{key === 'looseEnds' ? 'Loose ends' : key === 'gear' ? 'Original starting gear' : key}</dt><dd className={styles.notes}>{value || 'Not recorded'}</dd></div>)}</dl></details>

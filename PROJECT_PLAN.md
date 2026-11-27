@@ -60,9 +60,10 @@ part of the active milestone, rather than deferred work.
 | Effect templates and unified abilities | Implemented in milestone 013; user reports completion |
 | Encounter tracker | Compact official Mob phases and optional PvP initiative implemented in 016; database and browser acceptance pending |
 | GM-controlled level advancement | Complete; user confirmed migration 015, checks, and working in-app advancement on November 25, 2026 |
-| Third Floor Race/Class selection | Expanded in 019 to the full Core catalog, custom builds, verified evidence, GM rulings and per-benefit reconciliation; hosted/browser acceptance pending |
+| Third Floor Race/Class selection | GM-pushed Floor 3 terminal in 021, reviewed/curated catalog, six personalized AI matches and preserved reconciliation; apply 021 and complete hosted acceptance |
 | Modular System AI (Groq) | Implemented in 020 with strict schemas, legal drafts, suggestions and durable request limits; synthetic live provider test passed; hosted/browser acceptance pending |
 | App-wide Light mode / Dark mode themes | Implemented November 26, 2026; persistent browser preference, synchronized windows, themed dialogs and full local checks |
+| GM-pushed Class specialization menus | Implemented in 021 for Floors 6, 9 and 12 with private per-crawler choices and immutable history; GM-authored benefits are applied manually; hosted acceptance pending |
 
 The user confirmed the earlier authentication and lobby builds passed checks and
 reported that the game/database flow worked after migrations were applied.
@@ -90,6 +91,43 @@ consumable quantity use, and one-time potions for newly created spellcasters.
 The new potion/UI update adds 32 further cases. Its source harness passes 334
 cases with mocked boundary/view checks. Real application checks, migration 006,
 and live SQL/browser acceptance remain pending. See `Docs/POTIONS_UI_SETUP.md`.
+
+## GM-pushed milestone menus (021, November 26, 2026)
+
+- Removed the permanent Race/Class section from the character sheet. GM preparation
+  and push/withdraw controls live in the collapsed game-level selection desk.
+- GM pushes private, persistent menus to ready crawlers on Floor 3, 6, 9 or 12.
+  No automatic floor movement or unsolicited migration delivery occurs. Current
+  edits are protected by existing private live-refresh guards; offline players
+  receive pending menus when they return.
+- Floor 3 pushes preserve curated 018/019 offers, or authorize the reviewed catalog
+  when no curated offers exist. Atomic catalog confirmation uses the existing
+  checked benefit engine, retains prerequisite/reward/GM-override rules, and cannot
+  leave temporary offers behind after failure. Completed grants never repeat.
+- Pushed player terminals automatically request three distinct Race and three
+  distinct Class matches. Stats, trained Skills, backgrounds and complete trauma,
+  regret and loose-ends fields inform matching. Missing facts stay unknown. The
+  server validates compatible IDs and previews legal benefits before recommending;
+  catalog context is compacted for Groq's free-tier request limits without dropping
+  crawler story fields. Provider failures preserve manual selection.
+- Later specialization menus contain one to three GM-authored names/benefit rulings.
+  Choosing records immutable per-floor history and displays the latest specialization
+  in the sheet identity. Apply these benefits with existing GM controls after review;
+  no universal specialization budget/grants were found in the supplied books, so
+  Race/Class grants, resources and point balances are never silently reapplied.
+- Added migration 021, private per-crawler delivery state, owner/GM checked RPCs,
+  stale-version guards, withdrawal/floor expiry and existing-data upgrade fixtures.
+
+Verification: `npm run check` passed 1,218 tests, lint, typecheck and production
+build (four opt-in live cases skipped). Twelve isolated SQL suites passed, and
+an actual 020→021 upgrade preserved existing crawler fields/versions and writeups.
+The three original live Groq synthetic cases passed; the separate
+`npm run test:ai:selection` passed the new combined six-match schema. An initial
+oversized full-catalog request was fixed by compacting catalog summaries; a later
+provider rate limit was respected before retrying. Desktop/mobile browser preview
+verified real components with synthetic data/AI and saving disabled. Apply 021 and
+run authenticated GM/player acceptance before marking this milestone complete.
+See `Docs/SELECTION_MENUS_SETUP.md` for workflow, rulings and acceptance checks.
 
 ## App-wide themes (November 26, 2026)
 

@@ -2,11 +2,12 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { SheetContext } from '@/controllers/use-sheet-mutation';
 import { parseCustomBuild, type CustomBuild } from '@/domain/custom-build';
-import { suggestionsSchema, type ClassSuggestions } from '@/lib/ai/schemas/floor-three';
+import { suggestionsSchema, selectionSuggestionsSchema, type ClassSuggestions, type SelectionSuggestions } from '@/lib/ai/schemas/floor-three';
 import styles from '@/styles/sheet-controls.module.css';
-export function SystemAiPanel({context,raceId,onBuild,onSuggestions}:{context:SheetContext;raceId:string;onBuild(build:CustomBuild):void;onSuggestions(value:ClassSuggestions):void}){
- const[pending,setPending]=useState(false),[error,setError]=useState(''),[remaining,setRemaining]=useState(0),[build,setBuild]=useState<CustomBuild|null>(null),[notice,setNotice]=useState(''),[purpose,setPurpose]=useState('class-suggestions');
- const abort=useRef<AbortController|null>(null);
+export function SystemAiPanel({context,raceId,onBuild,onSuggestions,onMatches,autoGenerate=false}:{context:SheetContext;raceId:string;onBuild(build:CustomBuild):void;onSuggestions(value:ClassSuggestions):void;onMatches?(value:SelectionSuggestions):void;autoGenerate?:boolean}){
+ const[pending,setPending]=useState(false),[error,setError]=useState(''),[remaining,setRemaining]=useState(0),[build,setBuild]=useState<CustomBuild|null>(null),[notice,setNotice]=useState(''),[purpose,setPurpose]=useState('selection-suggestions');
+ const abort=useRef<AbortController|null>(null),formRef=useRef<HTMLFormElement|null>(null),automaticAttempt=useRef(false);
+ useEffect(()=>{if(!autoGenerate)return;const timer=setTimeout(()=>{if(automaticAttempt.current)return;automaticAttempt.current=true;formRef.current?.requestSubmit();},0);return()=>clearTimeout(timer);},[autoGenerate]);
  useEffect(()=>()=>{abort.current?.abort();},[]);
  useEffect(()=>{if(remaining<1)return;const timer=setTimeout(()=>setRemaining(n=>Math.max(0,n-1)),1000);return()=>clearTimeout(timer);},[remaining]);
  async function generate(event:FormEvent<HTMLFormElement>){
@@ -15,16 +16,17 @@ export function SystemAiPanel({context,raceId,onBuild,onSuggestions}:{context:Sh
   try{
    const response=await fetch('/api/system-ai',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({...context,purpose,raceId,kind:fields.get('kind'),earth:fields.get('earth')==='yes',theme:fields.get('theme')})});
    const result=await response.json();if(!response.ok){setRemaining(Math.min(3600,Math.max(0,Number(result.retryAfter)||0)));throw new Error(typeof result.error==='string'?result.error:'The System is unavailable.');}
-   if(purpose==='class-suggestions'){onSuggestions(suggestionsSchema.parse(result.result));setNotice('Recommendations ready. The GM controls the offered menu.');}
+   if(purpose==='selection-suggestions'){onMatches?.(selectionSuggestionsSchema.parse(result.result));setNotice('Top Race and Class matches ready. The GM controls the offered menu.');}
+   else if(purpose==='class-suggestions'){onSuggestions(suggestionsSchema.parse(result.result));setNotice('Recommendations ready. The GM controls the offered menu.');}
    else{setBuild(parseCustomBuild(result.result));setNotice('Legal custom draft ready for your review.');}
   }catch(error){if(!controller.signal.aborted)setError(error instanceof Error?error.message:'The System is unavailable.');else setError('The request ended before a draft arrived. Your crawler is unchanged.');}
   finally{clearTimeout(timeout);abort.current=null;setPending(false);}
  }
  function changePurpose(e:ChangeEvent<HTMLSelectElement>){setPurpose(e.target.value);}
  function useBuild(){if(build)onBuild(build);}
- return <details><summary>Ask the System AI</summary><p>Generate suggestions or a custom draft. The GM approves offers and custom definitions. Generation never applies benefits.</p>
-  <form onSubmit={generate}><fieldset className={styles.fields} disabled={pending||remaining>0}>
-   <label>Request<select name="purpose" value={purpose} onChange={changePurpose}><option value="class-suggestions">Class recommendations for the selected Race</option><option value="custom-build">Custom Race or Class draft</option></select></label>
+ return <details open={autoGenerate||undefined}><summary>Ask the System AI</summary><p>Generate suggestions or a custom draft. The GM approves offers and custom definitions. Generation never applies benefits.</p>
+  <form ref={formRef} onSubmit={generate}><fieldset className={styles.fields} disabled={pending||remaining>0}>
+   <label>Request<select name="purpose" value={purpose} onChange={changePurpose}><option value="selection-suggestions">Best three Races and Classes for this crawler</option><option value="class-suggestions">Class recommendations for the selected Race</option><option value="custom-build">Custom Race or Class draft</option></select></label>
    <div hidden={purpose!=='custom-build'}><label>Custom type<select name="kind" defaultValue="class"><option value="class">Class · 30 BP</option><option value="race">Race · 25 BP</option></select></label>
    <label><input name="earth" type="checkbox" value="yes" defaultChecked /> Earth origin for custom draft</label></div>
    <label>Theme / preferences<textarea name="theme" maxLength={800} placeholder="A protective chef who solves problems with a frying pan…" /></label>

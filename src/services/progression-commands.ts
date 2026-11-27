@@ -1,3 +1,4 @@
+import { pendingSelectionMenu } from '@/domain/selection-menus';
 import { getCampaignRole } from '@/domain';
 import { advancementReason, allocatePoints } from '@/domain/advancement';
 import { parseCustomBuild, validateCustomBuild } from '@/domain/custom-build';
@@ -22,8 +23,8 @@ export async function executeProgressionCommand(workspace:CampaignWorkspace,form
  const crawlerId=requireUuid(shortText(form.get('crawlerId'))),version=requireUuid(shortText(form.get('version'))),operation=shortText(form.get('operation'));
  const c=progressionContext(workspace,crawlerId,version),input=object(JSON.parse(shortText(form.get('payload'),100000))),reason=advancementReason(input.reason);
  if(input.confirmed!==true)throw new RangeError('Confirm the benefit and rules review.');
- if(!['draft','approve','evidence','offer','select','reward','prepare-reconciliation'].includes(operation))throw new RangeError('Unknown progression action.');
- if(!['draft','select'].includes(operation)&&!c.isGm)throw new Error('Only the GM may review evidence, approve builds, issue offers or override rules.');
+ if(!['draft','approve','evidence','offer','select','catalog-select','reward','prepare-reconciliation'].includes(operation))throw new RangeError('Unknown progression action.');
+ if(!['draft','select','catalog-select'].includes(operation)&&!c.isGm)throw new Error('Only the GM may review evidence, approve builds, issue offers or override rules.');
  let payload:Record<string,unknown>={reason,confirmed:true};
  if(operation==='draft')payload={...payload,build:parseCustomBuild(input.build)};
  if(operation==='approve'){
@@ -42,16 +43,20 @@ export async function executeProgressionCommand(workspace:CampaignWorkspace,form
    if(issues.some(i=>!waivers.includes(i.code))||waivers.some(code=>code!=='selection-rank-cap'&&!issues.some(i=>i.code===code)))throw new RangeError('Verify the missing facts or explicitly waive each listed constraint.');
    return{raceId,classId,waivers,reason};});payload={...payload,offers};
  }
- if(operation==='select'){
+ if(operation==='select'||operation==='catalog-select'){
   if(c.state.partialReview&&!c.sheet.thirdFloor!.reviewed&&!c.isGm)throw new Error('The GM must complete this partial benefit reconciliation.');
   if(!c.sheet.advancement!.reconciled)throw new RangeError('Reconcile level advancement first.');
-  const offerId=shortText(input.offerId),choices=object(input.choices) as Record<string,string[]>,split=object(input.split) as Record<string,Partial<Scores>>,skip=strings(input.skip),allocation=input.allocation;
+  const catalog=operation==='catalog-select',menu=pendingSelectionMenu(c.sheet.selectionMenus,c.sheet.floor);
+  if(catalog&&(!menu?.catalog||c.sheet.floor!==3||c.state.offers.length||c.sheet.thirdFloor!.offers.length))throw new RangeError('The GM must open the reviewed catalog for this crawler.');
+  const raceId=catalog?shortText(input.raceId):'',classId=catalog?shortText(input.classId):'',offerId=catalog?'catalog':shortText(input.offerId);
+  const selectionState=catalog?{...c.state,offers:[{id:offerId,raceId,classId,waivers:[],reason:'GM authorized the reviewed catalog'}]}:c.state;
+  const choices=object(input.choices) as Record<string,string[]>,split=object(input.split) as Record<string,Partial<Scores>>,skip=strings(input.skip),allocation=input.allocation;
   if(skip.length&&!c.isGm)throw new Error('Only the GM can reconcile individual benefits already applied.');
   let stats=c.stats;
   if(allocation!==undefined)stats=allocatePoints(c.sheet.level,c.sheet.advancement!,c.sheet.floor,allocation,c.stats).bases;
-  const result=previewProgression(c.state,c.sheet.thirdFloor!,c.sheet.floor,offerId,choices,split,{stats,skills:c.skills},c.loadout.defenseBase,c.sheet.baseDefenses??{},skip);
+  const result=previewProgression(selectionState,c.sheet.thirdFloor!,c.sheet.floor,offerId,choices,split,{stats,skills:c.skills},c.loadout.defenseBase,c.sheet.baseDefenses??{},skip);
   loadoutTotals(derivedBaseline(result.stats,c.sheet.effects),c.items,result.dr);
-  payload={...payload,offerId,choices,split,skip,...(allocation!==undefined?{allocation}: {})};
+  payload={...payload,...(catalog?{raceId,classId}:{offerId}),choices,split,skip,...(allocation!==undefined?{allocation}: {})};
  }
  await port.act({crawlerId,version,operation,payload});return'Race/Class progress saved.';
 }

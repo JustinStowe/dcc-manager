@@ -15,7 +15,7 @@ import type { ProgressionState } from '@/domain/progression';
 import type { AdvancementState } from '@/domain/advancement';
 
 export interface ThirdFloorManagerProps {
-  context: SheetContext; crawlerName?: string; level?: number; state?: ThirdFloorState; floor: number; isGm: boolean; advancementReady: boolean;
+  context: SheetContext; initiallyOpen?: boolean; catalogAllowed?: boolean; crawlerName?: string; level?: number; state?: ThirdFloorState; floor: number; isGm: boolean; advancementReady: boolean;
   bases: Scores; skills: readonly LearnedAbility[]; defenseBase: number; baseDefenses: TypedDefenses;
   progression?: ProgressionState; advancement?: AdvancementState;
 }
@@ -36,8 +36,8 @@ export function ThirdFloorManager(props: ThirdFloorManagerProps) {
   if (props.progression && ((props.state?.reviewed && props.state.offers.length === 0) || props.progression.partialReview)) return <ProgressionManager {...props} progression={props.progression} />;
   return <LegacyThirdFloorManager {...props} />;
 }
-function LegacyThirdFloorManager({ context, state, floor, isGm, advancementReady, bases, skills, defenseBase, baseDefenses, progression }: ThirdFloorManagerProps) {
-  const [open, setOpen] = useState(false), [epoch, setEpoch] = useState(0);
+function LegacyThirdFloorManager({ context, state, floor, isGm, advancementReady, bases, skills, defenseBase, baseDefenses, progression, initiallyOpen = false }: ThirdFloorManagerProps) {
+  const [open, setOpen] = useState(initiallyOpen), [epoch, setEpoch] = useState(0);
   const [offers, setOffers] = useState<readonly string[]>(state?.offers ?? []);
   const [pair, setPair] = useState(state?.offers[0] ?? '');
   const [choices, setChoices] = useState<Record<string, string[]>>({});

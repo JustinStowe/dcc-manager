@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ai": "node scripts/check-system-ai.mjs",
+    "test:ai:selection": "node scripts/check-system-ai.mjs --selection",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "check": "npm run test && npm run lint && npm run typecheck && npm run build"

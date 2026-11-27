@@ -41,3 +41,8 @@ describe('terminal selection safeguards',()=>{
  it('never offers the allocation assistant without a numerical minimum',()=>{expect(render(false).some(n=>n.type==='button'&&n.props.children==='Include minimum allocation in this selection')).toBe(false);});
  it('has no confirmation form for an already saved identity',()=>{const extra={state:{reviewed:true,offers:[],selected:{raceId:'human',classId:'blizzardmancer',raceName:'Human',className:'Blizzardmancer',mode:'reconciled' as const,notes:'Previously applied',move:20,step:10,size:4}}};expect(render(false,I.version,extra).some(n=>n.type==='form'&&n.props['aria-label']==='Select Race and Class')).toBe(false);});
 });
+
+describe('pushed reviewed catalog',()=>{
+ it('allows an authorized catalog pair to use the same final mechanical preview without a pre-curated offer',async()=>{const extra={progression:INITIAL_PROGRESSION,catalogAllowed:true};await call(find(render(false,I.version,extra),'button','children','Manage Race & Class'),'onClick');await call(find(render(false,I.version,extra),ProgressionCodex,'kind','class'),'onChoose','blizzardmancer');await goTo(4,extra);await call(selectionForm(render(false,I.version,extra)),'onSubmit',event());expect(shared.save.mock.calls[0][0].get('operation')).toBe('catalog-select');expect(JSON.parse(shared.save.mock.calls[0][0].get('payload'))).toMatchObject({raceId:'human',classId:'blizzardmancer',choices:{},skip:[]});});
+ it('opens a newly pushed terminal on mount',()=>{expect(render(false,I.version,{initiallyOpen:true}).find(n=>n.props.title==='Third Floor Race & Class')?.props.open).toBe(true);});
+});

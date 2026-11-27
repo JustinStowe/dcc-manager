@@ -69,7 +69,11 @@ set local role authenticated;
 select pg_temp.tf_act('offer','{"offers":["amazonian|fighter","human|blizzardmancer"],"confirmed":true,"reason":"GM reviewed requirements"}');
 select pg_temp.tf_sheet('floor','{"value":4}');
 select pg_temp.tf_assert((select third_floor->'offers'='[]'::jsonb from public.dcc_crawlers where id=current_setting('dcc_test.tf_crawler')::uuid),'Floor change did not close selection offers.');
+-- 021 schedules player selection on Floor 3; a floor change still revokes offers.
+select pg_temp.tf_sheet('floor','{"value":3}');
 select pg_temp.tf_act('offer','{"offers":["amazonian|fighter","human|blizzardmancer"],"confirmed":true,"reason":"New floor confirmation"}');
+do $$begin if to_regprocedure('public.dcc_selection_menu_action(uuid,text,jsonb)')is not null then perform public.dcc_selection_menu_action(current_setting('dcc_test.tf_game')::uuid,'push','{"floor":3}');end if;end$$;
+
 select set_config('dcc_test.tf_stale',(select version::text from public.dcc_crawlers where id=current_setting('dcc_test.tf_crawler')::uuid),true);
 select set_config('request.jwt.claim.sub','b1822222-2222-4222-8222-222222222222',true);
 select pg_temp.tf_error('select pg_temp.tf_act(''offer'',''{"offers":[],"confirmed":true,"reason":"Player revoke"}'')','42501');
@@ -102,6 +106,7 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub','b1811111-1111-4111-8111-111111111111',true);
 select set_config('dcc_test.tf_crawler',current_setting('dcc_test.tf_stress'),true);
 select pg_temp.tf_act('offer','{"offers":["igneous|blizzardmancer"],"confirmed":true,"reason":"Overflow boundary"}');
+do $$begin if to_regprocedure('public.dcc_selection_menu_action(uuid,text,jsonb)')is not null then perform public.dcc_selection_menu_action(current_setting('dcc_test.tf_stress_game')::uuid,'push','{"floor":3}');end if;end$$;
 select set_config('dcc_test.tf_atomic',(select to_jsonb(c)::text from public.dcc_crawlers c where id=current_setting('dcc_test.tf_crawler')::uuid),true);
 select set_config('dcc_test.tf_history',(select count(*)::text from public.dcc_advancement_history),true);
 select pg_temp.tf_error('select pg_temp.tf_act(''select'',''{"pair":"igneous|blizzardmancer","choices":{},"confirmed":true,"reason":"Overflow"}'')','22023');

@@ -22,3 +22,12 @@ it.runIf(process.env.DCC_RUN_LIVE_AI==='1')('validates real Groq recommendations
  expect(suggestionsSchema.safeParse(result.value).success).toBe(true);
  for(const row of result.value.recommendations){expect(row.commentary.length).toBeLessThanOrEqual(500);expect(row.reason.length).toBeLessThanOrEqual(400);}
 },60000);
+
+it.runIf(process.env.DCC_RUN_LIVE_SELECTION_AI==='1')('validates combined live Groq Race and Class matches using synthetic story data',async()=>{
+ process.loadEnvFile('.env.local');
+ const{progressionFixture,PG_IDS}=await import('@/test/progression-fixture');const{executeSystemAi}=await import('@/services/system-ai-commands');const{selectionSuggestionsSchema}=await import('./schemas/floor-three');
+ const w=progressionFixture(),old=w.tutorials![PG_IDS.crawler];
+ const workspace={...w,tutorials:{[PG_IDS.crawler]:{...old,profile:{...old.profile,notes:{...old.profile.notes,trauma:'A synthetic character lost their workshop in a storm.',regret:'They wish they had protected an apprentice.',looseEnds:'They want to find the apprentice and rebuild.'}}}}};
+ const result=await executeSystemAi(workspace,{campaignId:PG_IDS.game,crawlerId:PG_IDS.crawler,version:PG_IDS.version,purpose:'selection-suggestions',raceId:'',kind:'class',earth:true,theme:''},createGroqClient(),{reserve:async()=>({id:'synthetic-lease',cached:null}),finish:async()=>{}},systemAiModel());
+ const value=selectionSuggestionsSchema.parse(result.result);expect(value.races).toHaveLength(3);expect(value.classes).toHaveLength(3);
+},60000);

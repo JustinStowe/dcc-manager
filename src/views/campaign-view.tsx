@@ -10,6 +10,7 @@ import { formatGameCode, type HostSettings } from '@/services/game-lobby';
 import { SavedCrawlerChoices } from '@/components/saved-crawler-choices';
 import { DeleteGame } from '@/components/delete-game';
 import { EncounterView } from '@/views/encounter-view';
+import { SelectionMenusView } from './selection-menus-view';
 import { EncounterDialog } from '@/components/encounter-dialog';
 import type { SavedCrawlerProfile } from '@/services/crawler-profiles';
 
@@ -65,6 +66,7 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
           {!creationOnly && crawlers.length > 0 && <nav className={styles.crawlerTabs} aria-label={role === 'gm' ? 'Select a crawler' : 'Your crawler'}>
             {crawlers.map(({ crawler }) => <Link key={crawler.id} href={`/games/${campaign.id}?crawler=${crawler.id}#crawler-record`} prefetch={false} aria-current={selected?.crawler.id === crawler.id ? 'page' : undefined}>{crawler.name}</Link>)}
           </nav>}
+          {!creationOnly && workspace && <SelectionMenusView workspace={workspace} crawlerId={selected?.crawler.id} isGm={role==='gm'}/>}
           {!creationOnly && selected && [selected].map(({ crawler, ownerUserId }) => {
             const official = workspace?.tutorials?.[crawler.id];
             const version = workspace?.versions[crawler.id] ?? '';

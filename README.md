@@ -541,3 +541,19 @@ an open sheet/encounter dialog. Light mode is the default; Dark mode applies the
 browser/site and synchronizes other open windows on the same origin. It is a
 browser preference, not an account setting shared across devices. Printing uses
 the light palette in either theme. No database migration is required.
+
+## GM-pushed selection menus
+
+Apply migration **021** after 020, then use **Player selection menus · GM desk**
+in the game dashboard. Push Race/Class selection on Floor 3, and prepare/push
+Class specializations on Floors 6, 9 and 12. The old permanent sheet section is
+removed. Players receive their own pending menu and can return to it later.
+Floor 3 automatically requests the top three Races and Classes using stats,
+Skills and full trauma/regret/loose-ends notes. Existing curated offers are
+preserved; otherwise the GM push authorizes compatible, eligible catalog choices.
+Specialization benefits are explicitly GM-authored and applied with existing GM
+controls after checking what is already included. Original benefits are preserved.
+
+See [selection menu setup and acceptance](Docs/SELECTION_MENUS_SETUP.md).
+Use `npm run test:ai:selection` for the opt-in synthetic live combined-match check;
+it is separate from `npm run test:ai` to respect provider quotas.
