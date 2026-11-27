@@ -604,7 +604,7 @@ See [Safe Room setup, rulings and acceptance](Docs/SAFE_ROOM_SETUP.md).
 
 Apply **024** (`supabase/migrations/202611270024_saferoom_status.sql`) after 023,
 then run `supabase/tests/saferoom_status_permissions.sql` in an isolated database.
-In **Game management**, the GM ticks one or more crawlers under **Saferoom
+In the **Players & saferoom** panel, the GM ticks one or more crawlers under **Saferoom
 status** and chooses **Open saferoom** or **Close saferoom**. While it is open on
 the crawler's current floor, the owner can open and claim loot boxes and, on
 Floor 3+, spend every pending stat point (in Level advancement or Race & Class

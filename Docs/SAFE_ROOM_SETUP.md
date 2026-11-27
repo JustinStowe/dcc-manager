@@ -24,7 +24,7 @@ creates no rewards and grants no saferoom permission.
    not replay a new gold achievement banner. It can document a reward whose items
    have since been consumed or removed; no matching inventory entry is required.
 4. Confirm saferoom access for the current crawler/floor, or open it for several
-   crawlers at once from **Saferoom status** in Game management (migration 024).
+   crawlers at once from **Saferoom status** in the Players & saferoom panel (migration 024).
    It works on tutorial Floors 1–2 as well as later floors; on Floor 3+ an open
    saferoom also lets the owner spend every pending level-up stat point without a
    separate authorization. Owners can browse their queue/Codex outside a saferoom but cannot open
