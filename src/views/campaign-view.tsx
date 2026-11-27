@@ -8,15 +8,15 @@ import styles from '@/styles/campaign.module.css';
 import Link from 'next/link';
 import { formatGameCode, type HostSettings } from '@/services/game-lobby';
 import { SavedCrawlerChoices } from '@/components/saved-crawler-choices';
-import { DeleteGame } from '@/components/delete-game';
+import { CampaignHeaderView, type CampaignAccount } from '@/views/campaign-header-view';
 import { SelectionMenusView } from './selection-menus-view';
 import { EncounterLauncher } from '@/components/encounter-launcher';
 import type { SavedCrawlerProfile } from '@/services/crawler-profiles';
 import { GameHudShell } from '@/components/game-hud-shell';
 import type { HudSnapshot } from '@/domain/hud';
 
-export function CampaignView({ workspace, userId, storageError, hostSettings, profiles, creationOnly = false, selectedCrawlerId, hud = null, hudError = null }: {
-  workspace: CampaignWorkspace | null; userId: string; storageError: string | null;
+export function CampaignView({ workspace, userId, account, storageError, hostSettings, profiles, creationOnly = false, selectedCrawlerId, hud = null, hudError = null }: {
+  workspace: CampaignWorkspace | null; userId: string; account: CampaignAccount; storageError: string | null;
   hostSettings?: HostSettings | null; creationOnly?: boolean;
   profiles?: readonly SavedCrawlerProfile[];
   selectedCrawlerId?: string;
@@ -29,13 +29,11 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
   const ownerIds = campaign ? [campaign.gmUserId, ...campaign.playerUserIds] : [];
   const availableOwnerIds = ownerIds.filter((id) => !crawlers.some((entry) => entry.ownerUserId === id));
   const saferoomCrawlers = campaign?.crawlers.filter((entry) => entry.crawler.ruleset === 'tutorial-v1') ?? [];
+  const header = <CampaignHeaderView account={account} title={campaign?.name ?? 'Your campaign'}
+    badge={creationOnly ? 'Crawler creation' : role === 'gm' ? 'You are the GM' : 'Crawler Record'}
+    menu={campaign && role ? { campaignId: campaign.id, campaignName: campaign.name, isGm: role === 'gm', gameCode: hostSettings ? formatGameCode(hostSettings.code) : undefined, acceptingPlayers: hostSettings?.acceptingPlayers } : null} />
   const view = (
     <main className={`${styles.page} ${styles.dashboard}`}>
-      <Link href="/" className={styles.backLink}>Back to game lobby</Link>
-      <div className={styles.dashboardHeader}>
-        <div><p className={styles.eyebrow}>Dungeon Crawler Carl · campaign</p><h1>{campaign?.name ?? 'Your campaign'}</h1></div>
-        <p className={styles.roleBadge}>{creationOnly ? 'Crawler creation' : role === 'gm' ? 'You are the GM' : 'Your crawler record'}</p>
-      </div>
       {storageError ? <p role="alert" className={styles.error}>{storageError}</p> : !campaign ? (
         <section className={styles.panel}><h2>Game access unavailable</h2><p>Return to the lobby and enter a valid Game Code from your GM.</p></section>
       ) : (
@@ -43,21 +41,8 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
           <p className={styles.dashboardHint}>Changes save to this game and update automatically across signed-in sessions.</p>
           {role === 'gm' && (
             <details className={`${styles.panel} ${styles.gameManagement}`} open>
-              <summary className={styles.gameManagementSummary}>Game management</summary>
-              <div className={styles.gameManagementBody}><div>
-              {hostSettings && (
-                <>
-                  <h2>Game Code</h2>
-                  <p><code className={styles.gameCode}>{formatGameCode(hostSettings.code)}</code></p>
-                  <p>Share this code with players. Joining is {hostSettings.acceptingPlayers ? 'open' : 'paused'}.</p>
-                  <CampaignForm campaignId={campaign.id} label="Manage Game Code joining">
-                    <input type="hidden" name="operation" value="set-joining" />
-                    <input type="hidden" name="accepting" value={hostSettings.acceptingPlayers ? 'false' : 'true'} />
-                    <button type="submit">{hostSettings.acceptingPlayers ? 'Pause new joins' : 'Open new joins'}</button>
-                  </CampaignForm>
-                </>
-              )}
-              </div><div>
+              <summary className={styles.gameManagementSummary}>Players &amp; saferoom</summary>
+              <div>
               <h2>Players <span className={styles.countBadge}>{campaign.playerUserIds.length}</span></h2>
               <p>Players join with your Game Code and can view only their own crawler. New arrivals appear automatically.</p>
               <ul>{campaign.playerUserIds.map((id) => <li key={id}>{campaign.crawlers.find((entry) => entry.ownerUserId === id)?.crawler.name ?? 'Awaiting crawler creation'}</li>)}</ul>
@@ -70,8 +55,7 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
                 <p className={styles.saferoomHint}>Open: selected crawlers can open and claim loot boxes and, on Floor 3+, spend all pending stat points themselves. Changing floors closes it automatically.</p>
                 <div className={styles.saferoomActions}><button type="submit" name="allowed" value="true">Open saferoom</button><button type="submit" name="allowed" value="false">Close saferoom</button></div>
               </CampaignForm>}
-              <details className={styles.dangerZone}><summary>Delete this game</summary><DeleteGame game={{ id: campaign.id, name: campaign.name }} /></details>
-              </div></div>
+              </div>
             </details>
           )}
           {!creationOnly && role === 'gm' && <EncounterLauncher campaignId={campaign.id} active={workspace?.encounter?.active ?? false} round={workspace?.encounter?.round ?? null} />}
@@ -103,5 +87,5 @@ export function CampaignView({ workspace, userId, storageError, hostSettings, pr
     </main>
   );
   const floor = selected ? workspace?.sheets?.[selected.crawler.id]?.floor ?? 1 : 1;
-  return campaign && workspace && !creationOnly && !storageError ? <GameHudShell key={`${campaign.id}:${floor}`} campaignId={campaign.id} floor={floor} crawlerId={selected?.crawler.id} crawlerName={selected?.crawler.name} isGm={role === 'gm'} crawlers={role === 'gm' ? crawlers.map(e => ({ id: e.crawler.id, name: e.crawler.name })) : []} initial={hud} initialError={hudError}>{view}</GameHudShell> : view;
+  return <>{header}{campaign && workspace && !creationOnly && !storageError ? <GameHudShell key={`${campaign.id}:${floor}`} campaignId={campaign.id} floor={floor} crawlerId={selected?.crawler.id} crawlerName={selected?.crawler.name} isGm={role === 'gm'} crawlers={role === 'gm' ? crawlers.map(e => ({ id: e.crawler.id, name: e.crawler.name })) : []} initial={hud} initialError={hudError}>{view}</GameHudShell> : view}</>;
 }

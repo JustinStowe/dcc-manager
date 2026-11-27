@@ -6,7 +6,6 @@ import { getGameEntry } from '@/services/game-lobby';
 import { requireUuid } from '@/services/campaign-workspace';
 import type { CampaignWorkspace } from '@/services/campaign-workspace';
 import type { HostSettings } from '@/services/game-lobby';
-import { AccountBarView } from '@/views/account-bar-view';
 import { CampaignView } from '@/views/campaign-view';
 import { signOut } from '@/app/auth/actions';
 import { loadCrawlerProfiles } from '@/adapters/supabase-crawler-profiles';
@@ -46,10 +45,5 @@ export default async function GamePage({ params, searchParams }: { params: Promi
     try { hud = await (await createHudPort()).snapshot(campaignId, floor); }
     catch (error) { hudError = error instanceof Error ? error.message : 'Could not load table alerts.'; }
   }
-  return (
-    <>
-      <AccountBarView liveUserId={user.id} email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
-      <CampaignView workspace={workspace} userId={user.id} storageError={storageError} hostSettings={settings} profiles={profiles} selectedCrawlerId={selectedCrawlerId} hud={hud} hudError={hudError} />
-    </>
-  );
+  return <CampaignView workspace={workspace} userId={user.id} account={{ email: user.email ?? 'Crawler', liveUserId: user.id, onSignOut: signOut }} storageError={storageError} hostSettings={settings} profiles={profiles} selectedCrawlerId={selectedCrawlerId} hud={hud} hudError={hudError} />;
 }

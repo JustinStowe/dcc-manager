@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { isAppTheme, themeCookie, type AppTheme } from '@/lib/theme';
 import styles from '@/styles/theme-switcher.module.css';
 
@@ -45,4 +46,25 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
       <button type="button" data-theme="terminal" aria-pressed={context.theme === 'terminal'} onClick={choose}>Dark mode</button>
     </div>
   </div>;
+}
+
+/** Segmented Light/Dark toggle for menus that provide their own label. */
+export function ThemeToggle({ className }: { className?: string }) {
+  const context = useContext(ThemeContext);
+  if (!context) return null;
+  function choose(event: MouseEvent<HTMLButtonElement>) {
+    const value = event.currentTarget.dataset.theme;
+    if (isAppTheme(value)) context!.selectTheme(value);
+  }
+  return <div role="group" aria-label="Theme" className={className}>
+    <button type="button" data-theme="classic" aria-pressed={context.theme === 'classic'} onClick={choose}>Light mode</button>
+    <button type="button" data-theme="terminal" aria-pressed={context.theme === 'terminal'} onClick={choose}>Dark mode</button>
+  </div>;
+}
+
+// Campaign and crawler-creation pages show the theme inside their own navigation menu.
+const OWN_THEME_MENU = /^\/games\/[^/]+(\/create)?\/?$/;
+export function GlobalThemeBar() {
+  const pathname = usePathname();
+  return OWN_THEME_MENU.test(pathname ?? '') ? null : <ThemeSwitcher />;
 }

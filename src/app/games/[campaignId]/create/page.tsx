@@ -3,7 +3,6 @@ import { requireCurrentUser } from '@/adapters/supabase-authentication';
 import { loadCampaignWorkspace } from '@/adapters/supabase-campaign-repository';
 import { getGameEntry } from '@/services/game-lobby';
 import { requireUuid, type CampaignWorkspace } from '@/services/campaign-workspace';
-import { AccountBarView } from '@/views/account-bar-view';
 import { CampaignView } from '@/views/campaign-view';
 import { signOut } from '@/app/auth/actions';
 import { loadCrawlerProfiles } from '@/adapters/supabase-crawler-profiles';
@@ -29,10 +28,5 @@ export default async function CreateCrawlerPage({ params }: { params: Promise<{ 
   if (entry === 'gm' || entry === 'sheet') {
     redirect(`/games/${campaignId}`);
   }
-  return (
-    <>
-      <AccountBarView liveUserId={user.id} email={user.email ?? 'Crawler'} signOutFailed={false} onSignOut={signOut} />
-      <CampaignView workspace={workspace} userId={user.id} storageError={storageError} profiles={profiles} creationOnly />
-    </>
-  );
+  return <CampaignView workspace={workspace} userId={user.id} account={{ email: user.email ?? 'Crawler', liveUserId: user.id, onSignOut: signOut }} storageError={storageError} profiles={profiles} creationOnly />;
 }

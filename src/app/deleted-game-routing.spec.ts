@@ -53,7 +53,7 @@ describe.each([
   it('does not misrepresent a database failure as a deleted game', async () => {
     vi.mocked(loadCampaignWorkspace).mockRejectedValue(new Error('Storage unavailable'));
     const result = await page({ params: Promise.resolve({ campaignId: GAME }) });
-    expect(result.props.children[1].props.storageError).toBe('Storage unavailable');
+    expect(result.props.storageError).toBe('Storage unavailable');
     expect(redirect).not.toHaveBeenCalled();
   });
 });

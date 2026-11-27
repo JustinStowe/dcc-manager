@@ -51,14 +51,10 @@
 .inventoryItem .heading { margin-bottom: 0.5rem; gap: 0.5rem; }
 .inventory summary { cursor: pointer; padding: 0.5rem 0; }
 .dashboard { max-width: 1280px; }
-.dashboardHeader { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.2rem 0; border-bottom: 2px solid var(--sheet-border); margin-bottom: 1rem; }
 .eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.7rem; font-weight: 750; color: var(--text-subtle); }
-.roleBadge { padding: 0.45rem 0.8rem; border: 1px solid var(--border); background: var(--surface-muted); border-radius: 2rem; font-weight: 700; }
 .dashboardHint, .sheetHint { color: var(--text-muted); font-size: 0.82rem; }
 .gameManagementSummary { cursor: pointer; font-weight: 700; font-size: 1.1rem; }
 .gameManagement[open] > .gameManagementSummary { margin-bottom: 1rem; }
-.gameManagementBody { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 2rem; }
-.gameManagement .gameCode { font-size: 1rem; }
 .gameManagement ul { padding-left: 1.2rem; }
 .page .saferoomList { display: grid; gap: 0.4rem; }
 .page .saferoomList label { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; }
@@ -177,7 +173,6 @@
   .resourceGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
-  .gameManagementBody { grid-template-columns: 1fr; gap: 1rem; }
   .sheet { padding: 0.85rem; }.sheetHeader { grid-template-columns: 1fr; }
   .sheetBrand { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.5rem; transform: none; padding: 0.65rem; }
   .sheetBrand span, .sheetBrand strong, .sheetBrand b { font-size: 1.2rem; }
@@ -192,7 +187,7 @@
   .resourceGrid dd { font-size: 1.1rem; }.crawlerTabs a { max-width: 15rem; }
 }
 @media print {
-  .dashboardHeader, .gameManagement, .crawlerTabs, .backLink, .dashboardHint, .sheetControls, .gmControls, .inventory details { display: none; }
+  .gameManagement, .crawlerTabs, .backLink, .dashboardHint, .sheetControls, .gmControls, .inventory details { display: none; }
   .dashboard { padding: 0; max-width: none; }.sheet { border: 1px solid black; box-shadow: none; margin: 0; }.sheetBrand { transform: none; }
 }
 
